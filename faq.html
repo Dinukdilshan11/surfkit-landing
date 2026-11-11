@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help &amp; FAQ &mdash; Surfkit Platform (surfkit.cloud)</title>
+  <meta name="description" content="Frequently Asked Questions about Surfkit — how earning works, our Manifest V3 architecture, CPX Research partner tunnels, secure cloud architecture, and how to contact support.">
+
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surf: {
+              bg: '#090E1C',
+              card: '#0D1527',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10B981',
+              neon: '#14F195',
+              teal: '#06B6D4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #090E1C; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+    .glass-nav {
+      background: rgba(9, 14, 28, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13,21,39,0.85) 0%, rgba(9,14,28,0.95) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+    }
+    .grid-pattern {
+      background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #10B981, #06B6D4);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .faq-content { transition: none; }
+  </style>
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-[#090E1C] text-slate-200 font-sans antialiased selection:bg-emerald-500 selection:text-black min-h-screen flex flex-col justify-between">
+
+  <!-- Ambient background glow orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-emerald-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute top-[40%] -left-32 w-[450px] h-[450px] bg-teal-500/5 rounded-full blur-[160px]"></div>
+  </div>
+  <div class="fixed inset-0 grid-pattern opacity-40 pointer-events-none -z-10"></div>
+
+  <!-- ========================================================= -->
+  <!-- NAVIGATION BAR                                            -->
+  <!-- ========================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+
+        <!-- Logo & page badge -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform duration-300 group-hover:scale-105">
+            <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
+              S
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold tracking-tight text-white">Surf<span class="text-emerald-400">kit</span></span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">FAQ</span>
+          </div>
+        </a>
+
+        <!-- Right: Back button + Add to Chrome CTA -->
+        <div class="flex items-center gap-3">
+          <a href="index.html" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Back to Main Hub</span>
+          </a>
+          <a href="https://chrome.google.com" target="_blank" rel="noopener noreferrer"
+             class="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 transition-all shadow-lg shadow-emerald-500/20">
+            <svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24">
+              <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29L1.931 5.47zm13.473 4.298a5.452 5.452 0 0 1 1.414 7.687l-3.953 6.847C12.569 24.195 12.287 24 12 24c6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.822-4.364H15.404z"/>
+              <circle cx="12" cy="12" r="3.273"/>
+            </svg>
+            <span>Add to Chrome &mdash; It's Free</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- HERO / PAGE HEADER                                        -->
+  <!-- ========================================================= -->
+  <main class="flex-1 pt-32 pb-20">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Page intro -->
+      <div class="text-center mb-14">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-medium mb-6">
+          <i class="ri-shield-check-line text-sm"></i>
+          <span>100% Honest Technical Documentation</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight leading-tight mb-4">
+          Help &amp; <span class="text-gradient">FAQ</span>
+        </h1>
+        <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+          No fabricated metrics or marketing exaggerations. Clear answers on how Surfkit earns, how our architecture keeps you safe, and how to reach us.
+        </p>
+      </div>
+
+      <!-- Search bar -->
+      <div class="relative mb-8">
+        <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+          <i class="ri-search-line text-slate-500 text-lg"></i>
+        </div>
+        <input id="faq-search" type="text" placeholder="Search questions&hellip;"
+               class="w-full pl-11 pr-4 py-3.5 rounded-xl bg-white/[0.04] border border-white/10 text-slate-200 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.06] transition-all">
+      </div>
+
+      <!-- Category filter pills -->
+      <div class="flex flex-wrap gap-2 mb-10">
+        <button class="faq-filter-btn bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 font-bold px-3.5 py-1.5 rounded-full text-xs font-mono transition-all" data-category="all">All Topics</button>
+        <button class="faq-filter-btn bg-white/5 text-slate-400 border border-white/5 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all" data-category="platform">Platform</button>
+        <button class="faq-filter-btn bg-white/5 text-slate-400 border border-white/5 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all" data-category="earning">Earning</button>
+        <button class="faq-filter-btn bg-white/5 text-slate-400 border border-white/5 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all" data-category="privacy">Privacy &amp; Security</button>
+        <button class="faq-filter-btn bg-white/5 text-slate-400 border border-white/5 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all" data-category="technical">Technical</button>
+        <button class="faq-filter-btn bg-white/5 text-slate-400 border border-white/5 px-3.5 py-1.5 rounded-full text-xs font-mono transition-all" data-category="support">Support</button>
+      </div>
+
+      <!-- Empty state -->
+      <div id="faq-empty" class="hidden text-center py-16 text-slate-500">
+        <i class="ri-search-eye-line text-4xl mb-3 block"></i>
+        <p class="text-sm">No questions match your search. Try different keywords.</p>
+      </div>
+
+      <!-- ===================== FAQ ACCORDION ===================== -->
+      <div class="space-y-3" id="faq-list">
+
+        <!-- 1 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="platform">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">What exactly is Surfkit?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Surfkit is an independent, two-founder Chrome extension (Manifest V3) that lets you earn real rewards simply by browsing the web. When you browse with Surfkit active, you passively accumulate impression-based earnings — capped at a strict 2–6 ads per hour — from partner ad networks. You also unlock optional CPX Research surveys and mini-games for bonus income. All revenue is split <strong class="text-emerald-400">70% to you / 30% to the platform</strong> with zero hidden fees.</p>
+          </div>
+        </div>
+
+        <!-- 2 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">How does the ad frequency cap work?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Surfkit enforces a hard cap of <strong class="text-emerald-400">2–6 ad impressions per hour</strong> per user. This limit is tracked server-side in our secure cloud network and enforced both in the extension and at the postback layer — meaning even if a client were modified, excess impressions are rejected before wallet credit is applied. The cap exists to protect user experience and ensure partner CPMs remain sustainable.</p>
+          </div>
+        </div>
+
+        <!-- 3 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">How do surveys and mini-games open — and why a new tab?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Every CPX Research survey or mini-game opens in a dedicated <code class="text-cyan-400 font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded">task-view.html</code> tab with full iframe sandboxing — never as an inline popup inside the extension popup. This is required by Chrome Manifest V3's Content Security Policy and also protects you: partner content runs in an isolated context with no access to your browsing data. The task view automatically passes your session token so surveys authenticate without a "Session Needs Refresh" error.</p>
+          </div>
+        </div>
+
+        <!-- 4 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">Which survey and task partners are currently live?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed"><strong class="text-white">CPX Research</strong> is the sole active partner tunnel at launch. BitLabs and Lootably integrations are in development and will be enabled in a future release. We will only activate additional partners after completing end-to-end postback testing — we do not add partners for marketing credibility.</p>
+          </div>
+        </div>
+
+        <!-- 5 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="privacy">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">How is my data stored and secured?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">All user records are stored in an encrypted cloud PostgreSQL database with <strong class="text-emerald-400">AES-256 encryption at rest</strong> and <strong class="text-emerald-400">TLS 1.3 in transit</strong>. We collect only the minimum data required for reward tracking: an anonymised extension user ID, daily impression counts, and a 30-day rolling earnings history. We do not sell personal data to third parties. Detailed data handling is documented in our <a href="privacy.html" class="text-emerald-400 hover:underline">Privacy Policy</a>.</p>
+          </div>
+        </div>
+
+        <!-- 6 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="technical">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">What is Manifest V3 and why does it matter?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Manifest V3 (MV3) is Google Chrome's current extension security framework. It replaces persistent background pages with a service worker, restricts remote code execution, and tightens Content Security Policy. Surfkit was built natively on MV3 from day one — not retrofitted. This means no background snooping scripts, no arbitrary remote code injection, and full compatibility with Chrome's future extension roadmap.</p>
+          </div>
+        </div>
+
+        <!-- 7 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">How are daily impressions tracked?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">When a qualifying ad impression is confirmed by the partner postback, our cloud sync engine increments your <code class="text-cyan-400 font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded">daily_impressions</code> counter in the cloud ledger. This counter is scoped to the UTC calendar day and resets automatically at <strong class="text-emerald-400">00:00 UTC</strong> during the nightly maintenance window. Your dashboard displays both today's impressions and your 30-day rolling total so you can track trends.</p>
+          </div>
+        </div>
+
+        <!-- 8 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">What is the 30-day rolling earnings window?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Surfkit retains your per-day earnings records for a rolling 30-day window. Records older than 30 days are automatically purged from the history table during the nightly maintenance job. <strong class="text-white">This does not affect your wallet balance</strong> — your cumulative earned total is stored separately and persists indefinitely until withdrawal. The 30-day window is purely for the earnings chart and activity breakdown visible on your dashboard.</p>
+          </div>
+        </div>
+
+        <!-- Estimated Balance & Reconciliation FAQ Item -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">Why is my balance marked as Estimated, and can it change slightly?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Your live dashboard shows Estimated Earnings based on average global ad rates (eCPM) for your region and ad type. Because ad networks finalize and pay out actual campaign revenue on a monthly cycle (Net-30), your balance is automatically synced with the exact final amount once received—adjusting slightly up or down if needed to ensure 100% accuracy and your fair 70% revenue share.</p>
+          </div>
+        </div>
+
+        <!-- 9 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="technical">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">What happens during the midnight maintenance window?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Every night at <strong class="text-emerald-400">00:00 UTC</strong> a scheduled automated cloud routine runs three tasks: (1) resets all users' <code class="text-cyan-400 font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded">daily_impressions</code> counters to zero, (2) purges earnings history records older than 30 days, and (3) reconciles any pending postback credits. The job typically completes in under 10 seconds. If you happen to be active at exactly midnight UTC you may see your daily counter briefly reset — this is expected behaviour, not a bug.</p>
+          </div>
+        </div>
+
+        <!-- 10 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">What is the minimum cashout and how do I withdraw?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">The minimum withdrawal threshold is <strong class="text-emerald-400">$5.00 USD</strong>. Withdrawal options and processing times will be published in the dashboard once the payment pipeline is live. We will not announce specific payout methods until they have been fully tested end-to-end — accurate information only.</p>
+          </div>
+        </div>
+
+        <!-- 11 -->
+        <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="support">
+          <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
+            <span class="font-semibold text-white text-sm sm:text-base">How do I contact support?</span>
+            <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div class="faq-content hidden px-6 pb-6">
+            <p class="text-sm text-slate-300 leading-relaxed">Email us at <a href="mailto:support@surfkit.cloud" class="text-emerald-400 font-mono hover:underline">support@surfkit.cloud</a> for all enquiries — billing, technical issues, account problems, or general feedback. We are a two-person team, so response times may be 1–2 business days. There is currently no live chat or phone support.</p>
+          </div>
+        </div>
+
+      </div>
+      <!-- end FAQ list -->
+
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- FOOTER (Matching Surfkit Design System)                   -->
+  <!-- ========================================================= -->
+  <footer class="border-t border-white/10 bg-[#060A14] pt-16 pb-12 text-sm text-slate-400 relative overflow-hidden">
+    <!-- Subtle top glow accent -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Main 4-Column Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/5">
+        
+        <!-- Column 1: Brand -->
+        <div class="sm:col-span-2 lg:col-span-4 space-y-4">
+          <a href="index.html" class="inline-flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center p-0.5">
+              <div class="w-full h-full bg-[#090E1C] rounded-[6px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Surf<span class="text-emerald-400">kit</span></span>
+          </a>
+          <p class="text-xs text-slate-400 max-w-sm leading-relaxed">
+            Turn your daily web browsing and gaming into real rewards. 70/30 revenue split with complete privacy protection.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="X">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Discord">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Telegram">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="LinkedIn">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Surfkit Links -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Surfkit Links
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="earn.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Earn</a></li>
+            <li><a href="transparency.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency</a></li>
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal -->
+        <div class="space-y-3.5 lg:col-span-2">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+            Legal
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
+            <li><a href="privacy.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
+            <li><a href="creator-terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Support -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Support &amp; Inquiries
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="faq.html" class="text-emerald-400 font-semibold hover:text-emerald-300 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
+            <li>
+              <div class="pt-1">
+                <span class="text-slate-500 block text-[11px] uppercase tracking-wider mb-1 font-mono">Contact Operations:</span>
+                <a href="mailto:support@surfkit.cloud"
+                   class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-mono text-xs transition-all duration-200 group">
+                  <svg class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <span>support@surfkit.cloud</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Partner Disclaimer Box -->
+      <div class="py-4 my-6 px-4 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 leading-relaxed">
+        <strong class="text-slate-300">Partner Tunnel Disclaimer:</strong> Offerwall tasks, surveys, and interactive sponsor games are dynamically powered through secure, isolated partner tunnels provided by CPX Research (with BitLabs and Lootably coming soon). Reward postbacks are cryptographically verified before wallet settlement.
+      </div>
+
+      <!-- Bottom Sub-footer -->
+      <div class="pt-4 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div class="text-center md:text-left leading-relaxed">
+          Copyright &copy; 2026 Surfkit. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- FAQ INTERACTION SCRIPT                                    -->
+  <!-- ========================================================= -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+      // 1. Accordion toggle
+      document.querySelectorAll('.faq-trigger').forEach(function (trigger) {
+        trigger.addEventListener('click', function () {
+          var item    = trigger.closest('.faq-item');
+          var content = item.querySelector('.faq-content');
+          var icon    = item.querySelector('.faq-icon');
+          var isOpen  = !content.classList.contains('hidden');
+
+          // Close all others
+          document.querySelectorAll('.faq-item').forEach(function (other) {
+            if (other !== item) {
+              other.querySelector('.faq-content').classList.add('hidden');
+              other.querySelector('.faq-icon').style.transform = 'rotate(0deg)';
+              other.classList.remove('border-emerald-500/40');
+            }
+          });
+
+          // Toggle current
+          if (isOpen) {
+            content.classList.add('hidden');
+            icon.style.transform = 'rotate(0deg)';
+            item.classList.remove('border-emerald-500/40');
+          } else {
+            content.classList.remove('hidden');
+            icon.style.transform = 'rotate(180deg)';
+            item.classList.add('border-emerald-500/40');
+          }
+        });
+      });
+
+      // 2. Category filter
+      var filterBtns   = document.querySelectorAll('.faq-filter-btn');
+      var faqItems     = document.querySelectorAll('.faq-item');
+      var searchInput  = document.getElementById('faq-search');
+      var emptyState   = document.getElementById('faq-empty');
+      var currentCat   = 'all';
+
+      function applyFilter() {
+        var query   = searchInput.value.toLowerCase().trim();
+        var visible = 0;
+        faqItems.forEach(function (item) {
+          var cat        = item.getAttribute('data-category');
+          var matchCat   = (currentCat === 'all' || cat === currentCat);
+          var matchQuery = !query || item.innerText.toLowerCase().includes(query);
+          if (matchCat && matchQuery) { item.classList.remove('hidden'); visible++; }
+          else                         { item.classList.add('hidden'); }
+        });
+        emptyState.classList.toggle('hidden', visible > 0);
+      }
+
+      filterBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          filterBtns.forEach(function (b) {
+            b.classList.remove('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40', 'font-bold');
+            b.classList.add('bg-white/5', 'text-slate-400', 'border-white/5');
+          });
+          btn.classList.remove('bg-white/5', 'text-slate-400', 'border-white/5');
+          btn.classList.add('bg-emerald-500/20', 'text-emerald-300', 'border-emerald-500/40', 'font-bold');
+          currentCat = btn.getAttribute('data-category');
+          applyFilter();
+        });
+      });
+
+      // 3. Search filter
+      searchInput.addEventListener('input', applyFilter);
+    });
+  </script>
+
+</body>
+</html>

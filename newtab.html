@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#070D19]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Tab — Surfkit Browser</title>
+  <meta name="description" content="Surfkit New Tab dashboard with real-time balance tracking and one-click task access.">
+
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surf: {
+              bg: '#070D19',
+              card: '#0B1326',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10B981',
+              neon: '#14F195',
+              teal: '#06B6D4',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+
+  <style>
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13, 21, 39, 0.85) 0%, rgba(9, 14, 28, 0.95) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .glass-card:hover {
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.08), 0 0 25px rgba(20, 241, 149, 0.05);
+    }
+    .btn-glow {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.5);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 35px 2px rgba(20, 241, 149, 0.7);
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="h-full flex flex-col justify-between text-slate-100 font-sans antialiased p-6 relative overflow-hidden">
+  
+  <!-- Ambient Cyber Glows -->
+  <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+  <!-- TOP BAR: User Session & Nav -->
+  <header class="w-full max-w-6xl mx-auto flex items-center justify-between z-10">
+    <a href="index.html" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform group-hover:scale-105">
+        <div class="w-full h-full bg-[#070D19] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
+          S
+        </div>
+      </div>
+      <div>
+        <span class="text-xl font-extrabold tracking-tight text-white">Surf<span class="text-emerald-400">kit</span></span>
+        <span class="text-[10px] font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 ml-2">NEW TAB</span>
+      </div>
+    </a>
+
+    <!-- Live Balance Capsule -->
+    <div class="flex items-center gap-3">
+      <div class="glass-card px-4 py-2 rounded-xl flex items-center gap-3 font-mono text-xs border border-emerald-500/30">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-slate-400">Balance:</span>
+          <span id="nt-balance" class="text-emerald-400 font-bold">$8.170 USD</span>
+        </div>
+        <span class="text-slate-600">|</span>
+        <div class="text-slate-300">
+          <span id="nt-tokens" class="text-cyan-300 font-bold">8,170 SKIT</span>
+        </div>
+      </div>
+
+      <a href="hub.html" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-200 border border-white/10 transition-colors">
+        Hub &rarr;
+      </a>
+    </div>
+  </header>
+
+  <!-- CENTER HERO: Live Clock & Quick Task Launcher -->
+  <main class="w-full max-w-4xl mx-auto text-center my-auto z-10 py-8">
+    
+    <!-- Big Digital Time -->
+    <div id="live-clock" class="text-6xl sm:text-7xl lg:text-8xl font-black text-white font-mono tracking-tight mb-2 drop-shadow-[0_0_35px_rgba(16,185,129,0.3)]">
+      12:00
+    </div>
+    <div id="live-date" class="text-sm font-mono text-slate-400 uppercase tracking-widest mb-10">
+      Loading date...
+    </div>
+
+    <!-- Quick Action Launch Cards (Opens Strictly in Dedicated Task View) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-2xl mx-auto">
+      
+      <!-- Card 1: CPX Research Surveys -->
+      <button
+        type="button"
+        data-task-trigger="cpx"
+        class="task-launch-btn glass-card p-6 rounded-2xl border border-emerald-500/30 text-left flex items-start gap-4 hover:border-emerald-400 transition-all group cursor-pointer"
+      >
+        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 text-2xl shrink-0 group-hover:scale-110 transition-transform">
+          <i class="ri-survey-line"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors">CPX Research Surveys</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">LIVE</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">High-yield market research tasks. Opens in a dedicated task view tab.</p>
+          <div class="text-[11px] font-mono text-emerald-400 font-bold mt-2 flex items-center gap-1">
+            <span>Launch Survey in Task View</span>
+            <i class="ri-arrow-right-line"></i>
+          </div>
+        </div>
+      </button>
+
+      <!-- Card 2: Interactive Mini-Games & Quests -->
+      <button
+        type="button"
+        data-task-trigger="game"
+        class="task-launch-btn glass-card p-6 rounded-2xl border border-cyan-500/30 text-left flex items-start gap-4 hover:border-cyan-400 transition-all group cursor-pointer"
+      >
+        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 border border-cyan-400/40 flex items-center justify-center text-cyan-300 text-2xl shrink-0 group-hover:scale-110 transition-transform">
+          <i class="ri-gamepad-line"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-base font-bold text-white group-hover:text-cyan-300 transition-colors">Daily Mini-Game Quest</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-mono font-bold">ACTIVE</span>
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Engage with casual games & quests with instant USD credit.</p>
+          <div class="text-[11px] font-mono text-cyan-400 font-bold mt-2 flex items-center gap-1">
+            <span>Play in Dedicated Tab</span>
+            <i class="ri-arrow-right-line"></i>
+          </div>
+        </div>
+      </button>
+
+    </div>
+
+  </main>
+
+  <!-- BOTTOM FOOTER: Quick Links -->
+  <footer class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-500 pt-6 border-t border-white/5 z-10">
+    <div class="flex items-center gap-4 mb-2 sm:mb-0">
+      <a href="earn.html" class="hover:text-emerald-400 transition-colors">Ways to Earn</a>
+      <a href="transparency.html" class="hover:text-emerald-400 transition-colors">Transparency</a>
+      <a href="about.html" class="hover:text-emerald-400 transition-colors">About Us</a>
+      <a href="task-view.html" class="text-emerald-400 hover:text-emerald-300 transition-colors">Task View &rarr;</a>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+      <span>Surfkit Extension Connected &bull; 70/30 Fair Split</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script>
+    // Live Clock & Date
+    function updateClock() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const clockEl = document.getElementById('live-clock');
+      const dateEl = document.getElementById('live-date');
+      
+      if (clockEl) clockEl.textContent = `${hours}:${minutes}`;
+      if (dateEl) {
+        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+        dateEl.textContent = now.toLocaleDateString('en-US', options);
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Live Extension Storage Session Reader
+    function refreshNewTabBalance() {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['balanceUsd', 'tokensEarned'], (res) => {
+          if (chrome.runtime && chrome.runtime.lastError) return;
+          const bal = typeof res.balanceUsd === 'number' ? res.balanceUsd : (Number(res.balanceUsd) || 0);
+          const tokens = typeof res.tokensEarned === 'number' ? res.tokensEarned : Math.round(bal / 0.001);
+          const bEl = document.getElementById('nt-balance');
+          const tEl = document.getElementById('nt-tokens');
+          if (bEl) bEl.textContent = `$${bal.toFixed(3)} USD`;
+          if (tEl) tEl.textContent = `${tokens.toLocaleString()} SKIT`;
+        });
+      }
+    }
+    refreshNewTabBalance();
+
+    // User-Initiated Task View Launcher (CPX Surveys & Mini-Games)
+    document.querySelectorAll('[data-task-trigger]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const type = btn.getAttribute('data-task-trigger') || 'cpx';
+        const targetUrl = `task-view.html?type=${encodeURIComponent(type)}`;
+        if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.create) {
+          chrome.tabs.create({ url: chrome.runtime.getURL(targetUrl) });
+        } else {
+          window.open(targetUrl, '_blank', 'noopener,noreferrer');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

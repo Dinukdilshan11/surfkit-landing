@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surfkit Hub — Member Dashboard & Control Center</title>
+  <meta name="description" content="Access your live Surfkit Member Hub. Monitor your real-time USD balance, ad intensity settings, active daily streaks, and request instant PayPal or Bank Transfer payouts.">
+
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surf: {
+              bg: '#090E1C',
+              card: '#0D1527',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10B981',
+              neon: '#14F195',
+              teal: '#06B6D4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #090E1C; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+    .glass-nav {
+      background: rgba(9, 14, 28, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13, 21, 39, 0.85) 0%, rgba(9, 14, 28, 0.95) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .grid-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .btn-glow {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.5);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 35px 2px rgba(20, 241, 149, 0.7);
+      transform: translateY(-2px);
+    }
+  </style>
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-[#090E1C] text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Ambient background glow orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute top-[40%] -left-32 w-[500px] h-[500px] bg-teal-500/8 rounded-full blur-[160px]"></div>
+  </div>
+  <div class="fixed inset-0 grid-pattern opacity-40 pointer-events-none -z-10"></div>
+
+  <!-- ========================================================= -->
+  <!-- NAVIGATION BAR                                            -->
+  <!-- ========================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform duration-300 group-hover:scale-105">
+            <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
+              S
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold tracking-tight text-white">Surf<span class="text-emerald-400">kit</span></span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-widest px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">HUB</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
+          <a href="index.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Home</a>
+          <a href="earn.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Earn</a>
+          <a href="transparency.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Transparency</a>
+          <a href="about.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">About Us</a>
+        </nav>
+
+        <!-- Right User Pill -->
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#161F36] border border-[#233152] text-xs text-slate-300">
+            <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+            </svg>
+            <span class="font-mono font-medium">dinukdilshan39</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          </div>
+          <a href="index.html" class="text-xs font-mono text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/5 transition-colors">
+            Exit to Home
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- MAIN HUB CONTENT                                          -->
+  <!-- ========================================================= -->
+  <main class="flex-grow pt-32 pb-24">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+
+      <!-- Hub Header & Status Bar -->
+      <div class="glass-card rounded-3xl p-6 sm:p-8 border border-white/10 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+              v1.0.0 Active
+            </span>
+            <span class="text-xs font-mono text-slate-400">Connected to <strong class="text-white">surfkit.cloud</strong></span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Welcome back, <span class="text-emerald-400 font-mono">dinukdilshan39</span>
+          </h1>
+          <p class="text-xs sm:text-sm text-slate-400 mt-1">
+            Your Surfkit extension is silently surfing background ad inventory. 70% user reward active.
+          </p>
+        </div>
+
+        <!-- Quick Action Buttons -->
+        <div class="flex flex-wrap items-center gap-3">
+          <button type="button" data-task-trigger="cpx" class="task-launch-btn btn-glow inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 shadow-lg hover:brightness-110 transition-all cursor-pointer">
+            <i class="ri-survey-line text-slate-950 text-base"></i>
+            <span>Earn with CPX Surveys &rarr;</span>
+          </button>
+          <a href="#cashout" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
+            <span>💳</span>
+            <span>Request Payout</span>
+          </a>
+          <a href="earn.html" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-200 bg-white/5 hover:bg-white/10 border border-white/10 transition-colors">
+            <span>⚡</span>
+            <span>Browse Offerwalls</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Core Metrics Row (Exact true data from user extension: $8.170 USD, 8170 SKIT, 180 ads seen, 2 days streak) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+        <!-- Metric 1: Available Balance -->
+        <div class="glass-card rounded-2xl p-6 border border-emerald-500/30 space-y-3">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>AVAILABLE BALANCE</span>
+            <span class="text-emerald-400 font-bold">USD</span>
+          </div>
+          <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono tracking-tight" id="hub-usd-balance">
+            $8.170
+          </div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-white/5">
+            <span class="text-slate-400">Tokens Earned:</span>
+            <span class="font-mono font-bold text-emerald-400" id="hub-token-balance">8,170 SKIT</span>
+          </div>
+        </div>
+
+        <!-- Metric 2: Ads Seen Today -->
+        <div class="glass-card rounded-2xl p-6 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>ADS SEEN TODAY</span>
+            <span class="text-teal-400">👁 Live Feed</span>
+          </div>
+          <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono tracking-tight" id="hub-ads-today">
+            180
+          </div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-white/5">
+            <span class="text-slate-400">Session Yield (Today):</span>
+            <span class="font-mono font-bold text-teal-400">+$0.180 USD</span>
+          </div>
+        </div>
+
+        <!-- Metric 3: Active Streak -->
+        <div class="glass-card rounded-2xl p-6 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>ACTIVE STREAK</span>
+            <span class="text-amber-400">🔥 Consecutive</span>
+          </div>
+          <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono tracking-tight">
+            2 Days
+          </div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-white/5">
+            <span class="text-slate-400">Status:</span>
+            <span class="font-mono font-bold text-amber-300">Active Surfer</span>
+          </div>
+        </div>
+
+        <!-- Metric 4: Ad Frequency / Intensity -->
+        <div class="glass-card rounded-2xl p-6 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between text-xs font-mono text-slate-400">
+            <span>INTENSITY SETTING</span>
+            <span class="text-emerald-400 font-bold">High</span>
+          </div>
+          <div class="flex items-center gap-1.5 pt-1">
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] font-mono text-slate-400">Low</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 text-[11px] font-mono text-slate-400">Balanced</span>
+            <span class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold text-[11px] font-mono shadow-md">High</span>
+          </div>
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-white/5">
+            <span class="text-slate-400">RAM Footprint:</span>
+            <span class="font-mono text-slate-300">&lt; 14 MB</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Main Hub 2-Column Section: Payout Console & Recent Postback Activity Ledger -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Left: Cashout / Withdrawal Console (lg:col-span-5) -->
+        <div id="cashout" class="lg:col-span-5 glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-6">
+          <div>
+            <span class="text-xs font-mono font-bold uppercase text-emerald-400 tracking-wider">Fast Cashout Rails</span>
+            <h2 class="text-xl font-bold text-white mt-1">Withdraw USD Funds</h2>
+            <p class="text-xs text-slate-400 mt-1">Select your preferred payout method. Minimum threshold is $5.00 USD for both PayPal and Bank Transfer.</p>
+          </div>
+
+          <!-- Payout Method Selectors -->
+          <div class="grid grid-cols-2 gap-3">
+            <button type="button" class="p-3.5 rounded-xl border border-emerald-500 bg-emerald-500/10 text-left space-y-1">
+              <div class="flex items-center justify-between">
+                <span class="text-lg">💳</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              </div>
+              <div class="text-xs font-bold text-white">PayPal</div>
+              <div class="text-[10px] text-slate-400 font-mono">Min: $5.00 USD</div>
+            </button>
+
+            <button type="button" class="p-3.5 rounded-xl border border-white/10 bg-white/[0.02] hover:border-white/20 text-left space-y-1 transition-colors">
+              <div class="flex items-center justify-between">
+                <span class="text-lg">🏦</span>
+                <span class="text-[10px] font-mono text-slate-500">Wire</span>
+              </div>
+              <div class="text-xs font-bold text-white">Bank Transfer</div>
+              <div class="text-[10px] text-slate-400 font-mono">Min: $5.00 USD</div>
+            </button>
+          </div>
+
+          <!-- Payout Form Input -->
+          <div class="space-y-4 text-xs">
+            <div>
+              <label class="block text-slate-400 mb-1 font-medium">PayPal Email or Bank Wire Destination</label>
+              <input type="email" value="support@surfkit.cloud" class="w-full px-3.5 py-2.5 rounded-xl bg-[#090E1C] border border-white/10 text-white font-mono focus:outline-none focus:border-emerald-500">
+            </div>
+
+            <div>
+              <div class="flex justify-between text-slate-400 mb-1">
+                <span>Withdrawal Amount (USD)</span>
+                <span>Max: <strong class="text-emerald-400">$8.170</strong></span>
+              </div>
+              <div class="relative">
+                <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">$</span>
+                <input type="number" step="0.01" min="5.00" max="8.17" value="8.00" class="w-full pl-8 pr-3.5 py-2.5 rounded-xl bg-[#090E1C] border border-white/10 text-white font-mono focus:outline-none focus:border-emerald-500">
+              </div>
+            </div>
+
+            <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 space-y-1 text-[11px] text-slate-400">
+              <div class="flex justify-between">
+                <span>Gross Request:</span>
+                <span class="text-white font-mono font-semibold">$8.00 USD</span>
+              </div>
+              <div class="flex justify-between">
+                <span>Network Processing Fee:</span>
+                <span class="text-emerald-400 font-mono font-semibold">$0.00 (Free)</span>
+              </div>
+              <div class="flex justify-between pt-1 border-t border-white/5 font-bold text-white">
+                <span>You will receive:</span>
+                <span class="text-emerald-400 font-mono">$8.00 USD</span>
+              </div>
+            </div>
+
+            <button type="button" class="btn-glow w-full py-3 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400">
+              Submit Payout Request &rarr;
+            </button>
+
+            <p class="text-[10px] text-slate-500 text-center">
+              Processed within 24-48 business hours via secure partner postback clearance.
+            </p>
+          </div>
+        </div>
+
+        <!-- Right: Real-Time Verified Task & Postback Ledger (lg:col-span-7) -->
+        <div class="lg:col-span-7 glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-xs font-mono font-bold uppercase text-teal-400 tracking-wider">Cryptographic Audit Trail</span>
+              <h2 class="text-xl font-bold text-white mt-1">Recent Postback Activity</h2>
+            </div>
+            <span class="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              Live Sync
+            </span>
+          </div>
+
+          <!-- Transaction List -->
+          <div class="space-y-3 font-mono text-xs">
+            
+            <!-- Item 1 -->
+            <div class="p-3.5 rounded-xl bg-[#090E1C] border border-white/5 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+                  ✓
+                </div>
+                <div>
+                  <div class="text-white font-semibold">Background Surfed Ads (x12)</div>
+                  <div class="text-[10px] text-slate-500">reddit.com • Session Harvest • 2m ago</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-emerald-400 font-bold">+$0.0336 USD</div>
+                <div class="text-[10px] text-slate-400">33.6 SKIT</div>
+              </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="p-3.5 rounded-xl bg-[#090E1C] border border-white/5 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center font-bold">
+                  ✓
+                </div>
+                <div>
+                  <div class="text-white font-semibold">CPX Research Consumer Poll</div>
+                  <div class="text-[10px] text-slate-500">Survey Tunnel ID #849102 &bull; 45m ago</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-emerald-400 font-bold">+$0.8400 USD</div>
+                <div class="text-[10px] text-slate-400">980 SKIT (70% split)</div>
+              </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="p-3.5 rounded-xl bg-[#090E1C] border border-white/5 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">
+                  ✓
+                </div>
+                <div>
+                  <div class="text-white font-semibold">10% Referral Incentive Bonus</div>
+                  <div class="text-[10px] text-slate-500">Friend @alex_w earned &bull; 3h ago</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-emerald-400 font-bold">+$0.0480 USD</div>
+                <div class="text-[10px] text-slate-400">48 SKIT</div>
+              </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="p-3.5 rounded-xl bg-[#090E1C] border border-white/5 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold">
+                  ✓
+                </div>
+                <div>
+                  <div class="text-white font-semibold">CPX Research Mobile Mini-Game Quest</div>
+                  <div class="text-[10px] text-slate-500">Postback ID #CPX-99412 &bull; 8h ago</div>
+                </div>
+              </div>
+              <div class="text-right">
+                <div class="text-emerald-400 font-bold">+$1.2500 USD</div>
+                <div class="text-[10px] text-slate-400">1,250 SKIT</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Bottom Verification Route Note -->
+          <div class="pt-2 flex items-center justify-between text-[11px] font-mono text-slate-500 border-t border-white/5">
+            <span>Postback Settlement: <span class="text-slate-300">Verified Partner Tunnels</span></span>
+            <span class="text-emerald-400 font-semibold">100% Cryptographically Verified</span>
+          </div>
+        </div>
+
+
+      <!-- Member Community Rating & Feedback Banner -->
+      <div class="mt-8 glass-card rounded-2xl p-6 border border-emerald-500/20 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg">
+            ★
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-white tracking-tight">Verified Member Feedback &amp; Rating</h4>
+            <p class="text-xs text-slate-400 mt-0.5">Submit your platform feedback directly to our secure cloud network. Your rating updates the public trust score in real-time.</p>
+          </div>
+        </div>
+        <button type="button" class="open-rating-modal-btn btn-glow inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:opacity-95 transition-all shadow-md cursor-pointer whitespace-nowrap">
+          <span>Rate Surfkit</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        </button>
+      </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  
+  <!-- ========================================================= -->
+  <!-- SURFKIT LIVE COMMUNITY RATING & FEEDBACK MODAL -->
+  <!-- ========================================================= -->
+  <div id="rating-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+    <div class="relative glass-card w-full max-w-lg rounded-2xl border border-emerald-500/30 p-6 sm:p-8 shadow-2xl bg-[#090E1C]/95">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-white/10 mb-6">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-[1.5px] flex items-center justify-center">
+            <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-white tracking-tight">Rate Surfkit Platform</h3>
+            <div class="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Live Cloud Sync Engine</span>
+            </div>
+          </div>
+        </div>
+        <button id="close-rating-modal-btn" type="button" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/5 transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Rating Form Container -->
+      <form id="rating-submission-form" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 font-mono">
+            Select Your Star Rating:
+          </label>
+          <div class="flex items-center justify-center sm:justify-start gap-2 pt-1" id="interactive-star-picker">
+            <button type="button" data-star="1" class="star-pick-btn w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500 flex items-center justify-center transition-all cursor-pointer group">
+              <svg class="w-6 h-6 text-slate-500 group-hover:text-emerald-400 transition-colors pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+            <button type="button" data-star="2" class="star-pick-btn w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500 flex items-center justify-center transition-all cursor-pointer group">
+              <svg class="w-6 h-6 text-slate-500 group-hover:text-emerald-400 transition-colors pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+            <button type="button" data-star="3" class="star-pick-btn w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500 flex items-center justify-center transition-all cursor-pointer group">
+              <svg class="w-6 h-6 text-slate-500 group-hover:text-emerald-400 transition-colors pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+            <button type="button" data-star="4" class="star-pick-btn w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500 flex items-center justify-center transition-all cursor-pointer group">
+              <svg class="w-6 h-6 text-slate-500 group-hover:text-emerald-400 transition-colors pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+            <button type="button" data-star="5" class="star-pick-btn w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 hover:border-emerald-500 flex items-center justify-center transition-all cursor-pointer group">
+              <svg class="w-6 h-6 text-slate-500 group-hover:text-emerald-400 transition-colors pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </button>
+          </div>
+          <div id="star-rating-hint" class="text-xs text-emerald-400 mt-2 font-mono h-4">
+            Click a star to choose (1-5)
+          </div>
+        </div>
+
+        <div>
+          <label for="rating-feedback-text" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 font-mono">
+            Optional Feedback / Experience Note:
+          </label>
+          <textarea id="rating-feedback-text" rows="3" placeholder="Share your experience with background ad-surfing, task speeds, or payout transparency..."
+             class="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 transition-colors resize-none"></textarea>
+        </div>
+
+        <!-- Identity Banner -->
+        <div class="p-3 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-between text-[11px] font-mono text-slate-400">
+          <span>Active Session ID:</span>
+          <span class="text-emerald-400 font-bold" id="rating-user-identity">usr_dinuk_9981</span>
+        </div>
+
+        <!-- Submission Status Message -->
+        <div id="rating-modal-status" class="hidden p-3 rounded-xl text-xs font-mono"></div>
+
+        <!-- Modal Action Buttons -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" id="cancel-rating-modal-btn" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold transition-colors">
+            Cancel
+          </button>
+          <button type="submit" id="submit-rating-btn" class="btn-glow inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:opacity-95 transition-all shadow-md">
+            <span>Submit Feedback</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- FOOTER                                                    -->
+  <!-- ========================================================= -->
+  <footer class="border-t border-white/10 bg-[#060A14] pt-16 pb-12 text-sm text-slate-400 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Main 4-Column Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/5">
+        
+        <!-- Column 1: Brand -->
+        <div class="sm:col-span-2 lg:col-span-4 space-y-4">
+          <a href="index.html" class="inline-flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center p-0.5">
+              <div class="w-full h-full bg-[#090E1C] rounded-[6px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Surf<span class="text-emerald-400">kit</span></span>
+          </a>
+          <p class="text-xs text-slate-400 max-w-sm leading-relaxed">
+            Turn your daily web browsing and gaming into real rewards. 70/30 revenue split with complete privacy protection.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="X">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Discord">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Telegram">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="LinkedIn">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Surfkit Links -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Surfkit Links
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="earn.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Ways to Earn</a></li>
+            <li><a href="transparency.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency &amp; Security</a></li>
+            <li><a href="about.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal -->
+        <div class="space-y-3.5 lg:col-span-2">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+            Legal
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
+            <li><a href="privacy.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
+            <li><a href="creator-terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Support -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Support &amp; Inquiries
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="faq.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
+            <li>
+              <div class="pt-1">
+                <span class="text-slate-500 block text-[11px] uppercase tracking-wider mb-1 font-mono">Contact Operations:</span>
+                <a href="mailto:support@surfkit.cloud" 
+                   class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-mono text-xs transition-all duration-200 group">
+                  <svg class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <span>support@surfkit.cloud</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Partner Disclaimer Box -->
+      <div class="py-4 my-6 px-4 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 leading-relaxed">
+        <strong class="text-slate-300">Partner Tunnel Disclaimer:</strong> Offerwall tasks, surveys, and interactive sponsor games are dynamically powered through secure, isolated partner tunnels provided by CPX Research (with BitLabs and Lootably coming soon). Reward postbacks are cryptographically verified before wallet settlement.
+      </div>
+
+      <!-- Bottom Sub-footer -->
+      <div class="pt-4 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div class="text-center md:text-left leading-relaxed">
+          Copyright &copy; 2026 Surfkit. All rights reserved.
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script>
+    // Live Extension Storage Session Reader
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.get(['balanceUsd', 'tokensEarned', 'adsSeenToday'], (res) => {
+        if (chrome.runtime && chrome.runtime.lastError) return;
+        const bal = typeof res.balanceUsd === 'number' ? res.balanceUsd : (Number(res.balanceUsd) || 0);
+        const tokens = typeof res.tokensEarned === 'number' ? res.tokensEarned : Math.round(bal / 0.001);
+        const ads = typeof res.adsSeenToday === 'number' ? res.adsSeenToday : 0;
+        const el = document.getElementById('hub-usd-balance');
+        const tEl = document.getElementById('hub-token-balance');
+        const aEl = document.getElementById('hub-ads-today');
+        if (el) el.textContent = '$' + bal.toFixed(3);
+        if (tEl) tEl.textContent = tokens.toLocaleString() + ' SKIT';
+        if (aEl) aEl.textContent = ads.toString();
+      });
+    }
+  </script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
+

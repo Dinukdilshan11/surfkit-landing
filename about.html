@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us — Surfkit Platform (surfkit.cloud)</title>
+  <meta name="description" content="Discover the mission, vision, and team behind Surfkit (surfkit.cloud). We are decentralizing the $455B digital advertising economy by returning a 70% reward share directly to web surfers.">
+
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surf: {
+              bg: '#090E1C',
+              card: '#0D1527',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10B981',
+              neon: '#14F195',
+              teal: '#06B6D4',
+            }
+          },
+          animation: {
+            'glow-pulse': 'glow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 5s ease-in-out infinite',
+            'float-slow': 'float 8s ease-in-out infinite',
+            'beam': 'beam 3s linear infinite',
+          },
+          keyframes: {
+            glow: {
+              '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+              '50%': { opacity: '0.7', transform: 'scale(1.05)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-8px)' },
+            },
+            beam: {
+              '0%': { strokeDashoffset: '100' },
+              '100%': { strokeDashoffset: '0' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090E1C;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10B981;
+    }
+
+    .glass-nav {
+      background: rgba(9, 14, 28, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13, 21, 39, 0.85) 0%, rgba(9, 14, 28, 0.95) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .glass-card:hover {
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.08), 0 0 25px rgba(20, 241, 149, 0.05);
+    }
+    .grid-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #FFFFFF 20%, #A7F3D0 70%, #10B981 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .text-gradient-teal {
+      background: linear-gradient(135deg, #14F195 0%, #06B6D4 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn-glow {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.5);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 35px 2px rgba(20, 241, 149, 0.7);
+      transform: translateY(-2px);
+    }
+  </style>
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-[#090E1C] text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Ambient background glow orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/12 rounded-full blur-[140px] animate-glow-pulse"></div>
+    <div class="absolute top-[35%] -left-32 w-[550px] h-[550px] bg-teal-500/8 rounded-full blur-[160px]"></div>
+    <div class="absolute top-[65%] -right-40 w-[600px] h-[500px] bg-emerald-600/8 rounded-full blur-[170px]"></div>
+  </div>
+  <div class="fixed inset-0 grid-pattern opacity-40 pointer-events-none -z-10"></div>
+
+  <!-- ========================================================= -->
+  <!-- NAVIGATION BAR                                            -->
+  <!-- ========================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo -->
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform duration-300 group-hover:scale-105">
+            <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
+              S
+            </div>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full blur-[2px] animate-ping opacity-75"></span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold tracking-tight text-white">Surf<span class="text-emerald-400">kit</span></span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">ABOUT</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
+          <a href="index.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Home</a>
+          <a href="earn.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Earn</a>
+          <a href="transparency.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Transparency</a>
+          <a href="about.html" class="px-3.5 py-2 text-emerald-400 bg-white/5 rounded-lg font-semibold">About Us</a>
+        </nav>
+
+        <!-- Right CTA Button -->
+        <div class="hidden sm:flex items-center gap-3">
+          <a href="https://chrome.google.com" target="_blank" rel="noopener noreferrer" 
+             class="btn-glow inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
+            <svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24">
+              <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29L1.931 5.47zm13.473 4.298a5.452 5.452 0 0 1 1.414 7.687l-3.953 6.847C12.569 24.195 12.287 24 12 24c6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.822-4.364H15.404z"/>
+              <circle cx="12" cy="12" r="3.273"/>
+            </svg>
+            <span>Add to Chrome — Free</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ========================================================= -->
+  <!-- HERO HEADER: THE STORY OF SURFKIT                         -->
+  <!-- ========================================================= -->
+  <section class="pt-36 pb-16 md:pt-44 md:pb-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs sm:text-sm font-medium mb-6">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Reclaiming the Open Web</span>
+        <span class="text-slate-500">•</span>
+        <span class="text-slate-300">Founded 2026</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] max-w-4xl mx-auto mb-6">
+        The Web Generates Billions In Attention. <br class="hidden sm:inline" />
+        <span class="text-gradient">We Give It Back To You.</span>
+      </h1>
+
+      <p class="text-base sm:text-lg lg:text-xl text-slate-400 max-w-3xl mx-auto font-normal leading-relaxed">
+        For three decades, internet monopolies harvested human focus, selling advertising real estate for massive profits while leaving surfers with zero return. Surfkit was built to pioneer a fair, transparent revenue sharing model directly into your browser.
+      </p>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- 1. OUR MISSION: THE $455B DIGITAL AD PIE (VISUAL ASSET 1) -->
+  <!-- ========================================================= -->
+  <section id="mission" class="py-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-mono font-semibold mb-3">Our Core Mission</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Restructuring The <span class="text-gradient">$455 Billion</span> Digital Ad Economy
+        </p>
+        <p class="text-slate-400 mt-4 text-base sm:text-lg">
+          We replace extractive digital ad auctions with a transparent, decentralized user-split engine that pays people for simply browsing normally.
+        </p>
+      </div>
+
+      <!-- VISUAL INFOGRAPHIC 1: Stylized 'S' Hub + 70% vs 30% Digital Pie Breakdown -->
+      <div class="glass-card rounded-3xl p-8 sm:p-12 border border-white/10 relative overflow-hidden">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <!-- Left Visual: Handcrafted Stylized 'S' Central Hub with Peacefully Browsing Users -->
+          <div class="lg:col-span-6 relative flex flex-col items-center justify-center">
+            
+            <div class="relative w-full max-w-md aspect-square flex items-center justify-center">
+              
+              <!-- Orbital Rings & Data Beams -->
+              <div class="absolute inset-4 rounded-full border border-dashed border-emerald-500/20 animate-spin" style="animation-duration: 40s;"></div>
+              <div class="absolute inset-16 rounded-full border border-emerald-500/10"></div>
+              <div class="absolute inset-28 rounded-full bg-emerald-500/5 blur-2xl pointer-events-none"></div>
+
+              <!-- Orbiting User Avatar 1 (Laptop Surfer - Top Right) -->
+              <div class="absolute top-4 right-10 flex items-center gap-2.5 p-2.5 rounded-2xl bg-[#0B1222] border border-emerald-500/30 shadow-lg animate-float">
+                <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
+                  💻
+                </div>
+                <div class="text-left text-[11px]">
+                  <div class="text-white font-semibold">Alex W.</div>
+                  <div class="text-emerald-400 font-mono">Laptop • +$0.28/hr</div>
+                </div>
+              </div>
+
+              <!-- Orbiting User Avatar 2 (Mobile Casual - Bottom Left) -->
+              <div class="absolute bottom-6 left-6 flex items-center gap-2.5 p-2.5 rounded-2xl bg-[#0B1222] border border-teal-500/30 shadow-lg animate-float-slow">
+                <div class="w-8 h-8 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center text-sm font-bold">
+                  📱
+                </div>
+                <div class="text-left text-[11px]">
+                  <div class="text-white font-semibold">Maya S.</div>
+                  <div class="text-teal-400 font-mono">Mobile • Peaceful Flow</div>
+                </div>
+              </div>
+
+              <!-- Orbiting User Avatar 3 (Streamer / Creator - Bottom Right) -->
+              <div class="absolute bottom-12 right-6 flex items-center gap-2.5 p-2.5 rounded-2xl bg-[#0B1222] border border-purple-500/30 shadow-lg animate-float">
+                <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-sm font-bold">
+                  🎙️
+                </div>
+                <div class="text-left text-[11px]">
+                  <div class="text-white font-semibold">Liam K.</div>
+                  <div class="text-purple-300 font-mono">Creator Hub Split</div>
+                </div>
+              </div>
+
+              <!-- Central Stylized Surfkit 'S' Hub Node -->
+              <div class="relative z-10 w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[3px] shadow-[0_0_50px_rgba(16,185,129,0.35)] animate-glow-pulse">
+                <div class="w-full h-full bg-[#090E1C] rounded-[22px] flex flex-col items-center justify-center text-center p-3">
+                  <span class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-tr from-emerald-400 to-teal-300">S</span>
+                  <span class="text-[9px] uppercase font-mono font-bold tracking-widest text-emerald-400 mt-1">CORE HUB</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Subtitle badge below the hub -->
+            <div class="mt-4 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/10 text-xs text-slate-400 font-mono flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+              <span>Decentralized User Attention Routing Active</span>
+            </div>
+
+          </div>
+
+
+          <!-- Right Visual: Clean Digital Donut / Pie Visualization -->
+          <div class="lg:col-span-6 space-y-6">
+            
+            <div class="space-y-2">
+              <span class="text-xs font-mono font-semibold uppercase text-emerald-400 tracking-wider">Algorithmic Distribution Formula</span>
+              <h3 class="text-2xl sm:text-3xl font-extrabold text-white">The $455B Digital Ad Pie Redefined</h3>
+              <p class="text-slate-400 text-sm leading-relaxed">
+                Rather than siphoning billions into closed corporate silos, Surfkit enforces a strict, transparent smart split on all verified background ad streams:
+              </p>
+            </div>
+
+            <!-- Custom Pie / Donut SVG Chart Component -->
+            <div class="bg-[#090E1C] rounded-2xl p-6 border border-white/5 space-y-6">
+              
+              <div class="flex flex-col sm:flex-row items-center gap-8 justify-center">
+                
+                <!-- Interactive High-Tech SVG Donut -->
+                <div class="relative w-44 h-44 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                    <!-- Background Circle / 30% Platform Share -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#1E293B" stroke-width="14" stroke-dasharray="238.76" stroke-dashoffset="0" />
+                    <!-- 70% Bright Green User Share -->
+                    <circle cx="50" cy="50" r="38" fill="transparent" stroke="#10B981" stroke-width="14" stroke-dasharray="238.76" stroke-dashoffset="71.63" stroke-linecap="round" class="filter drop-shadow-[0_0_8px_rgba(16,185,129,0.7)]" />
+                  </svg>
+                  <!-- Central Label -->
+                  <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <span class="text-2xl font-black text-white font-mono">70%</span>
+                    <span class="text-[9px] uppercase font-mono font-bold text-emerald-400 tracking-wider">User Share</span>
+                  </div>
+                </div>
+
+                <!-- Legend & Detailed Breakdown -->
+                <div class="space-y-3.5 w-full text-xs">
+                  
+                  <!-- 70% Green Share -->
+                  <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                    <div class="flex items-center justify-between font-bold text-white mb-1">
+                      <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-md bg-emerald-400 shadow-[0_0_8px_#10B981]"></span>
+                        <span>User Attention Share</span>
+                      </span>
+                      <span class="font-mono text-emerald-400 text-sm">70% Net</span>
+                    </div>
+                    <div class="text-slate-400 text-[11px] leading-relaxed">
+                      Credited directly to user available USD balance based on verified edge postbacks.
+                    </div>
+                  </div>
+
+                  <!-- 30% Platform Share -->
+                  <div class="p-3 rounded-xl bg-slate-800/40 border border-slate-700/60">
+                    <div class="flex items-center justify-between font-bold text-slate-300 mb-1">
+                      <span class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-md bg-slate-600"></span>
+                        <span>Platform Operations &amp; Defense</span>
+                      </span>
+                      <span class="font-mono text-slate-400 text-sm">30% Ops</span>
+                    </div>
+                    <div class="text-slate-400 text-[11px] leading-relaxed">
+                      Maintains platform infrastructure, verified ad network integrations, and security defenses.
+                    </div>
+                  </div>
+
+                  <!-- 0% Tech Giants -->
+                  <div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-white/[0.02] text-slate-500 text-[11px] font-mono">
+                    <span>Tech Giant Extraction Share:</span>
+                    <span class="text-rose-400 font-bold">0% (Completely Eliminated)</span>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- 2. OUR VISION: THE 'FAIR INTERNET' LANDSCAPE (VISUAL 2)   -->
+  <!-- ========================================================= -->
+  <section id="vision" class="py-20 relative bg-gradient-to-b from-transparent via-[#0D1527]/40 to-transparent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Section Header -->
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-teal-400 font-mono font-semibold mb-3">Our Vision For Tomorrow</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Building The <span class="text-gradient">Fair Internet Bridge</span>
+        </p>
+        <p class="text-slate-400 mt-4 text-base sm:text-lg">
+          The internet is humanity's greatest achievement. Surfkit builds the suspension bridge connecting the old, extractive web to an open, rewarding ecosystem.
+        </p>
+      </div>
+
+      <!-- VISUAL INFOGRAPHIC 2: Futuristic 'Fair Internet' Bridge Graphic -->
+      <div class="glass-card rounded-3xl p-8 sm:p-12 border border-white/10 relative overflow-hidden mb-16">
+        
+        <!-- Interactive Conceptual Bridge Diagram Canvas -->
+        <div class="relative w-full rounded-2xl bg-[#070B16] border border-white/5 p-6 sm:p-10 overflow-hidden">
+          
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            
+            <!-- Left Side: Old Web (Addictive Data Extraction) -->
+            <div class="md:col-span-4 p-5 rounded-2xl bg-rose-950/20 border border-rose-500/20 text-center relative space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-500/10 text-rose-400 text-xs font-mono font-bold">
+                <span>⚠️</span> OLD INTERNET MODEL
+              </div>
+              <h4 class="text-lg font-bold text-white">Extractive Data Monopolies</h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Intrusive trackers, pop-up spam, closed walled gardens, and zero user compensation for personal attention.
+              </p>
+              <div class="pt-2 flex justify-center gap-2">
+                <span class="px-2 py-1 rounded bg-rose-500/10 text-[10px] font-mono text-rose-300">Popups</span>
+                <span class="px-2 py-1 rounded bg-rose-500/10 text-[10px] font-mono text-rose-300">Tracking</span>
+                <span class="px-2 py-1 rounded bg-rose-500/10 text-[10px] font-mono text-rose-300">$0 to Users</span>
+              </div>
+            </div>
+
+            <!-- Middle: The Futuristic Bridge & Flow of Reward Beams -->
+            <div class="md:col-span-4 flex flex-col items-center justify-center text-center space-y-3 py-4">
+              <span class="text-xs font-mono uppercase tracking-widest text-emerald-400 font-bold">THE SURFKIT BRIDGE</span>
+              
+              <!-- Bridge Flow Vector Animation Graphic -->
+              <div class="relative w-full flex items-center justify-center">
+                <div class="w-full h-1 bg-gradient-to-r from-rose-500/40 via-emerald-400 to-teal-400 rounded-full relative">
+                  <div class="absolute -top-1.5 left-1/2 -translate-x-1/2 w-4 h-4 rounded-full bg-emerald-400 shadow-[0_0_15px_#10B981] animate-ping"></div>
+                </div>
+              </div>
+
+              <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-xs text-emerald-300 font-mono">
+                ✨ "Fair Share for All"
+              </div>
+              <div class="text-[11px] text-slate-400">
+                Encrypted Partner Tunnels: <strong class="text-white">CPX Research (Live)</strong> &bull; BitLabs &amp; Lootably (Upcoming)
+              </div>
+            </div>
+
+            <!-- Right Side: Clean Decentralized Reward Hub -->
+            <div class="md:col-span-4 p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 text-center relative space-y-3">
+              <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 text-xs font-mono font-bold">
+                <span>🌟</span> SURFKIT ECOSYSTEM
+              </div>
+              <h4 class="text-lg font-bold text-white">The Decentralized Reward Hub</h4>
+              <p class="text-xs text-slate-400 leading-relaxed">
+                Background ad streaming, verified cryptographic postbacks, instant USD liquidity to PayPal and Bank Transfer.
+              </p>
+              <div class="pt-2 flex justify-center gap-2">
+                <span class="px-2 py-1 rounded bg-emerald-500/15 text-[10px] font-mono text-emerald-300">70% User Split</span>
+                <span class="px-2 py-1 rounded bg-teal-500/15 text-[10px] font-mono text-teal-300">100% Private</span>
+                <span class="px-2 py-1 rounded bg-cyan-500/15 text-[10px] font-mono text-cyan-300">PayPal/Wire</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- TIMELINE TO FAIRNESS (6-Step Pipeline as in Screenshot Panel 2) -->
+        <div class="mt-12 pt-10 border-t border-white/10">
+          <h3 class="text-center text-sm font-mono uppercase tracking-widest text-emerald-400 font-bold mb-8">
+            Timeline To Fairness: From Extractive Loop to Real Profits
+          </h3>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 text-center">
+            
+            <!-- Step 1 -->
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 flex items-center justify-center font-mono font-bold text-xs mx-auto">01</div>
+              <div class="font-bold text-white text-xs">Addiction Loop</div>
+              <div class="text-[10px] text-slate-400">Broken paradigm of free user data harvesting</div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-mono font-bold text-xs mx-auto">02</div>
+              <div class="font-bold text-white text-xs">Install Extension</div>
+              <div class="text-[10px] text-slate-400">One-click setup from Chrome Web Store</div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center font-mono font-bold text-xs mx-auto">03</div>
+              <div class="font-bold text-white text-xs">Attention Capture</div>
+              <div class="text-[10px] text-slate-400">Silent, lightweight background ad replacement</div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-mono font-bold text-xs mx-auto">04</div>
+              <div class="font-bold text-white text-xs">Data Verification</div>
+              <div class="text-[10px] text-slate-400">Cryptographic session token verification</div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 space-y-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-mono font-bold text-xs mx-auto">05</div>
+              <div class="font-bold text-white text-xs">Reward Postback</div>
+              <div class="text-[10px] text-slate-400">Verified partner postback settlement</div>
+            </div>
+
+            <!-- Step 6 (Real Profits Highlight) -->
+            <div class="p-4 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-[1.5px] shadow-lg shadow-emerald-500/20">
+              <div class="w-full h-full bg-[#090E1C] rounded-[14px] p-3 space-y-2">
+                <div class="w-8 h-8 rounded-lg bg-emerald-400 text-slate-950 flex items-center justify-center font-mono font-extrabold text-xs mx-auto">06</div>
+                <div class="font-bold text-emerald-300 text-xs">Real Profits</div>
+                <div class="text-[10px] text-slate-300 font-mono">Instant PayPal &amp; Bank Cashout</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- 3. PLATFORM PILLARS: AUTHENTIC VALUE PROPOSITIONS         -->
+  <!-- ========================================================= -->
+  <section id="stats" class="py-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-mono font-semibold mb-3">Early Access Platform</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Built For Trust, <span class="text-gradient">Privacy &amp; Fair Value</span>
+        </p>
+        <p class="text-slate-400 mt-4 text-base sm:text-lg">
+          An honest, transparent browsing companion connecting everyday users to real rewards.
+        </p>
+      </div>
+
+      <!-- 3-Card Grid for Platform Pillars -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        
+        <!-- Card 1: Global Early Access -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono font-bold uppercase text-slate-400">Launch Status</span>
+              <div class="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span>Public Beta</span>
+              </div>
+            </div>
+
+            <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono tracking-tight mb-2">Global Beta</div>
+            <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-4">Active Across Modern Browsers</div>
+            <p class="text-xs text-slate-400 leading-relaxed mb-6">
+              Designed for everyday web surfers across Chrome, Brave, and Edge browsers with a lightweight footprint.
+            </p>
+          </div>
+
+          <!-- Stylized Platform Curve Graphic -->
+          <div class="bg-[#090E1C] rounded-xl p-4 border border-white/5 space-y-3">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>Community Growth</span>
+              <span class="text-emerald-400 font-bold">2026 Public Release</span>
+            </div>
+            
+            <div class="h-20 w-full relative">
+              <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="growthGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#10B981" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#10B981" stop-opacity="0.0" />
+                  </linearGradient>
+                </defs>
+                <path d="M0,75 Q40,70 80,55 T140,30 T200,8 L200,80 L0,80 Z" fill="url(#growthGradient)" />
+                <path d="M0,75 Q40,70 80,55 T140,30 T200,8" fill="none" stroke="#10B981" stroke-width="3" stroke-linecap="round" />
+              </svg>
+            </div>
+
+            <!-- Global Community Flags -->
+            <div class="flex items-center justify-between pt-2 border-t border-white/5 text-xs text-slate-400">
+              <span class="text-[10px] font-mono">Available In:</span>
+              <div class="flex items-center gap-1.5 text-sm" title="Active in Sri Lanka, USA, UK, Germany, Japan, Singapore">
+                <span title="Sri Lanka">🇱🇰</span>
+                <span title="United States">🇺🇸</span>
+                <span title="United Kingdom">🇬🇧</span>
+                <span title="Germany">🇩🇪</span>
+                <span title="Japan">🇯🇵</span>
+                <span title="Singapore">🇸🇬</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Encrypted Partner Tunnels -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono font-bold uppercase text-slate-400">Data Integrity</span>
+              <div class="flex items-center gap-1.5 text-xs text-teal-400 bg-teal-500/10 px-2.5 py-0.5 rounded-full border border-teal-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+                <span>Zero Data Sold</span>
+              </div>
+            </div>
+
+            <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono tracking-tight mb-2">100% Privacy</div>
+            <div class="text-xs font-bold text-teal-400 uppercase tracking-wider mb-4">Isolated Partner Tunnels</div>
+            <p class="text-xs text-slate-400 leading-relaxed mb-6">
+              Surveys, tasks, and games run in sandboxed tunnels. Raw browsing logs are never collected or sold to advertisers.
+            </p>
+          </div>
+
+          <!-- Secure Postbacks Tunnel Visual -->
+          <div class="bg-[#090E1C] rounded-xl p-4 border border-white/5 space-y-3">
+            <div class="flex justify-between items-center text-[10px] font-mono">
+              <span class="text-slate-400">Partner Tunnel Security</span>
+              <span class="text-emerald-400 font-bold">Encrypted</span>
+            </div>
+
+            <!-- Pipeline Status Indicators -->
+            <div class="space-y-2 font-mono text-[11px]">
+              <div class="flex items-center justify-between p-2 rounded bg-white/[0.02] border border-white/5">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span class="text-white">CPX Research Live Tunnel</span>
+                </div>
+                <span class="text-emerald-400">Connected</span>
+              </div>
+              <div class="flex items-center justify-between p-2 rounded bg-white/[0.02] border border-white/5">
+                <div class="flex items-center gap-2">
+                  <span class="w-2 h-2 rounded-full bg-teal-400"></span>
+                  <span class="text-white">Cryptographic Verification</span>
+                </div>
+                <span class="text-teal-400">Active</span>
+              </div>
+            </div>
+
+            <div class="text-[10px] text-slate-400 text-center pt-1 font-mono">
+              CPX Research (Live) &bull; BitLabs &amp; Lootably (Upcoming)
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: 70/30 Fair Revenue Split -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-xs font-mono font-bold uppercase text-slate-400">Reward Model</span>
+              <div class="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                <span>Direct Cashout</span>
+              </div>
+            </div>
+
+            <div class="text-3xl sm:text-4xl font-extrabold text-white font-mono tracking-tight mb-2 text-gradient">70/30 Split</div>
+            <div class="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-4">Fair Direct Distribution</div>
+            <p class="text-xs text-slate-400 leading-relaxed mb-6">
+              A contractual 70% share of verified partner rewards is credited directly to you, redeemable via PayPal and Bank Transfer.
+            </p>
+          </div>
+
+          <!-- Bright Green Area Curve Graph -->
+          <div class="bg-[#090E1C] rounded-xl p-4 border border-white/5 space-y-3">
+            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>Standard Conversion Rate</span>
+              <span class="text-emerald-400 font-bold">1,000 SKIT = $1.00 USD</span>
+            </div>
+
+            <div class="h-20 w-full relative">
+              <svg class="w-full h-full" viewBox="0 0 200 80" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#14F195" stop-opacity="0.5" />
+                    <stop offset="100%" stop-color="#14F195" stop-opacity="0.0" />
+                  </linearGradient>
+                </defs>
+                <path d="M0,78 Q60,75 110,60 T160,35 T200,5 L200,80 L0,80 Z" fill="url(#revenueGradient)" />
+                <path d="M0,78 Q60,75 110,60 T160,35 T200,5" fill="none" stroke="#14F195" stroke-width="3" stroke-linecap="round" />
+              </svg>
+            </div>
+
+            <div class="flex justify-between items-center text-[10px] font-mono text-slate-400 pt-1">
+              <span>Min. Cashout: $5.00 USD</span>
+              <span class="text-emerald-400 font-bold">PayPal &amp; Bank Rails</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- 4. NEW TYPOGRAPHY SECTION: TIME SPENT BROWSING (VISUAL 4) -->
+  <!-- ========================================================= -->
+  <section class="py-20 relative bg-gradient-to-b from-transparent via-[#0D1527]/30 to-transparent">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+        
+        <!-- Left Column: High-Impact Typography -->
+        <div class="lg:col-span-7 space-y-6">
+          <span class="text-xs uppercase font-mono font-bold tracking-widest text-emerald-400">The Economic Shift</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-tight">
+            Stop Watching Ads For Free. <br />
+            <span class="text-gradient">Time Spent Browsing Is Value Created.</span>
+          </h2>
+          <p class="text-slate-300 text-base sm:text-lg leading-relaxed">
+            The average person spends over <strong class="text-white">6.5 hours online every day</strong>. For decades, legacy ad tech platforms extracted <strong class="text-emerald-400">billions in annual advertising profits</strong> from collective attention, leaving the users who actually create that engagement completely unrewarded.
+          </p>
+          <p class="text-slate-400 text-sm leading-relaxed">
+            Surfkit alters this baseline. By seamlessly pairing optional tasks, surveys, and sponsor views with your routine browsing sessions, your time online generates real, tangible rewards—cleanly withdrawable to PayPal or your bank.
+          </p>
+        </div>
+
+        <!-- Right Column: Global Value Extraction Bar Comparison -->
+        <div class="lg:col-span-5 glass-card rounded-3xl p-8 border border-white/10 relative">
+          <div class="text-xs font-mono font-bold text-white uppercase tracking-wider mb-6 flex items-center justify-between">
+            <span>Global Value Extraction Comparison</span>
+            <span class="text-emerald-400 font-mono">Industry Margins</span>
+          </div>
+
+          <!-- Comparison Bar Visual -->
+          <div class="space-y-6">
+            
+            <!-- Tech Giants Bar -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300 font-medium">Legacy Ad Tech Giants:</span>
+                <span class="text-rose-400 font-mono font-bold">100% Extracted (Zero Shared)</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-4 overflow-hidden p-0.5">
+                <div class="bg-rose-500 h-full rounded-full w-[98%] shadow-[0_0_12px_rgba(244,63,94,0.6)]"></div>
+              </div>
+              <p class="text-[10px] text-slate-400">Harvests user data and attention without sharing advertising dividends.</p>
+            </div>
+
+            <!-- Traditional Web Users Bar -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-xs">
+                <span class="text-slate-300 font-medium">Traditional Web Surfers:</span>
+                <span class="text-slate-400 font-mono font-bold">$0.00 / month</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-4 overflow-hidden p-0.5">
+                <div class="bg-slate-600 h-full rounded-full w-[2%]"></div>
+              </div>
+              <p class="text-[10px] text-slate-400">Zero compensation despite generating the impressions.</p>
+            </div>
+
+            <!-- Surfkit Users Bar -->
+            <div class="space-y-2 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
+              <div class="flex justify-between text-xs">
+                <span class="text-white font-bold flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Surfkit Members:</span>
+                </span>
+                <span class="text-emerald-400 font-mono font-bold text-sm">70% Net Reward Share</span>
+              </div>
+              <div class="w-full bg-slate-900 rounded-full h-4 overflow-hidden p-0.5 border border-emerald-500/30">
+                <div class="bg-gradient-to-r from-emerald-400 to-teal-400 h-full rounded-full w-[70%] shadow-[0_0_14px_rgba(20,241,149,0.8)]"></div>
+              </div>
+              <p class="text-[11px] text-emerald-200">Earn real USD rewards based on the surveys, tasks, and offers you complete.</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- 5. MEET THE TEAM BEHIND SURFKIT                           -->
+  <!-- ========================================================= -->
+  <section id="team" class="py-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase tracking-widest text-emerald-400 font-mono font-semibold mb-3">Founders & Leadership</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Meet The Team Behind <span class="text-gradient">Surfkit</span>
+        </p>
+        <p class="text-slate-400 mt-4 text-base">
+          Founder-led engineering and operations dedicated to creating transparent internet attention economics and returning value directly to web surfers.
+        </p>
+      </div>
+
+      <!-- Founder Cards Grid (Dinuk Dilshan & Vindya .R) -->
+      <div class="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-8 text-center">
+        
+        <!-- Dinuk Dilshan -->
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3 group hover:border-emerald-500/30 transition-all">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 p-0.5 mx-auto group-hover:scale-105 transition-transform">
+            <div class="w-full h-full bg-[#090E1C] rounded-[14px] flex items-center justify-center text-3xl">
+              👨‍💻
+            </div>
+          </div>
+          <div>
+            <div class="text-white font-bold text-base">Dinuk Dilshan</div>
+            <div class="text-xs text-emerald-400 font-mono font-semibold">Founder & Lead Systems Architect</div>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Chromium extension architect, distributed real-time ledger systems, and privacy-first ad monetization engineering.
+          </p>
+        </div>
+
+        <!-- Vindya .R -->
+        <div class="p-6 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3 group hover:border-emerald-500/30 transition-all">
+          <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-teal-400 to-cyan-400 p-0.5 mx-auto group-hover:scale-105 transition-transform">
+            <div class="w-full h-full bg-[#090E1C] rounded-[14px] flex items-center justify-center text-3xl">
+              👩‍💻
+            </div>
+          </div>
+          <div>
+            <div class="text-white font-bold text-base">Vindya .R</div>
+            <div class="text-xs text-teal-400 font-mono font-semibold">Co-Founder & Product Operations</div>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            Partner tunnel integration, compliance frameworks, community growth, and user rewards settlement operations.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- FINAL CALL TO ACTION: ADD TO CHROME (WITH CASH / COIN)    -->
+  <!-- ========================================================= -->
+  <section class="py-20 relative overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="glass-card rounded-3xl p-10 sm:p-14 text-center border border-emerald-500/30 relative overflow-hidden">
+        
+        <div class="absolute -top-32 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <!-- Floating Cash & Coin Icons -->
+        <div class="flex items-center justify-center gap-3 text-3xl mb-4">
+          <span class="animate-float">💵</span>
+          <span class="text-2xl font-mono text-emerald-400 font-bold bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/30">Start Getting Paid</span>
+          <span class="animate-float-slow">🪙</span>
+        </div>
+
+        <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight mb-4">
+          Ready to Claim Your 70% Share?
+        </h2>
+        <p class="text-slate-400 max-w-xl mx-auto text-base sm:text-lg mb-8">
+          Built by independent developers, for independent users. 100% free, private, and openly honest about what we are — an indie duo building something real.
+        </p>
+
+        <!-- Chrome Web Store Button -->
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="https://chrome.google.com" target="_blank" rel="noopener noreferrer" 
+             class="btn-glow inline-flex items-center gap-3 px-8 py-4 rounded-xl text-base font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 shadow-xl group">
+            <svg class="w-5 h-5 fill-slate-950 transition-transform group-hover:rotate-45" viewBox="0 0 24 24">
+              <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29L1.931 5.47zm13.473 4.298a5.452 5.452 0 0 1 1.414 7.687l-3.953 6.847C12.569 24.195 12.287 24 12 24c6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.822-4.364H15.404z"/>
+              <circle cx="12" cy="12" r="3.273"/>
+            </svg>
+            <span>Add Surfkit to Chrome — Free</span>
+          </a>
+        </div>
+
+        <div class="flex items-center justify-center gap-2 mt-4 text-xs font-mono text-slate-400">
+          <span>✓ Manifest V3 Compliant</span>
+          <span>•</span>
+          <span>Manifest V3</span>
+          <span>•</span>
+          <span>Zero Battery Drain</span>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ========================================================= -->
+  <!-- FOOTER (Matching Surfkit Design System)                   -->
+  <!-- ========================================================= -->
+  <footer class="border-t border-white/10 bg-[#060A14] pt-16 pb-12 text-sm text-slate-400 relative overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Main 4-Column Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/5">
+        
+        <!-- Column 1: Brand -->
+        <div class="sm:col-span-2 lg:col-span-4 space-y-4">
+          <a href="index.html" class="inline-flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center p-0.5">
+              <div class="w-full h-full bg-[#090E1C] rounded-[6px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Surf<span class="text-emerald-400">kit</span></span>
+          </a>
+          <p class="text-xs text-slate-400 max-w-sm leading-relaxed">
+            Turn your daily web browsing and gaming into real rewards. 70/30 revenue split with complete privacy protection.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="X">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Discord">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Telegram">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="LinkedIn">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Surfkit Links -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Surfkit Links
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="earn.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Ways to Earn</a></li>
+            <li><a href="transparency.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency &amp; Security</a></li>
+            <li><a href="about.html" class="text-emerald-400 font-semibold hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal -->
+        <div class="space-y-3.5 lg:col-span-2">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+            Legal
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
+            <li><a href="privacy.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
+            <li><a href="creator-terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Support -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Support &amp; Inquiries
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="faq.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
+            <li>
+              <div class="pt-1">
+                <span class="text-slate-500 block text-[11px] uppercase tracking-wider mb-1 font-mono">Contact Operations:</span>
+                <a href="mailto:support@surfkit.cloud" 
+                   class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-mono text-xs transition-all duration-200 group">
+                  <svg class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <span>support@surfkit.cloud</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Partner Disclaimer Box -->
+      <div class="py-4 my-6 px-4 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 leading-relaxed">
+        <strong class="text-slate-300">Partner Tunnel Disclaimer:</strong> Offerwall tasks, surveys, and interactive sponsor games are dynamically powered through secure, isolated partner tunnels provided by CPX Research (with BitLabs and Lootably coming soon). Reward postbacks are cryptographically verified before wallet settlement.
+      </div>
+
+      <!-- Bottom Sub-footer -->
+      <div class="pt-4 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div class="text-center md:text-left leading-relaxed">
+          Copyright &copy; 2026 Surfkit. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
