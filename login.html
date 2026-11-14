@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — Surfkit</title>
+  <meta name="description" content="Sign in to your Surfkit account to access your dashboard, earnings, and rewards.">
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CDN -->
+  <script src="/tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'] },
+          colors: {
+            surf: {
+              bg: '#0A0F1D', surface: '#111A2E', border: '#1E2C4A',
+              teal: '#00D2B4', tealHover: '#00BAA0',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #0A0F1D; color: #e2e8f0; }
+
+    .input-field {
+      width: 100%;
+      background: #111A2E;
+      border: 1px solid #1E2C4A;
+      border-radius: 12px;
+      padding: 12px 16px;
+      color: #e2e8f0;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: #00D2B4; box-shadow: 0 0 0 3px rgba(0,210,180,0.12); }
+    .input-field::placeholder { color: #64748b; }
+
+    .btn-primary {
+      width: 100%;
+      background: #00D2B4;
+      color: #0A0F1D;
+      font-weight: 700;
+      font-size: 15px;
+      padding: 13px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-primary:hover  { background: #00BAA0; }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    .error-box {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #fca5a5;
+      font-size: 13px;
+      display: none;
+    }
+    .success-box {
+      background: rgba(16,185,129,.1);
+      border: 1px solid rgba(16,185,129,.3);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #6ee7b7;
+      font-size: 13px;
+      display: none;
+    }
+
+    .card {
+      background: #111A2E;
+      border: 1px solid #1E2C4A;
+      border-radius: 20px;
+      padding: 36px 32px;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    @media (max-width: 480px) { .card { padding: 28px 20px; border-radius: 16px; } }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider span { flex: 1; height: 1px; background: #1E2C4A; }
+    .divider p { color: #475569; font-size: 12px; white-space: nowrap; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(10,15,29,.4);
+      border-top-color: #0A0F1D;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center px-4 py-10 font-sans antialiased">
+
+  <!-- Ambient glows -->
+  <div style="position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;">
+    <div style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:300px;background:rgba(0,210,180,.06);border-radius:50%;filter:blur(80px);"></div>
+    <div style="position:absolute;bottom:0;right:-80px;width:400px;height:400px;background:rgba(0,229,255,.04);border-radius:50%;filter:blur(100px);"></div>
+  </div>
+
+  <!-- Card -->
+  <div class="card relative z-10">
+
+    <!-- Logo -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+      <a href="/home" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#10b981,#00D2B4,#00e5ff);display:flex;align-items:center;justify-content:center;box-shadow:0 0 20px -3px rgba(0,210,180,.4);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0A0F1D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 12c3-4 6-4 9 0 3 4 6 4 9 0 3-4 6-4 9 0"/>
+            <path d="M12 2v20"/>
+          </svg>
+        </div>
+        <div>
+          <span style="font-size:18px;font-weight:800;color:#fff;letter-spacing:-.5px;">Surf<span style="color:#00D2B4;">kit</span></span>
+        </div>
+      </a>
+    </div>
+
+    <!-- Heading -->
+    <h1 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;">Welcome back</h1>
+    <p style="font-size:14px;color:#94a3b8;margin:0 0 24px;">Sign in to your Surfkit account to access your dashboard and earnings.</p>
+
+    <!-- Error / Success messages -->
+    <div id="error-box"   class="error-box"   style="margin-bottom:16px;"></div>
+    <div id="success-box" class="success-box" style="margin-bottom:16px;"></div>
+
+    <!-- Sign-In Form -->
+    <form id="signin-form" autocomplete="on" novalidate>
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Email Address</label>
+        <input id="email-input" type="email" autocomplete="email" class="input-field" placeholder="you@example.com" required>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+          <label style="font-size:12px;font-weight:600;color:#94a3b8;letter-spacing:.05em;text-transform:uppercase;">Password</label>
+          <button type="button" id="forgot-btn" style="font-size:12px;color:#00D2B4;background:none;border:none;cursor:pointer;padding:0;">Forgot password?</button>
+        </div>
+        <div style="position:relative;">
+          <input id="pass-input" type="password" autocomplete="current-password" class="input-field" placeholder="••••••••" required style="padding-right:44px;">
+          <button type="button" id="toggle-pass" tabindex="-1" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;" title="Show/hide password">
+            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" id="signin-btn" class="btn-primary">Sign In</button>
+    </form>
+
+    <div class="divider">
+      <span></span>
+      <p>New to Surfkit?</p>
+      <span></span>
+    </div>
+
+    <!-- Sign-Up trigger -->
+    <button type="button" id="signup-toggle-btn" style="width:100%;background:transparent;border:1px solid #1E2C4A;color:#e2e8f0;font-size:14px;font-weight:600;padding:12px;border-radius:12px;cursor:pointer;transition:border-color .2s,color .2s;">
+      Create Account
+    </button>
+
+    <!-- Sign-Up Form (hidden by default) -->
+    <form id="signup-form" autocomplete="on" novalidate style="display:none;margin-top:20px;">
+      <div style="margin-bottom:14px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Email Address</label>
+        <input id="su-email" type="email" autocomplete="email" class="input-field" placeholder="you@example.com" required>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Password</label>
+        <input id="su-pass" type="password" autocomplete="new-password" class="input-field" placeholder="Min 6 characters" required>
+      </div>
+      <button type="submit" id="signup-btn" class="btn-primary" style="background:#1E2C4A;color:#e2e8f0;">Create Account &amp; Sign In</button>
+      <p style="font-size:11px;color:#475569;margin-top:12px;text-align:center;">By creating an account you agree to our <a href="/terms" style="color:#00D2B4;">Terms</a> and <a href="/privacy" style="color:#00D2B4;">Privacy Policy</a>.</p>
+    </form>
+
+    <!-- Back to home -->
+    <div style="margin-top:24px;text-align:center;">
+      <a href="/home" style="font-size:12px;color:#475569;text-decoration:none;">← Back to Surfkit Home</a>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- AUTH LOGIC                                                     -->
+  <!-- ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    var SUPA_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
+    var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
+
+    var supabase = window.supabase && typeof window.supabase.createClient === 'function'
+      ? window.supabase.createClient(SUPA_URL, SUPA_KEY)
+      : null;
+
+    /* ── If already signed in, redirect straight to dashboard ── */
+    if (supabase) {
+      supabase.auth.getSession().then(function (res) {
+        if (res.data && res.data.session && res.data.session.user) {
+          window.location.replace('/dashboard');
+        }
+      }).catch(function () {});
+    }
+
+    /* ── UI helpers ── */
+    function showError(msg) {
+      var el = document.getElementById('error-box');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('success-box').style.display = 'none';
+    }
+    function showSuccess(msg) {
+      var el = document.getElementById('success-box');
+      el.textContent = msg; el.style.display = 'block';
+      document.getElementById('error-box').style.display = 'none';
+    }
+    function clearMessages() {
+      document.getElementById('error-box').style.display = 'none';
+      document.getElementById('success-box').style.display = 'none';
+    }
+    function setLoading(btn, loading, label) {
+      btn.disabled = loading;
+      btn.innerHTML = loading
+        ? '<span class="spinner"></span>'
+        : (label || btn.dataset.label || 'Submit');
+    }
+
+    /* ── Password toggle ── */
+    document.getElementById('toggle-pass').addEventListener('click', function () {
+      var inp  = document.getElementById('pass-input');
+      var icon = document.getElementById('eye-icon');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+      } else {
+        inp.type = 'password';
+        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    });
+
+    /* ── Forgot password ── */
+    document.getElementById('forgot-btn').addEventListener('click', function () {
+      var email = document.getElementById('email-input').value.trim();
+      if (!email) { showError('Enter your email address first.'); return; }
+      if (!supabase) { showError('Auth service unavailable. Please try again later.'); return; }
+      clearMessages();
+      supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/dashboard' })
+        .then(function (res) {
+          if (res.error) showError(res.error.message);
+          else showSuccess('Reset link sent! Check your email inbox.');
+        })
+        .catch(function (e) { showError(e.message || 'Failed to send reset email.'); });
+    });
+
+    /* ── Sign-In form ── */
+    var signinBtn = document.getElementById('signin-btn');
+    signinBtn.dataset.label = 'Sign In';
+    document.getElementById('signin-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearMessages();
+      if (!supabase) { showError('Auth service unavailable. Please try again later.'); return; }
+
+      var email = document.getElementById('email-input').value.trim();
+      var pass  = document.getElementById('pass-input').value;
+
+      if (!email || !pass) { showError('Please enter both email and password.'); return; }
+
+      setLoading(signinBtn, true);
+      try {
+        var res = await supabase.auth.signInWithPassword({ email: email, password: pass });
+        if (res.error) {
+          showError(res.error.message || 'Invalid email or password.');
+          setLoading(signinBtn, false, 'Sign In');
+        } else if (res.data && res.data.session) {
+          var u = res.data.session.user;
+          try {
+            localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
+              email: u.email.trim().toLowerCase(),
+              name: (u.user_metadata && u.user_metadata.display_name) || u.email.split('@')[0],
+              timestamp: Date.now()
+            }));
+          } catch(e) {}
+          try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
+          showSuccess('Signed in! Redirecting to your dashboard\u2026');
+          setTimeout(function () { window.location.replace('/dashboard'); }, 500);
+        }
+      } catch (err) {
+        showError(err.message || 'Sign in failed. Please try again.');
+        setLoading(signinBtn, false, 'Sign In');
+      }
+    });
+
+    /* ── Sign-Up form toggle ── */
+    var signinFormEl  = document.getElementById('signin-form');
+    var signupFormEl  = document.getElementById('signup-form');
+    var signupToggle  = document.getElementById('signup-toggle-btn');
+
+    signupToggle.addEventListener('click', function () {
+      var isShowing = signupFormEl.style.display !== 'none';
+      signinFormEl.style.display  = isShowing ? 'block' : 'none';
+      signupFormEl.style.display  = isShowing ? 'none'  : 'block';
+      signupToggle.textContent    = isShowing ? 'Create Account' : 'Back to Sign In';
+      clearMessages();
+    });
+
+    /* ── Sign-Up form submit ── */
+    var signupBtn = document.getElementById('signup-btn');
+    signupBtn.dataset.label = 'Create Account & Sign In';
+    document.getElementById('signup-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearMessages();
+      if (!supabase) { showError('Auth service unavailable. Please try again later.'); return; }
+
+      var email = document.getElementById('su-email').value.trim();
+      var pass  = document.getElementById('su-pass').value;
+
+      if (!email || !pass) { showError('Please fill in all fields.'); return; }
+      if (pass.length < 6) { showError('Password must be at least 6 characters.'); return; }
+
+      setLoading(signupBtn, true);
+      try {
+        var res = await supabase.auth.signUp({ email: email, password: pass });
+        if (res.error) {
+          showError(res.error.message || 'Failed to create account.');
+          setLoading(signupBtn, false, 'Create Account & Sign In');
+        } else if (res.data && res.data.session) {
+          var u = res.data.session.user;
+          try {
+            localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
+              email: u.email.trim().toLowerCase(),
+              name: (u.user_metadata && u.user_metadata.display_name) || u.email.split('@')[0],
+              timestamp: Date.now()
+            }));
+          } catch(e) {}
+          try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
+          showSuccess('Account created! Redirecting\u2026');
+          setTimeout(function () { window.location.replace('/dashboard'); }, 500);
+        } else {
+          showSuccess('Account created! Check your email to confirm, then sign in.');
+          setLoading(signupBtn, false, 'Create Account & Sign In');
+        }
+      } catch (err) {
+        showError(err.message || 'Sign up failed. Please try again.');
+        setLoading(signupBtn, false, 'Create Account & Sign In');
+      }
+    });
+
+    /* ── Listen for extension sign-in events ── */
+    window.addEventListener('message', function (e) {
+      if (e.data && e.data.type === 'SURFKIT_USER_SIGNED_IN') {
+        window.location.replace('/dashboard');
+      }
+    });
+
+  })();
+  </script>
+
+</body>
+</html>

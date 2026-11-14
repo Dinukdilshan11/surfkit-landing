@@ -136,6 +136,144 @@
   </style>
 </head>
 <body class="bg-surf-bg text-slate-200 min-h-screen font-sans flex flex-col antialiased selection:bg-surf-teal selection:text-slate-900">
+  <!-- ============================================================ -->
+  <!-- SURFKIT DASHBOARD AUTH GUARD v1.0                            -->
+  <!-- Runs BEFORE app renders. Redirects guests to /login.         -->
+  <!-- ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    var SUPA_REF  = 'kpvrewhmnrifsnkgswdt';
+    var SUPA_URL  = 'https://' + SUPA_REF + '.supabase.co';
+    var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
+    var LS_JWT    = 'sb-' + SUPA_REF + '-auth-token';
+    var LS_EXT    = 'surfkit_ext_auth_user';
+    var LOGIN_URL = '/login';
+
+    /* ── Helpers ── */
+    function isValidEmail(e) {
+      if (!e || typeof e !== 'string') return false;
+      var c = e.trim().toLowerCase();
+      if (c === 'guest@surfkit.cloud' || c === 'guest' || c === 'null') return false;
+      return /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(c);
+    }
+
+    /* ── Fast sync: Supabase JWT localStorage ── */
+    function checkJWT() {
+      try {
+        var raw = localStorage.getItem(LS_JWT);
+        if (!raw) return false;
+        var p   = JSON.parse(raw);
+        var u   = p.user || (p.currentSession && p.currentSession.user);
+        var tok = p.access_token || (p.currentSession && p.currentSession.access_token);
+        var exp = p.expires_at   || (p.currentSession && p.currentSession.expires_at);
+        if (!tok || !u || !isValidEmail(u.email)) return false;
+        if (exp && Math.floor(Date.now() / 1000) >= Number(exp)) return false;
+        return true;
+      } catch (e) { return false; }
+    }
+
+    /* ── Fast sync: Extension auth flag ── */
+    function checkExt() {
+      try {
+        var raw = localStorage.getItem(LS_EXT);
+        if (!raw) return false;
+        var d = JSON.parse(raw);
+        if (d && isValidEmail(d.email) && d.timestamp) {
+          return (Date.now() - d.timestamp) < 3600000;   // 1-hour TTL
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    /* ── Build full-screen overlay (prevents content flash) ── */
+    var _overlay = document.createElement('div');
+    _overlay.id  = 'surfkit-auth-guard-overlay';
+    _overlay.setAttribute('style', [
+      'position:fixed', 'inset:0', 'background:#0A0F1D', 'z-index:999999',
+      'display:flex', 'flex-direction:column', 'align-items:center',
+      'justify-content:center', 'gap:18px'
+    ].join(';'));
+    _overlay.innerHTML = (
+      '<svg width="52" height="52" viewBox="0 0 24 24" fill="none"' +
+      ' stroke="#00D2B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M2 12c3-4 6-4 9 0 3 4 6 4 9 0 3-4 6-4 9 0"/>' +
+      '<path d="M12 2v20"/></svg>' +
+      '<p style="color:#94a3b8;font-size:14px;font-family:system-ui,sans-serif;' +
+      'margin:0;letter-spacing:.02em">Verifying session…</p>'
+    );
+    document.body.insertBefore(_overlay, document.body.firstChild);
+
+    function hideOverlay() {
+      var el = document.getElementById('surfkit-auth-guard-overlay');
+      if (el) el.remove();
+    }
+
+    function redirectToLogin() {
+      window.location.replace(LOGIN_URL);
+    }
+
+    /* ── 1. Synchronous fast-path (no network, instant) ── */
+    if (checkJWT() || checkExt()) {
+      hideOverlay();         // Authenticated – let the app load normally
+      return;
+    }
+
+    /* ── 2. Async Supabase network check ── */
+    var _guardTimer = setTimeout(redirectToLogin, 4500);
+
+    function runNetworkCheck() {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+          var client = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+          client.auth.getSession().then(function (res) {
+            var sess = res && res.data && res.data.session;
+            if (sess && sess.user && isValidEmail(sess.user.email)) {
+              clearTimeout(_guardTimer);
+              hideOverlay();         // Session confirmed – show dashboard
+            } else {
+              clearTimeout(_guardTimer);
+              redirectToLogin();     // No valid session
+            }
+          }).catch(function () {
+            clearTimeout(_guardTimer);
+            redirectToLogin();
+          });
+        } catch (e) {
+          clearTimeout(_guardTimer);
+          redirectToLogin();
+        }
+      }
+    }
+
+    /* ── 3. Listen for real-time extension sign-in event ── */
+    window.addEventListener('message', function (e) {
+      if (!e.data) return;
+      if (e.data.type === 'SURFKIT_EXTENSION_STATE_UPDATE') {
+        var d = e.data.data;
+        if (d && d.authUser && isValidEmail(d.authUser.email)) {
+          clearTimeout(_guardTimer);
+          hideOverlay();
+        } else if (d && d.isExplicitSignOut) {
+          clearTimeout(_guardTimer);
+          redirectToLogin();
+        }
+      }
+      if (e.data.type === 'SURFKIT_USER_SIGNED_IN')  { clearTimeout(_guardTimer); hideOverlay(); }
+      if (e.data.type === 'SURFKIT_USER_SIGNED_OUT') { clearTimeout(_guardTimer); redirectToLogin(); }
+    });
+
+    /* ── 4. Also listen for onAuthStateChange via Supabase CDN ── */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runNetworkCheck);
+    } else {
+      runNetworkCheck();
+    }
+
+  })();
+  </script>
+
 
   <!-- APP SHELL WRAPPER -->
   <div class="flex h-screen overflow-hidden">
@@ -2655,12 +2793,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const signoutRow = document.getElementById('auth-signout-row');
       if (signoutRow) signoutRow.classList.add('hidden');
 
+      try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (e) {}
+      try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (e) {}
       saveState();
       closeAuthModal();
       showToast('Signed out of account', 'info');
       renderApp();
       loadChatHistory();
       renderNotifications();
+      setTimeout(function() { window.location.replace('/login'); }, 400);
     }
 
     async function refreshLiveSync() {
@@ -2711,8 +2852,10 @@ document.addEventListener('DOMContentLoaded', () => {
           return currentUser;
         }
 
-        // Auto-discover / link to Supabase profile when no active JWT session
+        // Auth guard ensures only authenticated users reach here.
+        // No auto-discovery needed – return null if no JWT session.
         try {
+          return null; // Let the guard handle unauthenticated users
           const targetEmail = state.user?.email || 'dinukdilshan19@gmail.com';
           const { data: pEmail } = await supabaseClient.from('profiles').select('*').ilike('email', targetEmail).maybeSingle();
           if (pEmail && pEmail.id) {

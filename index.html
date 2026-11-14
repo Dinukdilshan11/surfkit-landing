@@ -375,7 +375,7 @@
       var subfolders = {
         'home': 1, 'earn': 1, 'transparency': 1, 'about': 1, 'terms': 1,
         'privacy': 1, 'creator-terms': 1, 'faq': 1, 'dashboard': 1, 'hub': 1,
-        'leaderboard': 1, 'task-view': 1, 'newtab': 1
+        'leaderboard': 1, 'task-view': 1, 'newtab': 1, 'login': 1
       };
       var isSub = (currentFile === 'index.html' && subfolders[parentFolder]);
       var prefix = isSub ? '../' : '';
@@ -392,6 +392,7 @@
         '/creators': prefix + 'creator-terms.html',
         '/faq': prefix + 'faq.html',
         '/dashboard': prefix + 'hub.html',
+        '/login': prefix + 'login.html',
         '/leaderboard': prefix + 'leaderboard.html',
         '/task-view': prefix + 'task-view.html',
         '/newtab': prefix + 'newtab.html'
@@ -475,9 +476,9 @@
 
         <!-- Right CTA & Chrome Badge -->
         <div class="hidden sm:flex items-center gap-3">
-          <a href="/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
-            <i class="ri-dashboard-3-line text-base"></i>
-            Dashboard
+          <a id="nav-auth-btn" href="/login" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+            <i id="nav-auth-icon" class="ri-login-box-line text-base"></i>
+            <span id="nav-auth-text">Sign In</span>
           </a>
           <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
              class="btn-glow inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
@@ -757,12 +758,12 @@
               </div>
 
               <!-- 7. Dashboard Button (links directly to hub.html) -->
-              <a href="/dashboard" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
+              <a id="mobile-auth-btn" href="/login" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
                 <svg class="w-4 h-4 text-slate-300 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke-width="2"/>
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/>
                 </svg>
-                <span>Dashboard</span>
+                <span id="mobile-auth-text">Sign In</span>
               </a>
 
             </div>
@@ -2652,5 +2653,114 @@
   })();
   </script>
 
+
+  <!-- ============================================================ -->
+  <!-- SURFKIT NAVBAR AUTH DETECTOR                                  -->
+  <!-- Dynamically shows Sign In / Dashboard based on session state  -->
+  <!-- ============================================================ -->
+  <script src="auth-session.js"></script>
+  <script>
+  (function () {
+    'use strict';
+
+    function getDesktopBtn()   { return document.getElementById('nav-auth-btn'); }
+    function getDesktopIcon()  { return document.getElementById('nav-auth-icon'); }
+    function getDesktopText()  { return document.getElementById('nav-auth-text'); }
+    function getMobileBtn()    { return document.getElementById('mobile-auth-btn'); }
+    function getMobileText()   { return document.getElementById('mobile-auth-text'); }
+
+    function applySignedIn() {
+      var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
+      var mBtn = getMobileBtn(),   mTxt = getMobileText();
+      if (btn)  btn.href  = '/dashboard';
+      if (icon) icon.className = 'ri-dashboard-3-line text-base';
+      if (text) text.textContent = 'Dashboard';
+      if (mBtn) mBtn.href = '/dashboard';
+      if (mTxt) mTxt.textContent = 'Dashboard';
+    }
+
+    function applySignedOut() {
+      var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
+      var mBtn = getMobileBtn(),   mTxt = getMobileText();
+      if (btn)  btn.href  = '/login';
+      if (icon) icon.className = 'ri-login-box-line text-base';
+      if (text) text.textContent = 'Sign In';
+      if (mBtn) mBtn.href = '/login';
+      if (mTxt) mTxt.textContent = 'Sign In';
+    }
+
+    function quickCheck() {
+      if (window.SurfkitAuth) {
+        if (window.SurfkitAuth.checkSupabaseLS() || window.SurfkitAuth.checkExtLS()) return true;
+      }
+      return false;
+    }
+
+    async function fullCheck() {
+      if (!window.SurfkitAuth) return;
+      var session = await window.SurfkitAuth.getActiveSession();
+      if (session) applySignedIn();
+      else         applySignedOut();
+    }
+
+    window.addEventListener('message', function (e) {
+      if (!e.data) return;
+      if (e.data.type === 'SURFKIT_EXTENSION_STATE_UPDATE') {
+        var d = e.data.data;
+        if (d && (d.authUser || d.user || d.userEmail)) {
+          var userObj = d.authUser || d.user;
+          var email = (userObj && userObj.email) || d.userEmail;
+          if (email && email !== 'guest@surfkit.cloud' && email !== 'guest') {
+            if (window.SurfkitAuth && window.SurfkitAuth.setExtensionSession) {
+              window.SurfkitAuth.setExtensionSession(email, (userObj && (userObj.name || userObj.display_name)) || '');
+            }
+            applySignedIn();
+            return;
+          }
+        }
+        if (d && (d.isExplicitSignOut || d.signedOut)) {
+          if (window.SurfkitAuth && window.SurfkitAuth.clearExtensionSession) {
+            window.SurfkitAuth.clearExtensionSession();
+          }
+          applySignedOut();
+        }
+      }
+      if (e.data.type === 'SURFKIT_USER_SIGNED_IN')  applySignedIn();
+      if (e.data.type === 'SURFKIT_USER_SIGNED_OUT') {
+        if (window.SurfkitAuth && window.SurfkitAuth.clearExtensionSession) {
+          window.SurfkitAuth.clearExtensionSession();
+        }
+        applySignedOut();
+      }
+    });
+
+    // Cross-tab storage synchronization
+    window.addEventListener('storage', function (e) {
+      if (e.key && (e.key.indexOf('sb-') !== -1 || e.key === 'surfkit_ext_auth_user' || e.key === 'surfkit_dashboard_state_v1')) {
+        boot();
+      }
+    });
+
+    // Custom DOM event support
+    window.addEventListener('surfkit-auth-update', function(e) {
+      if (e.detail && e.detail.signedIn) applySignedIn();
+      else if (e.detail && e.detail.signedIn === false) applySignedOut();
+      else boot();
+    });
+
+    function boot() {
+      if (quickCheck()) applySignedIn();
+      else              applySignedOut();
+      fullCheck().catch(function(){});
+      try { window.postMessage({ type: 'SURFKIT_PAGE_GET_STATE' }, '*'); } catch(e) {}
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', boot);
+    } else {
+      boot();
+    }
+  })();
+  </script>
 </body>
 </html>

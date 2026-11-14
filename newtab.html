@@ -87,7 +87,7 @@
       var subfolders = {
         'home': 1, 'earn': 1, 'transparency': 1, 'about': 1, 'terms': 1,
         'privacy': 1, 'creator-terms': 1, 'faq': 1, 'dashboard': 1, 'hub': 1,
-        'leaderboard': 1, 'task-view': 1, 'newtab': 1
+        'leaderboard': 1, 'task-view': 1, 'newtab': 1, 'login': 1
       };
       var isSub = (currentFile === 'index.html' && subfolders[parentFolder]);
       var prefix = isSub ? '../' : '';
@@ -104,6 +104,7 @@
         '/creators': prefix + 'creator-terms.html',
         '/faq': prefix + 'faq.html',
         '/dashboard': prefix + 'hub.html',
+        '/login': prefix + 'login.html',
         '/leaderboard': prefix + 'leaderboard.html',
         '/task-view': prefix + 'task-view.html',
         '/newtab': prefix + 'newtab.html'
