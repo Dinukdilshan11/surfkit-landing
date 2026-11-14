@@ -61,6 +61,88 @@
       transform: translateY(-2px);
     }
   </style>
+  <!-- Dual-Mode Navigation Resolver: Local file:// & GitHub Pages clean URLs -->
+  <script>
+    (function() {
+      var isFile = window.location.protocol === 'file:';
+
+      // 1. Web / GitHub Pages mode: Clean .html from address bar if present
+      if (!isFile) {
+        var p = window.location.pathname;
+        if (p && p.length > 1 && p.indexOf('.html') !== -1) {
+          var clean = p.replace(/\.html$/, '');
+          if (clean === '/index') clean = '/home';
+          try {
+            window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+          } catch(e) {}
+        }
+        return;
+      }
+
+      // 2. Local file:// mode: Resolve clean root-relative links to local files
+      var path = window.location.pathname.replace(/\\/g, '/');
+      var parts = path.split('/').filter(Boolean);
+      var currentFile = parts[parts.length - 1] || '';
+      var parentFolder = parts.length > 1 ? parts[parts.length - 2] : '';
+      var subfolders = {
+        'home': 1, 'earn': 1, 'transparency': 1, 'about': 1, 'terms': 1,
+        'privacy': 1, 'creator-terms': 1, 'faq': 1, 'dashboard': 1, 'hub': 1,
+        'leaderboard': 1, 'task-view': 1, 'newtab': 1
+      };
+      var isSub = (currentFile === 'index.html' && subfolders[parentFolder]);
+      var prefix = isSub ? '../' : '';
+
+      var routeMap = {
+        '/': prefix + 'index.html',
+        '/home': prefix + 'index.html',
+        '/earn': prefix + 'earn.html',
+        '/transparency': prefix + 'transparency.html',
+        '/about': prefix + 'about.html',
+        '/terms': prefix + 'terms.html',
+        '/privacy': prefix + 'privacy.html',
+        '/creator-terms': prefix + 'creator-terms.html',
+        '/creators': prefix + 'creator-terms.html',
+        '/faq': prefix + 'faq.html',
+        '/dashboard': prefix + 'hub.html',
+        '/leaderboard': prefix + 'leaderboard.html',
+        '/task-view': prefix + 'task-view.html',
+        '/newtab': prefix + 'newtab.html'
+      };
+
+      function resolveTarget(href) {
+        if (!href || href.charAt(0) !== '/') return null;
+        var hash = href.indexOf('#') !== -1 ? href.substring(href.indexOf('#')) : '';
+        var base = href.split('#')[0].replace(/\/$/, '') || '/';
+        var localTarget = routeMap[base];
+        return localTarget ? (localTarget + hash) : null;
+      }
+
+      function rewriteLinks() {
+        var links = document.querySelectorAll('a[href^="/"]');
+        for (var i = 0; i < links.length; i++) {
+          var target = resolveTarget(links[i].getAttribute('href'));
+          if (target) links[i].setAttribute('href', target);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', rewriteLinks);
+      } else {
+        rewriteLinks();
+      }
+
+      document.addEventListener('click', function(e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        var target = resolveTarget(href);
+        if (target) {
+          e.preventDefault();
+          window.location.href = target;
+        }
+      }, true);
+    })();
+  </script>
 </head>
 <body class="h-full flex flex-col justify-between text-slate-100 font-sans antialiased p-6 relative overflow-hidden">
   
@@ -69,7 +151,7 @@
 
   <!-- TOP BAR: User Session & Nav -->
   <header class="w-full max-w-6xl mx-auto flex items-center justify-between z-10">
-    <a href="index.html" class="flex items-center gap-3 group">
+    <a href="/home" class="flex items-center gap-3 group">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform group-hover:scale-105">
         <div class="w-full h-full bg-[#070D19] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
           S
@@ -95,7 +177,7 @@
         </div>
       </div>
 
-      <a href="hub.html" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-200 border border-white/10 transition-colors">
+      <a href="/dashboard" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-xs font-semibold text-slate-200 border border-white/10 transition-colors">
         Hub &rarr;
       </a>
     </div>
@@ -166,9 +248,9 @@
   <!-- BOTTOM FOOTER: Quick Links -->
   <footer class="w-full max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between text-xs font-mono text-slate-500 pt-6 border-t border-white/5 z-10">
     <div class="flex items-center gap-4 mb-2 sm:mb-0">
-      <a href="earn.html" class="hover:text-emerald-400 transition-colors">Ways to Earn</a>
-      <a href="transparency.html" class="hover:text-emerald-400 transition-colors">Transparency</a>
-      <a href="about.html" class="hover:text-emerald-400 transition-colors">About Us</a>
+      <a href="/earn" class="hover:text-emerald-400 transition-colors">Ways to Earn</a>
+      <a href="/transparency" class="hover:text-emerald-400 transition-colors">Transparency</a>
+      <a href="/about" class="hover:text-emerald-400 transition-colors">About Us</a>
       <a href="task-view.html" class="text-emerald-400 hover:text-emerald-300 transition-colors">Task View &rarr;</a>
     </div>
     <div class="flex items-center gap-2">

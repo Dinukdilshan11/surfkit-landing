@@ -9,8 +9,8 @@
 
   // 1. Session & Identity Resolution Helper
   function getActiveUserSession() {
-    let userId = 'dinukdilshan39'; // Default active verified user account
-    let extUserId = 'usr_dinuk_9981';
+    let userId = null;
+    let extUserId = null;
 
     try {
       const cached = localStorage.getItem('surfkit_session');
@@ -23,7 +23,7 @@
       console.warn('[Surfkit] Local session read fallback:', e);
     }
 
-    return { userId, extUserId };
+    return { userId, extUserId, isGuest: !userId };
   }
 
   // 2. Standardized Task Launch in Dedicated New Tab
@@ -405,7 +405,7 @@
           if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.classList.add('opacity-75');
-            submitBtn.innerHTML = `<span>Saving to Cloud...</span>`;
+            submitBtn.innerHTML = `<span>Saving to Supabase...</span>`;
           }
 
           const feedback = feedbackInput ? feedbackInput.value : '';
@@ -427,7 +427,7 @@
           setTimeout(() => {
             closeModal();
             if (submitBtn) {
-              submitBtn.innerHTML = `<span>Submit Feedback</span><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
+              submitBtn.innerHTML = `<span>Submit to Supabase</span><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>`;
             }
           }, 1200);
         });

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ways to Earn — Surfkit Platform (surfkit.cloud)</title>
+  <meta name="description" content="Explore verified ways to earn passive USD on Surfkit. Background ad surfing, partner survey offerwalls (CPX Research, BitLabs, Lootably), and flat 10% referral bonuses.">
+
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surf: {
+              bg: '#090E1C',
+              card: '#0D1527',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10B981',
+              neon: '#14F195',
+              teal: '#06B6D4',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #090E1C; }
+    ::-webkit-scrollbar-thumb { background: #1E293B; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+    .glass-nav {
+      background: rgba(9, 14, 28, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13, 21, 39, 0.85) 0%, rgba(9, 14, 28, 0.95) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .glass-card:hover {
+      border-color: rgba(16, 185, 129, 0.35);
+      box-shadow: 0 20px 50px rgba(16, 185, 129, 0.08), 0 0 25px rgba(20, 241, 149, 0.05);
+    }
+    .grid-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+    .text-gradient {
+      background: linear-gradient(135deg, #FFFFFF 20%, #A7F3D0 70%, #10B981 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn-glow {
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.5);
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 35px 2px rgba(20, 241, 149, 0.7);
+      transform: translateY(-2px);
+    }
+  </style>
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+  <!-- Dual-Mode Navigation Resolver: Local file:// & GitHub Pages clean URLs -->
+  <script>
+    (function() {
+      var isFile = window.location.protocol === 'file:';
+
+      // 1. Web / GitHub Pages mode: Clean .html from address bar if present
+      if (!isFile) {
+        var p = window.location.pathname;
+        if (p && p.length > 1 && p.indexOf('.html') !== -1) {
+          var clean = p.replace(/\.html$/, '');
+          if (clean === '/index') clean = '/home';
+          try {
+            window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+          } catch(e) {}
+        }
+        return;
+      }
+
+      // 2. Local file:// mode: Resolve clean root-relative links to local files
+      var path = window.location.pathname.replace(/\\/g, '/');
+      var parts = path.split('/').filter(Boolean);
+      var currentFile = parts[parts.length - 1] || '';
+      var parentFolder = parts.length > 1 ? parts[parts.length - 2] : '';
+      var subfolders = {
+        'home': 1, 'earn': 1, 'transparency': 1, 'about': 1, 'terms': 1,
+        'privacy': 1, 'creator-terms': 1, 'faq': 1, 'dashboard': 1, 'hub': 1,
+        'leaderboard': 1, 'task-view': 1, 'newtab': 1
+      };
+      var isSub = (currentFile === 'index.html' && subfolders[parentFolder]);
+      var prefix = isSub ? '../' : '';
+
+      var routeMap = {
+        '/': prefix + 'index.html',
+        '/home': prefix + 'index.html',
+        '/earn': prefix + 'earn.html',
+        '/transparency': prefix + 'transparency.html',
+        '/about': prefix + 'about.html',
+        '/terms': prefix + 'terms.html',
+        '/privacy': prefix + 'privacy.html',
+        '/creator-terms': prefix + 'creator-terms.html',
+        '/creators': prefix + 'creator-terms.html',
+        '/faq': prefix + 'faq.html',
+        '/dashboard': prefix + 'hub.html',
+        '/leaderboard': prefix + 'leaderboard.html',
+        '/task-view': prefix + 'task-view.html',
+        '/newtab': prefix + 'newtab.html'
+      };
+
+      function resolveTarget(href) {
+        if (!href || href.charAt(0) !== '/') return null;
+        var hash = href.indexOf('#') !== -1 ? href.substring(href.indexOf('#')) : '';
+        var base = href.split('#')[0].replace(/\/$/, '') || '/';
+        var localTarget = routeMap[base];
+        return localTarget ? (localTarget + hash) : null;
+      }
+
+      function rewriteLinks() {
+        var links = document.querySelectorAll('a[href^="/"]');
+        for (var i = 0; i < links.length; i++) {
+          var target = resolveTarget(links[i].getAttribute('href'));
+          if (target) links[i].setAttribute('href', target);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', rewriteLinks);
+      } else {
+        rewriteLinks();
+      }
+
+      document.addEventListener('click', function(e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        var target = resolveTarget(href);
+        if (target) {
+          e.preventDefault();
+          window.location.href = target;
+        }
+      }, true);
+    })();
+  </script>
+</head>
+
+<body class="bg-[#090E1C] text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+  <!-- Ambient background glow orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-emerald-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute top-[40%] -right-32 w-[500px] h-[500px] bg-teal-500/8 rounded-full blur-[160px]"></div>
+  </div>
+  <div class="fixed inset-0 grid-pattern opacity-40 pointer-events-none -z-10"></div>
+
+  <!-- ========================================================= -->
+  <!-- NAVIGATION BAR                                            -->
+  <!-- ========================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo -->
+        <a href="/home" class="flex items-center gap-3 group">
+          <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform duration-300 group-hover:scale-105">
+            <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
+              S
+            </div>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full blur-[2px] animate-ping opacity-75"></span>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold tracking-tight text-white">Surf<span class="text-emerald-400">kit</span></span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">EARN</span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
+          <a href="/home" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Home</a>
+          <a href="/earn" class="px-3.5 py-2 text-emerald-400 bg-white/5 rounded-lg font-semibold">Earn</a>
+          <a href="/transparency" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Transparency</a>
+          <a href="/about" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">About Us</a>
+        </nav>
+
+        <!-- Right CTA Button -->
+        <div class="hidden sm:flex items-center gap-3">
+          <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
+             class="btn-glow inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
+            <svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24">
+              <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29L1.931 5.47zm13.473 4.298a5.452 5.452 0 0 1 1.414 7.687l-3.953 6.847C12.569 24.195 12.287 24 12 24c6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.822-4.364H15.404z"/>
+              <circle cx="12" cy="12" r="3.273"/>
+            </svg>
+            <span>Add to Chrome — Free</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- HERO HEADER                                               -->
+  <!-- ========================================================= -->
+  <section class="pt-36 pb-16 md:pt-44 md:pb-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      
+      <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 text-xs sm:text-sm font-medium mb-6">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>Audited Earning Channels</span>
+        <span class="text-slate-500">•</span>
+        <span class="text-slate-300">70% User Revenue Split</span>
+      </div>
+
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] max-w-4xl mx-auto mb-6">
+        Choose How You Earn: <br class="hidden sm:inline" />
+        <span class="text-gradient">Passive Surfing or Active Tasks.</span>
+      </h1>
+
+      <p class="text-base sm:text-lg lg:text-xl text-slate-400 max-w-3xl mx-auto font-normal leading-relaxed">
+        Earn USD cash while browsing YouTube, Reddit, or your favorite sites. Boost your yields anytime with vetted brand surveys, mini-games, and referral commissions.
+      </p>
+
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- 4 PRIMARY EARNING AVENUES                                 -->
+  <!-- ========================================================= -->
+  <section class="pb-24 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <!-- Avenue 1: Background Ad Surfing (Passive) -->
+        <div class="glass-card rounded-3xl p-8 border border-emerald-500/30 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <span class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-2xl">
+                ⚡
+              </span>
+              <span class="px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+                100% PASSIVE &bull; CAPPED
+              </span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">Background Ad Surfing</h3>
+            <p class="text-slate-400 text-sm leading-relaxed mb-6">
+              Install the extension and browse the web as usual. Surfkit subtly matches display sponsor slots in the background. Delivery is governed by adjustable hourly ad caps (Low, Balanced, or High) to safeguard browsing smoothness.
+            </p>
+          </div>
+
+          <div class="bg-[#090E1C] rounded-2xl p-4 border border-white/5 space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between text-slate-300">
+              <span>Hourly Intensity Modes:</span>
+              <span class="text-emerald-400 font-bold">Low &bull; Balanced &bull; High</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Hourly Delivery Caps:</span>
+              <span class="text-white font-bold">02 to 06 ads / hr (Capped Limit: 2 to 6 ads/hr)</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Yield Potential (Hourly):</span>
+              <span class="text-teal-400 font-bold">~$0.010 &ndash; $0.030+ / hr (by Tier &amp; Mode)</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Resource &amp; Speed Impact:</span>
+              <span class="text-slate-400">&lt; 14 MB RAM &bull; ~2ms latency</span>
+            </div>
+            <div class="pt-1 text-[11px] text-slate-500 font-sans leading-tight border-t border-white/5">
+              * Hourly caps: Low (2 ads/hr), Balanced (4 ads/hr), High (6 ads/hr) - strictly capped between 2 and 6 ads per hour maximum. Rates scale by geographic demand.
+            </div>
+          </div>
+        </div>
+
+        <!-- Avenue 2: Partner Offerwalls & Brand Surveys (Active) -->
+        <div class="glass-card rounded-3xl p-8 border border-white/10 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <span class="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/25 flex items-center justify-center text-2xl">
+                📝
+              </span>
+              <span class="px-3 py-1 rounded-full bg-teal-500/15 border border-teal-500/30 text-teal-300 text-xs font-mono font-bold">
+                CPX RESEARCH LIVE &bull; TIER 1&ndash;4 RANGES
+              </span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">Partner Surveys &amp; Offerwalls</h3>
+            <p class="text-slate-400 text-sm leading-relaxed mb-6">
+              Surfkit is currently integrated and live solely with <strong class="text-emerald-400">CPX Research</strong> for verified consumer surveys and brand quests. Additional reward networks (<strong class="text-slate-300">BitLabs</strong>, <strong class="text-slate-300">Lootably</strong>, <strong class="text-slate-300">AdGate Media</strong>, and <strong class="text-slate-300">TimeWall</strong>) are strictly marked as <em>Coming Soon</em> and will activate in upcoming release phases.
+            </p>
+          </div>
+
+          <div class="bg-[#090E1C] rounded-2xl p-4 border border-white/5 space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between text-slate-300">
+              <span>Active Partner:</span>
+              <span class="text-emerald-400 font-bold">CPX Research (Sole Live Network)</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Tier 1 Yield (US, UK, CA, AU, DE):</span>
+              <span class="text-emerald-400 font-bold">~$0.25 &ndash; $3.00+ USD / task</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Tier 2 Yield (FR, IT, ES, JP, etc.):</span>
+              <span class="text-teal-400 font-bold">~$0.10 &ndash; $1.20 USD / task</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Tier 3 &amp; 4 Yield (Global / Emerging):</span>
+              <span class="text-slate-400 font-bold">Variable by Sponsor Inventory</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Contractual Net Split:</span>
+              <span class="text-white font-bold">70% User Share (Direct Credit)</span>
+            </div>
+            <div class="pt-1 text-[11px] text-slate-500 font-sans leading-tight border-t border-white/5">
+              * Earnings scale dynamically across Tiers 1–4 based on sponsor bid density and demographic matching; payouts are never fixed or guaranteed.
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5">
+            <button type="button" data-task-trigger="cpx" class="task-launch-btn btn-glow w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg hover:brightness-110 transition-all cursor-pointer">
+              <i class="ri-survey-line text-sm"></i>
+              <span>Launch CPX Surveys in Dedicated New Tab &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Avenue 3: 10% Lifetime Referral Crew -->
+        <div class="glass-card rounded-3xl p-8 border border-white/10 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <span class="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/25 flex items-center justify-center text-2xl">
+                👥
+              </span>
+              <span class="px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-mono font-bold">
+                LIFETIME PASSIVE
+              </span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">Flat 10% Referral Bonus</h3>
+            <p class="text-slate-400 text-sm leading-relaxed mb-6">
+              Share your personal link with friends, study groups, or co-workers. Earn an ongoing 10% bonus from every verified dollar they earn—funded entirely by Surfkit, never deducted from your friend's balance.
+            </p>
+          </div>
+
+          <div class="bg-[#090E1C] rounded-2xl p-4 border border-white/5 space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between text-slate-300">
+              <span>Bonus Percentage:</span>
+              <span class="text-emerald-400 font-bold">Flat 10% for every friend</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Referral Caps:</span>
+              <span class="text-white font-bold">Unlimited friends</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Tier Limitations:</span>
+              <span class="text-purple-400 font-bold">No tiers &bull; Simple &amp; direct</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Avenue 4: Interactive Mini-Games & Quests -->
+        <div class="glass-card rounded-3xl p-8 border border-white/10 flex flex-col justify-between group">
+          <div>
+            <div class="flex items-center justify-between mb-5">
+              <span class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-2xl">
+                🎮
+              </span>
+              <span class="px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-mono font-bold">
+                DEDICATED NEW TAB VIEW
+              </span>
+            </div>
+            <h3 class="text-2xl font-bold text-white mb-2">Mini-Games &amp; Interactive Quests</h3>
+            <p class="text-slate-400 text-sm leading-relaxed mb-6">
+              Engage with casual sponsor mini-games and complete interactive quest milestones. All games and quests launch in an isolated New Tab Task View for clean sandboxing and optimal performance.
+            </p>
+          </div>
+
+          <div class="bg-[#090E1C] rounded-2xl p-4 border border-white/5 space-y-2.5 text-xs font-mono">
+            <div class="flex justify-between text-slate-300">
+              <span>Quest USD Rewards:</span>
+              <span class="text-amber-400 font-bold">+$0.05 to +$0.50 USD / quest</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Execution Window:</span>
+              <span class="text-emerald-400 font-bold">Dedicated New Tab Task View</span>
+            </div>
+            <div class="flex justify-between text-slate-300">
+              <span>Memory Footprint:</span>
+              <span class="text-slate-400">&lt; 20 MB RAM &bull; Sandboxed</span>
+            </div>
+            <div class="pt-1 text-[11px] text-slate-500 font-sans leading-tight border-t border-white/5">
+              * Quest payouts are calculated strictly in USD equivalents. All tasks open in an isolated new tab task interface for security.
+            </div>
+          </div>
+          <div class="mt-4 pt-3 border-t border-white/5">
+            <button type="button" data-task-trigger="game" class="task-launch-btn btn-glow w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-teal-400 to-cyan-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-2 shadow-lg hover:brightness-110 transition-all cursor-pointer">
+              <i class="ri-gamepad-line text-sm"></i>
+              <span>Play Mini-Games in Dedicated New Tab &rarr;</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Integrated Partner Tunnels Showcase -->
+      <div class="glass-card rounded-3xl p-8 border border-white/10 text-center">
+        <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">Direct API &amp; Iframe Integrations</span>
+        <h3 class="text-xl sm:text-2xl font-bold text-white mt-1 mb-6">Our Offerwall Partner Ecosystem</h3>
+        
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 text-xs font-mono">
+          <!-- Active Partner: CPX Research -->
+          <div class="p-4 rounded-xl bg-emerald-500/10 border-2 border-emerald-500/40 text-emerald-300 font-bold flex flex-col items-center gap-1.5 shadow-lg shadow-emerald-500/10">
+            <span class="text-sm text-white font-bold">CPX Research</span>
+            <span class="inline-flex items-center gap-1.5 text-[10px] text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/30">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              Active &bull; Live
+            </span>
+          </div>
+
+          <!-- Upcoming Partner: BitLabs -->
+          <div class="p-4 rounded-xl bg-[#090E1C] border border-white/5 text-slate-400 opacity-75 flex flex-col items-center gap-1.5">
+            <span class="text-sm text-slate-300">BitLabs</span>
+            <span class="text-[10px] text-slate-500 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10">Coming Soon</span>
+          </div>
+
+          <!-- Upcoming Partner: Lootably -->
+          <div class="p-4 rounded-xl bg-[#090E1C] border border-white/5 text-slate-400 opacity-75 flex flex-col items-center gap-1.5">
+            <span class="text-sm text-slate-300">Lootably</span>
+            <span class="text-[10px] text-slate-500 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10">Coming Soon</span>
+          </div>
+
+          <!-- Upcoming Partner: AdGate Media -->
+          <div class="p-4 rounded-xl bg-[#090E1C] border border-white/5 text-slate-400 opacity-75 flex flex-col items-center gap-1.5">
+            <span class="text-sm text-slate-300">AdGate Media</span>
+            <span class="text-[10px] text-slate-500 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10">Coming Soon</span>
+          </div>
+
+          <!-- Upcoming Partner: TimeWall -->
+          <div class="p-4 rounded-xl bg-[#090E1C] border border-white/5 text-slate-400 opacity-75 flex flex-col items-center gap-1.5">
+            <span class="text-sm text-slate-300">TimeWall</span>
+            <span class="text-[10px] text-slate-500 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10">Coming Soon</span>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-400 mt-5 font-mono">
+          <strong class="text-emerald-400">CPX Research</strong> is our sole live connected provider. BitLabs, Lootably, AdGate Media, and TimeWall tunnels are currently in pipeline development and will be activated once integration testing is complete.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- FOOTER                                                    -->
+  <!-- ========================================================= -->
+  <footer class="border-t border-white/10 bg-[#060A14] pt-16 pb-12 text-sm text-slate-400 relative overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Main 4-Column Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/5">
+
+        <!-- Column 1: Brand -->
+        <div class="sm:col-span-2 lg:col-span-4 space-y-4">
+          <a href="/home" class="inline-flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center p-0.5">
+              <div class="w-full h-full bg-[#090E1C] rounded-[6px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Surf<span class="text-emerald-400">kit</span></span>
+          </a>
+          <p class="text-xs text-slate-400 max-w-sm leading-relaxed">
+            Turn your daily web browsing and gaming into real rewards. 70/30 revenue split with complete privacy protection.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="X">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Discord">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Telegram">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="LinkedIn">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Surfkit Links -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Surfkit Links
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="/earn" class="text-emerald-400 font-semibold hover:translate-x-1 inline-block transition-all duration-150">Ways to Earn</a></li>
+            <li><a href="/transparency" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency &amp; Security</a></li>
+            <li><a href="/about" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal -->
+        <div class="space-y-3.5 lg:col-span-2">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+            Legal
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="/terms" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
+            <li><a href="/privacy" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
+            <li><a href="/creator-terms" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Support -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Support &amp; Inquiries
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="/faq" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
+            <li>
+              <div class="pt-1">
+                <span class="text-slate-500 block text-[11px] uppercase tracking-wider mb-1 font-mono">Contact Operations:</span>
+                <a href="mailto:surfkitcloud@gmail.com"
+                   class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-mono text-xs transition-all duration-200 group">
+                  <svg class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <span>surfkitcloud@gmail.com</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Partner Disclaimer Box -->
+      <div class="py-4 my-6 px-4 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 leading-relaxed">
+        <strong class="text-slate-300">Partner Tunnel Disclaimer:</strong> Offerwall tasks, surveys, and interactive sponsor games are dynamically powered through secure, isolated partner tunnels provided by CPX Research (with BitLabs and Lootably coming soon). Reward postbacks are cryptographically verified before wallet settlement.
+      </div>
+
+      <!-- Bottom Sub-footer -->
+      <div class="pt-4 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div class="text-center md:text-left leading-relaxed">
+          Copyright &copy; 2026 Surfkit. All rights reserved.
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

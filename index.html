@@ -2,7 +2,7 @@
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
-  <!-- Cloud Project Config -->
+  <!-- Supabase Project Config -->
   <script>
     window.SURFKIT_SUPABASE_URL      = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
     window.SURFKIT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
@@ -104,7 +104,6 @@
     .text-gradient {
       background: linear-gradient(135deg, #FFFFFF 20%, #A7F3D0 70%, #10B981 100%);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .btn-glow {
@@ -126,14 +125,12 @@
     /* Range slider custom style */
     input[type=range] {
       -webkit-appearance: none;
-      appearance: none;
       background: #1E293B;
       height: 8px;
       border-radius: 9999px;
     }
     input[type=range]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      appearance: none;
       height: 22px;
       width: 22px;
       border-radius: 50%;
@@ -352,6 +349,88 @@
   </style>
   <!-- Remix Icon CDN -->
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+  <!-- Dual-Mode Navigation Resolver: Local file:// & GitHub Pages clean URLs -->
+  <script>
+    (function() {
+      var isFile = window.location.protocol === 'file:';
+
+      // 1. Web / GitHub Pages mode: Clean .html from address bar if present
+      if (!isFile) {
+        var p = window.location.pathname;
+        if (p && p.length > 1 && p.indexOf('.html') !== -1) {
+          var clean = p.replace(/\.html$/, '');
+          if (clean === '/index') clean = '/home';
+          try {
+            window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+          } catch(e) {}
+        }
+        return;
+      }
+
+      // 2. Local file:// mode: Resolve clean root-relative links to local files
+      var path = window.location.pathname.replace(/\\/g, '/');
+      var parts = path.split('/').filter(Boolean);
+      var currentFile = parts[parts.length - 1] || '';
+      var parentFolder = parts.length > 1 ? parts[parts.length - 2] : '';
+      var subfolders = {
+        'home': 1, 'earn': 1, 'transparency': 1, 'about': 1, 'terms': 1,
+        'privacy': 1, 'creator-terms': 1, 'faq': 1, 'dashboard': 1, 'hub': 1,
+        'leaderboard': 1, 'task-view': 1, 'newtab': 1
+      };
+      var isSub = (currentFile === 'index.html' && subfolders[parentFolder]);
+      var prefix = isSub ? '../' : '';
+
+      var routeMap = {
+        '/': prefix + 'index.html',
+        '/home': prefix + 'index.html',
+        '/earn': prefix + 'earn.html',
+        '/transparency': prefix + 'transparency.html',
+        '/about': prefix + 'about.html',
+        '/terms': prefix + 'terms.html',
+        '/privacy': prefix + 'privacy.html',
+        '/creator-terms': prefix + 'creator-terms.html',
+        '/creators': prefix + 'creator-terms.html',
+        '/faq': prefix + 'faq.html',
+        '/dashboard': prefix + 'hub.html',
+        '/leaderboard': prefix + 'leaderboard.html',
+        '/task-view': prefix + 'task-view.html',
+        '/newtab': prefix + 'newtab.html'
+      };
+
+      function resolveTarget(href) {
+        if (!href || href.charAt(0) !== '/') return null;
+        var hash = href.indexOf('#') !== -1 ? href.substring(href.indexOf('#')) : '';
+        var base = href.split('#')[0].replace(/\/$/, '') || '/';
+        var localTarget = routeMap[base];
+        return localTarget ? (localTarget + hash) : null;
+      }
+
+      function rewriteLinks() {
+        var links = document.querySelectorAll('a[href^="/"]');
+        for (var i = 0; i < links.length; i++) {
+          var target = resolveTarget(links[i].getAttribute('href'));
+          if (target) links[i].setAttribute('href', target);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', rewriteLinks);
+      } else {
+        rewriteLinks();
+      }
+
+      document.addEventListener('click', function(e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        var target = resolveTarget(href);
+        if (target) {
+          e.preventDefault();
+          window.location.href = target;
+        }
+      }, true);
+    })();
+  </script>
 </head>
 
 <body class="bg-[#090E1C] text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black overflow-x-hidden min-h-screen flex flex-col justify-between">
@@ -372,7 +451,7 @@
       <div class="flex items-center justify-between h-20">
         
         <!-- Logo -->
-        <a href="index.html" class="flex items-center gap-3 group">
+        <a href="/home" class="flex items-center gap-3 group">
           <div class="relative w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 p-[1.5px] transition-transform duration-300 group-hover:scale-105">
             <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-emerald-400 text-lg">
               S
@@ -388,14 +467,18 @@
 
         <!-- Desktop Navigation Links -->
         <nav class="hidden md:flex items-center space-x-1 lg:space-x-2 text-sm font-medium">
-          <a href="index.html" class="px-3.5 py-2 text-emerald-400 bg-white/5 rounded-lg font-semibold">Home</a>
-          <a href="earn.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Earn</a>
-          <a href="transparency.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Transparency</a>
-          <a href="about.html" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">About Us</a>
+          <a href="/home" class="px-3.5 py-2 text-emerald-400 bg-white/5 rounded-lg font-semibold">Home</a>
+          <a href="/earn" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Earn</a>
+          <a href="/transparency" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">Transparency</a>
+          <a href="/about" class="px-3.5 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors">About Us</a>
         </nav>
 
         <!-- Right CTA & Chrome Badge -->
         <div class="hidden sm:flex items-center gap-3">
+          <a href="../Surfkit Dashboard/index.html" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+            <i class="ri-dashboard-3-line text-base"></i>
+            Dashboard
+          </a>
           <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
              class="btn-glow inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
             <!-- Chrome SVG Icon -->
@@ -421,10 +504,10 @@
 
     <!-- Mobile Navigation Drawer -->
     <div id="mobile-menu" class="hidden md:hidden border-b border-white/10 bg-[#090E1C]/95 backdrop-blur-2xl px-4 pt-3 pb-6 space-y-3">
-      <a href="index.html" class="block px-3 py-2 rounded-md text-base font-medium text-emerald-400 bg-white/5">Home</a>
-      <a href="earn.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-emerald-400">Earn</a>
-      <a href="transparency.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-emerald-400">Transparency</a>
-      <a href="about.html" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-emerald-400">About Us</a>
+      <a href="/home" class="block px-3 py-2 rounded-md text-base font-medium text-emerald-400 bg-white/5">Home</a>
+      <a href="/earn" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-emerald-400">Earn</a>
+      <a href="/transparency" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-emerald-400">Transparency</a>
+      <a href="/about" class="block px-3 py-2 rounded-md text-base font-medium text-slate-300 hover:bg-white/5 hover:text-emerald-400">About Us</a>
       <div class="pt-3">
         <a href="https://chrome.google.com/webstore" class="w-full btn-glow flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400">
           Add to Chrome — It's Free
@@ -468,7 +551,7 @@
           <!-- Live Rating Display (Pure Visual Indicator - Non-Clickable) -->
           <div id="surfkit-rating-widget"
                class="inline-flex items-center gap-2.5 px-3 py-1.5 mb-7 rounded-xl bg-[#0b0f17]/90 border border-white/10 shadow-sm select-none">
-            <!-- Green Square Star Rating (Dynamic Live Sync) -->
+            <!-- Green Square Star Rating (Dynamic Supabase Sync) -->
             <div id="rating-stars-container" class="flex items-center gap-1" aria-hidden="true">
               <div class="w-5 h-5 rounded-sm bg-slate-800/80 border border-slate-700/60 flex items-center justify-center shadow-sm">
                 <svg class="w-3.5 h-3.5 text-slate-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
@@ -505,7 +588,7 @@
               </svg>
             </a>
 
-            <!-- Live User Count Badge (Live Cloud Sync) -->
+            <!-- Live User Count Badge (Supabase Dynamic) -->
             <div id="live-user-badge" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-5 py-4 rounded-xl text-xs font-semibold text-slate-300 bg-white/[0.04] border border-white/10 backdrop-blur-sm select-none">
               <span class="relative flex h-2.5 w-2.5 flex-shrink-0">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60"></span>
@@ -665,7 +748,7 @@
                   <div class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xs">★</div>
                   <div>
                     <div class="text-[11px] font-bold text-white">Rate Surfkit Extension</div>
-                    <div class="text-[9px] text-slate-400 font-mono" id="popup-rating-sync-status">Live Cloud Sync</div>
+                    <div class="text-[9px] text-slate-400 font-mono" id="popup-rating-sync-status">Supabase Direct Sync</div>
                   </div>
                 </div>
                 <button type="button" class="open-rating-modal-btn px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold transition-all cursor-pointer">
@@ -674,7 +757,7 @@
               </div>
 
               <!-- 7. Dashboard Button (links directly to hub.html) -->
-              <a href="hub.html" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
+              <a href="/dashboard" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
                 <svg class="w-4 h-4 text-slate-300 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke-width="2"/>
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/>
@@ -1041,62 +1124,62 @@
                 Secure cloud ledger synchronization. Real-time balance updates reconcile seamlessly between your local Chrome extension and encrypted cloud ledger.
               </p>
 
-              <!-- SYNCHRONIZATION ANIMATION: Cloud Core radiating to Desktop Chrome Extension only -->
-              <div class="relative w-full h-40 my-4 flex items-center justify-between px-2 sm:px-3 overflow-hidden rounded-xl bg-[#060B17]/90 border border-teal-500/20 shadow-inner">
+                            <!-- SYNCHRONIZATION ANIMATION: Cloud Core radiating to Desktop Chrome Extension only (No Tablet, No Mobile) -->
+              <div class="relative w-full h-40 my-4 flex items-center justify-between px-3 sm:px-4 overflow-hidden rounded-xl bg-[#060B17]/90 border border-teal-500/20 shadow-inner">
                 
                 <!-- Left: Encrypted Cloud Core with Radiating Data Wave -->
-                <div class="relative flex flex-col items-center justify-center shrink-0 w-16 sm:w-20">
-                  <svg class="w-12 h-12 sm:w-14 sm:h-14" viewBox="0 0 80 80">
+                <div class="relative flex flex-col items-center justify-center shrink-0 w-20">
+                  <svg class="w-14 h-14" viewBox="0 0 80 80">
                     <circle cx="40" cy="40" r="15" fill="none" stroke="#2DD4BF" stroke-width="2" class="animate-cloud-wave"/>
                     <circle cx="40" cy="40" r="22" fill="#0B132B" stroke="#10B981" stroke-width="2"/>
                     <!-- Cloud Icon inside Core -->
                     <path d="M32 44a6 6 0 0 1 0-12 8 8 0 0 1 15-2 6 6 0 0 1 3 14H32z" fill="#10B981" fill-opacity="0.3" stroke="#14F195" stroke-width="1.5"/>
                   </svg>
-                  <span class="text-[8.5px] sm:text-[9px] font-mono font-bold text-teal-400 uppercase tracking-widest mt-0.5">Cloud Vault</span>
+                  <span class="text-[9px] font-mono font-bold text-teal-400 uppercase tracking-widest mt-1">CLOUD VAULT</span>
                 </div>
 
                 <!-- Center: Flowing Data Stream with Lock Icon Forming Around Stream -->
-                <div class="relative flex-1 min-w-[32px] max-w-[56px] flex flex-col items-center justify-center px-0.5">
+                <div class="relative flex-1 flex flex-col items-center justify-center px-1 min-w-[60px]">
                   <!-- Flowing Fiber Trace with Traveling Data Packets -->
                   <div class="w-full h-0.5 bg-gradient-to-r from-teal-400 via-emerald-300 to-cyan-400 relative">
                     <div class="w-2 h-2 rounded-full bg-emerald-300 absolute -top-[3px] animate-timeline-packet shadow-[0_0_8px_#10B981]"></div>
                   </div>
                   <!-- Secure Lock Forming Around Flowing Stream -->
-                  <div class="mt-2 px-1.5 py-0.5 rounded-md bg-[#091122] border border-emerald-400/50 flex items-center gap-1 shadow-[0_0_12px_rgba(16,185,129,0.35)]">
-                    <svg class="w-3 h-3 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <div class="mt-2.5 px-2 py-0.5 rounded-md bg-[#091122] border border-emerald-400/50 flex items-center gap-1 shadow-[0_0_12px_rgba(16,185,129,0.35)] whitespace-nowrap">
+                    <svg class="w-3 h-3 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                       <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
                     </svg>
-                    <span class="text-[8px] font-mono font-bold text-emerald-300 uppercase">Encrypted</span>
+                    <span class="text-[9px] font-mono font-bold text-emerald-300 uppercase">Encrypted</span>
                   </div>
                 </div>
 
-                <!-- Right: Desktop Chrome Extension Sync Endpoints Only -->
-                <div class="flex flex-col gap-1.5 shrink-0 pr-1 sm:pr-2">
+                <!-- Right: Desktop Chrome Extension Sync Endpoints Only (No Mobile, No Tablet) -->
+                <div class="flex flex-col gap-1.5 shrink-0 pl-1">
                   <!-- Desktop Chrome Browser -->
-                  <div class="flex items-center gap-1.5 py-1 px-2 rounded-lg bg-emerald-950/40 border border-emerald-500/30">
+                  <div class="flex items-center gap-1.5 py-1 px-2 rounded-lg bg-emerald-950/40 border border-emerald-500/30 whitespace-nowrap">
                     <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <rect x="3" y="4" width="18" height="12" rx="2"/>
                       <line x1="2" y1="20" x2="22" y2="20"/>
                     </svg>
-                    <span class="text-[8.5px] sm:text-[9px] font-mono text-slate-200 whitespace-nowrap">Chrome Desktop</span>
+                    <span class="text-[9px] font-mono text-slate-200">Chrome Desktop</span>
                   </div>
                   <!-- Local Storage Cache -->
-                  <div class="flex items-center gap-1.5 py-1 px-2 rounded-lg bg-teal-950/40 border border-teal-500/30">
+                  <div class="flex items-center gap-1.5 py-1 px-2 rounded-lg bg-teal-950/40 border border-teal-500/30 whitespace-nowrap">
                     <svg class="w-3.5 h-3.5 text-teal-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <ellipse cx="12" cy="5" rx="9" ry="3"/>
                       <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
                       <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
                     </svg>
-                    <span class="text-[8.5px] sm:text-[9px] font-mono text-slate-200 whitespace-nowrap">Local Ledger</span>
+                    <span class="text-[9px] font-mono text-slate-200">Local Ledger</span>
                   </div>
                   <!-- Extension Live Session -->
-                  <div class="flex items-center gap-1.5 py-1 px-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30">
+                  <div class="flex items-center gap-1.5 py-1 px-2 rounded-lg bg-cyan-950/40 border border-cyan-500/30 whitespace-nowrap">
                     <svg class="w-3.5 h-3.5 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                       <circle cx="12" cy="12" r="10"/>
                       <path d="m9 12 2 2 4-4"/>
                     </svg>
-                    <span class="text-[8.5px] sm:text-[9px] font-mono text-slate-200 whitespace-nowrap">Live Session</span>
+                    <span class="text-[9px] font-mono text-slate-200">Live Session</span>
                   </div>
                 </div>
 
@@ -1118,7 +1201,6 @@
       </div>
     </div>
   </section>
-
 
   <!-- ========================================================= -->
   <!-- 4. USER EXPERIENCE PATH (SEAMLESS WORKFLOW DIAGRAM)       -->
@@ -1730,7 +1812,7 @@
 
 
 <!-- ========================================================= -->
-  <!-- 6. WHAT PEOPLE SAY ABOUT US (TESTIMONIALS – Live Dynamic Sync) -->
+  <!-- 6. WHAT PEOPLE SAY ABOUT US (TESTIMONIALS — Supabase Dynamic) -->
   <!-- ========================================================= -->
   <section id="testimonials" class="py-20 relative">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1938,7 +2020,7 @@
         
         <!-- Column 1: Brand -->
         <div class="sm:col-span-2 lg:col-span-4 space-y-4">
-          <a href="index.html" class="inline-flex items-center gap-2.5 group">
+          <a href="/home" class="inline-flex items-center gap-2.5 group">
             <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center p-0.5">
               <div class="w-full h-full bg-[#090E1C] rounded-[6px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
             </div>
@@ -1970,9 +2052,9 @@
             Surfkit Links
           </h4>
           <ul class="space-y-2.5 text-xs">
-            <li><a href="earn.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Ways to Earn</a></li>
-            <li><a href="transparency.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency &amp; Security</a></li>
-            <li><a href="about.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
+            <li><a href="/earn" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Ways to Earn</a></li>
+            <li><a href="/transparency" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency &amp; Security</a></li>
+            <li><a href="/about" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
           </ul>
         </div>
 
@@ -1983,9 +2065,9 @@
             Legal
           </h4>
           <ul class="space-y-2.5 text-xs">
-            <li><a href="terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
-            <li><a href="privacy.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
-            <li><a href="creator-terms.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
+            <li><a href="/terms" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
+            <li><a href="/privacy" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
+            <li><a href="/creator-terms" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
           </ul>
         </div>
 
@@ -1996,16 +2078,16 @@
             Support &amp; Inquiries
           </h4>
           <ul class="space-y-2.5 text-xs">
-            <li><a href="faq.html" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
+            <li><a href="/faq" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
             <li>
               <div class="pt-1">
                 <span class="text-slate-500 block text-[11px] uppercase tracking-wider mb-1 font-mono">Contact Operations:</span>
-                <a href="mailto:support@surfkit.cloud" 
+                <a href="mailto:surfkitcloud@gmail.com" 
                    class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-mono text-xs transition-all duration-200 group">
                   <svg class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                   </svg>
-                  <span>support@surfkit.cloud</span>
+                  <span>surfkitcloud@gmail.com</span>
                 </a>
               </div>
             </li>
@@ -2072,7 +2154,7 @@
 
 
   <!-- ========================================================= -->
-  <!-- SURFKIT LIVE COMMUNITY RATING & FEEDBACK MODAL -->
+  <!-- SURFKIT LIVE COMMUNITY RATING & FEEDBACK MODAL (SUPABASE) -->
   <!-- ========================================================= -->
   <div id="rating-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
     <div class="relative glass-card w-full max-w-lg rounded-2xl border border-emerald-500/30 p-6 sm:p-8 shadow-2xl bg-[#090E1C]/95">
@@ -2087,7 +2169,7 @@
             <h3 class="text-base font-bold text-white tracking-tight">Rate Surfkit Platform</h3>
             <div class="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Live Cloud Sync Engine</span>
+              <span>Supabase Direct Sync Engine</span>
             </div>
           </div>
         </div>
@@ -2149,7 +2231,7 @@
             Cancel
           </button>
           <button type="submit" id="submit-rating-btn" class="btn-glow inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:opacity-95 transition-all shadow-md">
-            <span>Submit Review</span>
+            <span>Submit to Supabase</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </div>
@@ -2320,7 +2402,7 @@
   <script src="dashboard.js"></script>
 
   <!-- ================================================================ -->
-  <!-- DYNAMIC REVIEWS ENGINE: Cloud Sync -> testimonials cards + rating
+  <!-- DYNAMIC REVIEWS ENGINE: Supabase → testimonials cards + rating   -->
   <!-- ================================================================ -->
   <script>
   (function () {
@@ -2527,7 +2609,7 @@
 
 
   <!-- ================================================================ -->
-  <!-- LIVE USER COUNT: Fetches real registered user total -->
+  <!-- LIVE USER COUNT: Fetches real registered user total from Supabase -->
   <!-- ================================================================ -->
   <script>
   (function () {
@@ -2569,5 +2651,6 @@
     } else { fetchUserCount(); }
   })();
   </script>
+
 </body>
 </html>

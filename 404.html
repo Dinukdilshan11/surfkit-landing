@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Surfkit — Redirecting...</title>
+  <script>
+    (function() {
+      var p = window.location.pathname.replace(/\/$/, '').toLowerCase();
+      var routeMap = {
+        '/home': '/home/',
+        '/earn': '/earn/',
+        '/transparency': '/transparency/',
+        '/about': '/about/',
+        '/terms': '/terms/',
+        '/privacy': '/privacy/',
+        '/creator-terms': '/creator-terms/',
+        '/creators': '/creator-terms/',
+        '/faq': '/faq/',
+        '/leaderboard': '/leaderboard/',
+        '/dashboard': '/dashboard/'
+      };
+      var target = routeMap[p];
+      if (target) {
+        window.location.replace(target + window.location.search + window.location.hash);
+      } else {
+        window.location.replace('/' + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
+</head>
+<body style="background:#090E1C;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+  <p style="font-size:1.1rem;color:#10B981;">Redirecting to Surfkit...</p>
+</body>
+</html>

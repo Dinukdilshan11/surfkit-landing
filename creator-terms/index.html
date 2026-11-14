@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Terms & Conditions — Surfkit Platform (surfkit.cloud)</title>
+  <meta name="description" content="Official Creator Partner Terms of Service for verified Streamers and Content Creators (Twitch, YouTube, Kick) on Surfkit (surfkit.cloud). Review revenue splits, viewer contributions, and anti-abuse policies.">
+
+  <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="tailwind.cdn.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            surf: {
+              bg: '#090E1C',
+              card: '#0D1527',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10B981',
+              neon: '#14F195',
+              teal: '#06B6D4',
+              purple: '#8B5CF6',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #090E1C;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1E293B;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10B981;
+    }
+
+    .glass-nav {
+      background: rgba(9, 14, 28, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .glass-card {
+      background: linear-gradient(135deg, rgba(13, 21, 39, 0.85) 0%, rgba(9, 14, 28, 0.95) 100%);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    }
+    .grid-pattern {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+  </style>
+  <!-- Remix Icon CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.min.css" rel="stylesheet">
+  <!-- Dual-Mode Navigation Resolver: Local file:// & GitHub Pages clean URLs -->
+  <script>
+    (function() {
+      var isFile = window.location.protocol === 'file:';
+
+      // 1. Web / GitHub Pages mode: Clean .html from address bar if present
+      if (!isFile) {
+        var p = window.location.pathname;
+        if (p && p.length > 1 && p.indexOf('.html') !== -1) {
+          var clean = p.replace(/\.html$/, '');
+          if (clean === '/index') clean = '/home';
+          try {
+            window.history.replaceState(null, '', clean + window.location.search + window.location.hash);
+          } catch(e) {}
+        }
+        return;
+      }
+
+      // 2. Local file:// mode: Resolve clean root-relative links to local files
+      var path = window.location.pathname.replace(/\\/g, '/');
+      var parts = path.split('/').filter(Boolean);
+      var currentFile = parts[parts.length - 1] || '';
+      var parentFolder = parts.length > 1 ? parts[parts.length - 2] : '';
+      var subfolders = {
+        'home': 1, 'earn': 1, 'transparency': 1, 'about': 1, 'terms': 1,
+        'privacy': 1, 'creator-terms': 1, 'faq': 1, 'dashboard': 1, 'hub': 1,
+        'leaderboard': 1, 'task-view': 1, 'newtab': 1
+      };
+      var isSub = (currentFile === 'index.html' && subfolders[parentFolder]);
+      var prefix = isSub ? '../' : '';
+
+      var routeMap = {
+        '/': prefix + 'index.html',
+        '/home': prefix + 'index.html',
+        '/earn': prefix + 'earn.html',
+        '/transparency': prefix + 'transparency.html',
+        '/about': prefix + 'about.html',
+        '/terms': prefix + 'terms.html',
+        '/privacy': prefix + 'privacy.html',
+        '/creator-terms': prefix + 'creator-terms.html',
+        '/creators': prefix + 'creator-terms.html',
+        '/faq': prefix + 'faq.html',
+        '/dashboard': prefix + 'hub.html',
+        '/leaderboard': prefix + 'leaderboard.html',
+        '/task-view': prefix + 'task-view.html',
+        '/newtab': prefix + 'newtab.html'
+      };
+
+      function resolveTarget(href) {
+        if (!href || href.charAt(0) !== '/') return null;
+        var hash = href.indexOf('#') !== -1 ? href.substring(href.indexOf('#')) : '';
+        var base = href.split('#')[0].replace(/\/$/, '') || '/';
+        var localTarget = routeMap[base];
+        return localTarget ? (localTarget + hash) : null;
+      }
+
+      function rewriteLinks() {
+        var links = document.querySelectorAll('a[href^="/"]');
+        for (var i = 0; i < links.length; i++) {
+          var target = resolveTarget(links[i].getAttribute('href'));
+          if (target) links[i].setAttribute('href', target);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', rewriteLinks);
+      } else {
+        rewriteLinks();
+      }
+
+      document.addEventListener('click', function(e) {
+        var a = e.target.closest('a');
+        if (!a) return;
+        var href = a.getAttribute('href');
+        var target = resolveTarget(href);
+        if (target) {
+          e.preventDefault();
+          window.location.href = target;
+        }
+      }, true);
+    })();
+  </script>
+</head>
+
+<body class="bg-[#090E1C] text-slate-200 font-sans antialiased selection:bg-emerald-500 selection:text-black min-h-screen flex flex-col justify-between">
+
+  <!-- Ambient background glow orbs -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden -z-10">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-purple-500/10 rounded-full blur-[140px]"></div>
+    <div class="absolute top-[40%] -left-32 w-[450px] h-[450px] bg-emerald-500/5 rounded-full blur-[160px]"></div>
+  </div>
+  <div class="fixed inset-0 grid-pattern opacity-40 pointer-events-none -z-10"></div>
+
+  <!-- ========================================================= -->
+  <!-- NAVIGATION BAR                                            -->
+  <!-- ========================================================= -->
+  <header class="fixed top-0 left-0 right-0 z-50 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        
+        <!-- Logo & Back to Home Link -->
+        <a href="/home" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-500 via-teal-400 to-emerald-400 p-[1.5px] transition-transform duration-300 group-hover:scale-105">
+            <div class="w-full h-full bg-[#090E1C] rounded-[10px] flex items-center justify-center font-black text-purple-400 text-lg">
+              S
+            </div>
+          </div>
+          <div class="flex items-baseline gap-1.5">
+            <span class="text-2xl font-extrabold tracking-tight text-white">Surf<span class="text-emerald-400">kit</span></span>
+            <span class="text-[10px] uppercase font-mono font-bold tracking-widest px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">LEGAL</span>
+          </div>
+        </a>
+
+        <!-- Return to Landing / App Hub -->
+        <div class="flex items-center gap-4">
+          <a href="/home" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            <span>Back to Main Hub</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- MAIN CREATOR TERMS CONTENT                                -->
+  <!-- ========================================================= -->
+  <main class="flex-grow pt-32 pb-24">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Document Header Banner -->
+      <div class="glass-card rounded-3xl p-8 sm:p-12 border border-white/10 mb-12 relative overflow-hidden">
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-white/10">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-mono font-semibold">
+            <span class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></span>
+            Creator Partner Program
+          </div>
+          <div class="text-xs font-mono text-slate-400">
+            Last Updated: <span class="text-white font-semibold">November 2, 2026</span>
+          </div>
+        </div>
+
+        <div class="mt-6">
+          <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight mb-4">
+            Creator Partner Terms &amp; Conditions
+          </h1>
+          <p class="text-slate-400 text-base sm:text-lg leading-relaxed max-w-3xl">
+            These Creator Partner Terms govern participation in the Surfkit Creator Program for verified live streamers, video producers, and digital creators (including Twitch, YouTube, and Kick broadcasters). Monetize community attention without forcing viewers into paid subscriptions.
+          </p>
+        </div>
+
+        <!-- Creator Program Perks Box -->
+        <div class="mt-8 p-4 sm:p-5 rounded-2xl bg-purple-500/[0.04] border border-purple-500/20 text-xs sm:text-sm text-slate-300 space-y-2">
+          <div class="font-bold text-purple-400 flex items-center gap-2 text-sm">
+            <span>🎙️</span> Creator Program Highlights
+          </div>
+          <p>
+            Verified Creators can receive <strong class="text-white">viewer-directed reward donations</strong>, earn a dedicated <strong class="text-white">50/50 revenue split</strong> on ad engagement and offerwall completions performed by viewers on creator-linked streams, and access unified USD payouts via PayPal or Direct Bank Transfer.
+          </p>
+        </div>
+      </div>
+
+      <!-- Content Container with Table of Contents -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        
+        <!-- Table of Contents (Sticky on Desktop) -->
+        <aside class="lg:col-span-4 sticky top-28 glass-card rounded-2xl p-6 border border-white/10 hidden lg:block text-xs">
+          <div class="font-mono font-bold text-white uppercase tracking-wider mb-4 text-xs flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
+            Creator Navigation
+          </div>
+          <nav class="space-y-2">
+            <a href="#section-1" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">1. Overview &amp; Scope</a>
+            <a href="#section-2" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">2. Eligibility &amp; OAuth Verification</a>
+            <a href="#section-3" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">3. Revenue Split &amp; Task Donations</a>
+            <a href="#section-4" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">4. Anti-Abuse &amp; Zero Bot Tolerance</a>
+            <a href="#section-5" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">5. Payouts, Thresholds &amp; Taxes</a>
+            <a href="#section-6" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">6. Content &amp; Conduct Standards</a>
+            <a href="#section-7" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">7. License &amp; Brand Usage</a>
+            <a href="#section-8" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">8. Disclaimer of Warranties</a>
+            <a href="#section-9" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">9. Indemnification &amp; Liability</a>
+            <a href="#section-10" class="block text-slate-400 hover:text-purple-400 py-1 transition-colors">10. Termination &amp; Creator Support</a>
+          </nav>
+        </aside>
+
+        <!-- Terms Clauses -->
+        <article class="lg:col-span-8 space-y-10 text-slate-300 text-sm sm:text-base leading-relaxed">
+
+          <!-- 1. Overview & Scope -->
+          <section id="section-1" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">01</span>
+              Program Overview &amp; Scope
+            </h2>
+            <p>
+              These Creator Partner Terms and Conditions (the "<strong>Creator Terms</strong>") govern your onboarding and participation as a verified content creator in the <strong>Surfkit Creator Support Program</strong> on <code class="text-purple-400 font-mono text-sm">surfkit.cloud</code>.
+            </p>
+            <p class="text-slate-400 text-sm">
+              The Creator Program is operated by the Surfkit Operations Team ("<strong>Surfkit</strong>", "<strong>we</strong>", "<strong>our</strong>"). These Creator Terms supplement our general <a href="/terms" class="text-emerald-400 underline">Terms &amp; Conditions</a>. In the event of a conflict between these Creator Terms and general platform terms, these Creator Terms shall govern your creator-specific revenue distributions.
+            </p>
+          </section>
+
+          <!-- 2. Eligibility & OAuth Verification -->
+          <section id="section-2" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">02</span>
+              Eligibility &amp; Channel Verification
+            </h2>
+            <div class="space-y-3">
+              <h3 class="font-bold text-white text-base">2.1 Age &amp; Standing</h3>
+              <p>
+                To be verified as a Creator, you must be at least 18 years of age (or the legal age of majority in your jurisdiction), or at least 16 years of age with express consent and representation from a parent or legal guardian. Your account must be in good standing without prior infractions.
+              </p>
+
+              <h3 class="font-bold text-white text-base">2.2 Mandatory OAuth Channel Ownership</h3>
+              <p>
+                To prevent impersonation and false claims, Creators must authenticate their broadcast channels via official OAuth integrations (e.g., <strong>Twitch OAuth</strong>, <strong>Google / YouTube API</strong>, or verified <strong>Kick</strong> channel webhooks). Surfkit will never ask for your channel passwords or full administrative access.
+              </p>
+
+              <h3 class="font-bold text-white text-base">2.3 Single Creator Profile</h3>
+              <p>
+                Each verified creator entity is mapped to one unified Creator Profile on Surfkit. Operating fake, duplicated, or shell creator accounts is strictly prohibited.
+              </p>
+            </div>
+          </section>
+
+          <!-- 3. Revenue Split & Task Donations -->
+          <section id="section-3" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">03</span>
+              Earning Structure &amp; Revenue Splits
+            </h2>
+            <p>
+              The Surfkit Creator Program enables creators to unlock community revenue through two distinct mechanisms:
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+              <div class="p-4 rounded-xl bg-slate-900/80 border border-purple-500/30 space-y-2">
+                <div class="font-bold text-purple-400 text-sm">A. Direct Viewer Task Donations</div>
+                <p class="text-slate-300">
+                  Surfkit extension users can opt to allocate a portion or 100% of their earned SKIT reward balances directly to their favorite verified creator as voluntary community support.
+                </p>
+              </div>
+              <div class="p-4 rounded-xl bg-slate-900/80 border border-emerald-500/30 space-y-2">
+                <div class="font-bold text-emerald-400 text-sm">B. 50/50 Channel Engagement Split</div>
+                <p class="text-slate-300">
+                  When viewers engage with verified sponsor ad views or offerwall tasks on creator-linked domain pages or stream hubs, Surfkit applies a dedicated <strong>50/50 creator split</strong> on net platform revenue.
+                </p>
+              </div>
+            </div>
+
+            <p class="text-xs text-slate-400">
+              * All creator earnings are contingent upon confirmed, cryptographically verified postback callbacks received by our secure postback gateway from monetization partners (currently live with CPX Research, with BitLabs, Lootably, and AdGate joining soon).
+            </p>
+          </section>
+
+          <!-- 4. Anti-Abuse & Zero Bot Tolerance -->
+          <section id="section-4" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-rose-500/10 text-rose-400 font-mono text-sm flex items-center justify-center font-bold">04</span>
+              Anti-Abuse, Viewbotting &amp; Fraud Defense
+            </h2>
+            <p>
+              Surfkit enforces strict brand safety standards. Creators agree to adhere to the following anti-abuse rules:
+            </p>
+            <ul class="space-y-2 text-sm text-slate-300">
+              <li class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">✕</span>
+                <span><strong>No Encouraging Automation:</strong> You may not instruct, incentivize, or script your community to use bots, macros, auto-refreshers, headless browsers, or VPNs to simulate tasks.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">✕</span>
+                <span><strong>No Self-Donation Arbitrage:</strong> You may not complete high volumes of synthetic tasks yourself under multiple fake viewer accounts to funnel funds into your own creator profile.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-rose-400 font-bold">✕</span>
+                <span><strong>No Traffic Laundering:</strong> Using pop-unders, hidden iframe embeds, or deceptive click redirects to generate artificial ad impressions is strictly forbidden.</span>
+              </li>
+            </ul>
+            <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/25 text-rose-200 text-xs sm:text-sm">
+              <strong>Penalties for Creator Fraud:</strong> Any detected viewbotting, proxy manipulation, or artificial task inflation will result in immediate termination of creator status, permanent disqualification from the platform, and complete forfeiture of all pending balances without recourse.
+            </div>
+          </section>
+
+          <!-- 5. Payouts, Thresholds & Taxes -->
+          <section id="section-5" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">05</span>
+              Payout Processing &amp; Tax Compliance
+            </h2>
+            <div class="space-y-3 text-sm text-slate-300">
+              <h3 class="font-bold text-white text-base">5.1 Payout Channels &amp; Minimums</h3>
+              <p>
+                Creator balances are denominated in real <strong>USD</strong> (calculated at 1,000 SKIT = $1.00 USD). Creators can request payouts via <strong>PayPal</strong> and <strong>Direct Bank Wire Transfer</strong> once their balance reaches the uniform minimum threshold of <strong>$5.00 USD</strong> for both payout methods. Standard verification windows are 3 to 5 business days.
+              </p>
+
+              <h3 class="font-bold text-white text-base">5.2 Independent Contractor Status &amp; Taxes</h3>
+              <p>
+                Creators participate strictly as independent contractors. Surfkit does not act as an employer. You are solely and exclusively responsible for reporting all earnings, filing all applicable income, VAT, sales, or self-employment taxes, and submitting required tax documentation (such as IRS Form W-9 for US residents or Form W-8BEN for international creators) where legally required.
+              </p>
+            </div>
+          </section>
+
+          <!-- 6. Content & Conduct Standards -->
+          <section id="section-6" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">06</span>
+              Content Standards &amp; Brand Safety
+            </h2>
+            <p>
+              To maintain eligibility, your broadcast channel and linked digital content must comply with community safety standards. You agree never to use Surfkit in connection with:
+            </p>
+            <ul class="list-disc pl-5 space-y-1.5 text-xs sm:text-sm text-slate-400">
+              <li>Hate speech, harassment, defamation, or promoting violence;</li>
+              <li>Sexually explicit, pornographic, or non-consensual media;</li>
+              <li>Promoting malware, phishing links, illegal narcotics, or unlicensed gambling;</li>
+              <li>Deceptive financial schemes, pyramid programs, or unauthorized giveaways.</li>
+            </ul>
+          </section>
+
+          <!-- 7. License & Brand Usage -->
+          <section id="section-7" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">07</span>
+              Limited Brand License &amp; Marketing
+            </h2>
+            <p class="text-slate-300 text-sm">
+              Surfkit grants verified Creators a limited, revocable, non-exclusive license to display the Surfkit logo, stream overlay assets, and affiliate links on their broadcast channels solely for promoting their Surfkit creator profile.
+            </p>
+            <p class="text-slate-400 text-xs">
+              Creators grant Surfkit the right to showcase their channel name, avatar, and public stream link within our public Creator Leaderboard and discovery directory on <code class="text-purple-400 font-mono text-xs">surfkit.cloud</code>.
+            </p>
+          </section>
+
+          <!-- 8. Disclaimer of Warranties -->
+          <section id="section-8" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">08</span>
+              Disclaimer of Warranties ("AS IS")
+            </h2>
+            <p class="text-xs text-slate-400 leading-relaxed uppercase font-mono">
+              THE SURFKIT CREATOR PROGRAM IS PROVIDED STRICTLY ON AN "AS IS" AND "AS AVAILABLE" BASIS. SURFKIT DOES NOT GUARANTEE SPECIFIC EARNING LEVELS, VIEWER DONATION VOLUMES, OR CONTINUOUS OFFERWALL AD INVENTORY FROM THIRD-PARTY PARTNER TUNNELS (CURRENTLY INTEGRATED WITH CPX RESEARCH; UPCOMING PARTNERS INCLUDE BITLABS AND LOOTABLY). ALL PARTNER INVENTORIES ARE SUBJECT TO SPONSOR DEMAND AND DEMOGRAPHIC FLUCTUATIONS.
+            </p>
+          </section>
+
+          <!-- 9. Indemnification & Liability -->
+          <section id="section-9" class="glass-card rounded-2xl p-6 sm:p-8 border border-white/10 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">09</span>
+              Indemnification &amp; Limitation of Liability
+            </h2>
+            <p class="text-sm text-slate-300">
+              You agree to defend, indemnify, and hold harmless Surfkit, its edge function developers, and advertising partners against any claims, damages, liabilities, or legal expenses arising from your stream broadcasts, third-party copyright claims on your content, or your violation of these Creator Terms.
+            </p>
+            <p class="text-xs text-slate-400">
+              In no event shall Surfkit's aggregate cumulative liability to any Creator exceed the total creator distributions paid to you during the preceding three (3) calendar months.
+            </p>
+          </section>
+
+          <!-- 10. Termination & Creator Support -->
+          <section id="section-10" class="glass-card rounded-2xl p-6 sm:p-8 border border-purple-500/30 space-y-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+              <span class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 font-mono text-sm flex items-center justify-center font-bold">10</span>
+              Termination &amp; Creator Desk
+            </h2>
+            <p class="text-sm text-slate-300">
+              Either party may terminate participation in the Creator Program at any time upon written notice. Upon termination, verified un-disputed balances exceeding the minimum payout threshold will be processed in the next payment cycle. Accounts terminated for fraudulent activity or terms violations forfeit all balances.
+            </p>
+            <div class="p-4 rounded-xl bg-[#090E1C] border border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <div class="text-xs font-mono uppercase text-slate-400">Direct Creator Relations</div>
+                <div class="text-purple-400 font-mono font-bold text-base mt-0.5">surfkitcloud@gmail.com</div>
+              </div>
+              <a href="mailto:surfkitcloud@gmail.com" 
+                 class="px-4 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-500/30 text-xs font-mono font-bold transition-all">
+                Contact Creator Desk &rarr;
+              </a>
+            </div>
+          </section>
+
+        </article>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- FOOTER (Matching Surfkit Design System)                   -->
+  <!-- ========================================================= -->
+  <footer class="border-t border-white/10 bg-[#060A14] pt-16 pb-12 text-sm text-slate-400 relative overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Main 4-Column Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12 border-b border-white/5">
+        
+        <!-- Column 1: Brand -->
+        <div class="sm:col-span-2 lg:col-span-4 space-y-4">
+          <a href="/home" class="inline-flex items-center gap-2.5 group">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center p-0.5">
+              <div class="w-full h-full bg-[#090E1C] rounded-[6px] flex items-center justify-center font-black text-emerald-400 text-sm">S</div>
+            </div>
+            <span class="text-xl font-bold text-white tracking-tight">Surf<span class="text-emerald-400">kit</span></span>
+          </a>
+          <p class="text-xs text-slate-400 max-w-sm leading-relaxed">
+            Turn your daily web browsing and gaming into real rewards. 70/30 revenue split with complete privacy protection.
+          </p>
+          <div class="flex items-center gap-3 pt-1">
+            <a href="https://x.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="X">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="https://discord.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Discord">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+            </a>
+            <a href="https://t.me" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="Telegram">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+            </a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-400 flex items-center justify-center text-slate-400 transition-colors" aria-label="LinkedIn">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Column 2: Surfkit Links -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+            Surfkit Links
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="/earn" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Earn</a></li>
+            <li><a href="/transparency" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Transparency &amp; Security</a></li>
+            <li><a href="/about" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">About Us</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 3: Legal -->
+        <div class="space-y-3.5 lg:col-span-2">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-teal-400"></span>
+            Legal
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="/terms" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Terms &amp; Conditions</a></li>
+            <li><a href="/privacy" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Privacy Policy</a></li>
+            <li><a href="/creator-terms" class="text-emerald-400 font-semibold hover:translate-x-1 inline-block transition-all duration-150">Creator Terms</a></li>
+          </ul>
+        </div>
+
+        <!-- Column 4: Support -->
+        <div class="space-y-3.5 lg:col-span-3">
+          <h4 class="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            Support &amp; Inquiries
+          </h4>
+          <ul class="space-y-2.5 text-xs">
+            <li><a href="/faq" class="text-slate-400 hover:text-emerald-400 hover:translate-x-1 inline-block transition-all duration-150">Help &amp; FAQ</a></li>
+            <li>
+              <div class="pt-1">
+                <span class="text-slate-500 block text-[11px] uppercase tracking-wider mb-1 font-mono">Contact Operations:</span>
+                <a href="mailto:surfkitcloud@gmail.com" 
+                   class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white/[0.03] border border-white/10 hover:border-emerald-500/30 hover:bg-emerald-500/10 text-emerald-400 font-mono text-xs transition-all duration-200 group">
+                  <svg class="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                  </svg>
+                  <span>surfkitcloud@gmail.com</span>
+                </a>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- Partner Disclaimer Box -->
+      <div class="py-4 my-6 px-4 rounded-xl bg-white/[0.02] border border-white/5 text-[11px] text-slate-400 leading-relaxed">
+        <strong class="text-slate-300">Partner Tunnel Disclaimer:</strong> Offerwall tasks, surveys, and interactive sponsor games are dynamically powered through secure, isolated partner tunnels provided by CPX Research (with BitLabs and Lootably coming soon). Reward postbacks are cryptographically verified before wallet settlement.
+      </div>
+
+      <!-- Bottom Sub-footer -->
+      <div class="pt-4 flex flex-col md:flex-row items-center justify-between text-xs text-slate-400 gap-4">
+        <div class="text-center md:text-left leading-relaxed">
+          Copyright &copy; 2026 Surfkit. All rights reserved.
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
