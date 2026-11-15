@@ -137,140 +137,24 @@
 </head>
 <body class="bg-surf-bg text-slate-200 min-h-screen font-sans flex flex-col antialiased selection:bg-surf-teal selection:text-slate-900">
   <!-- ============================================================ -->
-  <!-- SURFKIT DASHBOARD AUTH GUARD v1.0                            -->
-  <!-- Runs BEFORE app renders. Redirects guests to /login.         -->
+  <!-- SURFKIT REAL-TIME EXTENSION & SESSION SYNC                  -->
+  <!-- Gracefully detects active session or presents Guest Hub.    -->
   <!-- ============================================================ -->
   <script>
   (function () {
     'use strict';
-
-    var SUPA_REF  = 'kpvrewhmnrifsnkgswdt';
-    var SUPA_URL  = 'https://' + SUPA_REF + '.supabase.co';
-    var SUPA_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
-    var LS_JWT    = 'sb-' + SUPA_REF + '-auth-token';
-    var LS_EXT    = 'surfkit_ext_auth_user';
-    var LOGIN_URL = '/login';
-
-    /* ── Helpers ── */
-    function isValidEmail(e) {
-      if (!e || typeof e !== 'string') return false;
-      var c = e.trim().toLowerCase();
-      if (c === 'guest@surfkit.cloud' || c === 'guest' || c === 'null') return false;
-      return /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$/.test(c);
-    }
-
-    /* ── Fast sync: Supabase JWT localStorage ── */
-    function checkJWT() {
-      try {
-        var raw = localStorage.getItem(LS_JWT);
-        if (!raw) return false;
-        var p   = JSON.parse(raw);
-        var u   = p.user || (p.currentSession && p.currentSession.user);
-        var tok = p.access_token || (p.currentSession && p.currentSession.access_token);
-        var exp = p.expires_at   || (p.currentSession && p.currentSession.expires_at);
-        if (!tok || !u || !isValidEmail(u.email)) return false;
-        if (exp && Math.floor(Date.now() / 1000) >= Number(exp)) return false;
-        return true;
-      } catch (e) { return false; }
-    }
-
-    /* ── Fast sync: Extension auth flag ── */
-    function checkExt() {
-      try {
-        var raw = localStorage.getItem(LS_EXT);
-        if (!raw) return false;
-        var d = JSON.parse(raw);
-        if (d && isValidEmail(d.email) && d.timestamp) {
-          return (Date.now() - d.timestamp) < 3600000;   // 1-hour TTL
-        }
-      } catch (e) {}
-      return false;
-    }
-
-    /* ── Build full-screen overlay (prevents content flash) ── */
-    var _overlay = document.createElement('div');
-    _overlay.id  = 'surfkit-auth-guard-overlay';
-    _overlay.setAttribute('style', [
-      'position:fixed', 'inset:0', 'background:#0A0F1D', 'z-index:999999',
-      'display:flex', 'flex-direction:column', 'align-items:center',
-      'justify-content:center', 'gap:18px'
-    ].join(';'));
-    _overlay.innerHTML = (
-      '<svg width="52" height="52" viewBox="0 0 24 24" fill="none"' +
-      ' stroke="#00D2B4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-      '<path d="M2 12c3-4 6-4 9 0 3 4 6 4 9 0 3-4 6-4 9 0"/>' +
-      '<path d="M12 2v20"/></svg>' +
-      '<p style="color:#94a3b8;font-size:14px;font-family:system-ui,sans-serif;' +
-      'margin:0;letter-spacing:.02em">Verifying session…</p>'
-    );
-    document.body.insertBefore(_overlay, document.body.firstChild);
-
-    function hideOverlay() {
-      var el = document.getElementById('surfkit-auth-guard-overlay');
-      if (el) el.remove();
-    }
-
-    function redirectToLogin() {
-      window.location.replace(LOGIN_URL);
-    }
-
-    /* ── 1. Synchronous fast-path (no network, instant) ── */
-    if (checkJWT() || checkExt()) {
-      hideOverlay();         // Authenticated – let the app load normally
-      return;
-    }
-
-    /* ── 2. Async Supabase network check ── */
-    var _guardTimer = setTimeout(redirectToLogin, 4500);
-
-    function runNetworkCheck() {
-      if (window.supabase && typeof window.supabase.createClient === 'function') {
-        try {
-          var client = window.supabase.createClient(SUPA_URL, SUPA_KEY);
-          client.auth.getSession().then(function (res) {
-            var sess = res && res.data && res.data.session;
-            if (sess && sess.user && isValidEmail(sess.user.email)) {
-              clearTimeout(_guardTimer);
-              hideOverlay();         // Session confirmed – show dashboard
-            } else {
-              clearTimeout(_guardTimer);
-              redirectToLogin();     // No valid session
-            }
-          }).catch(function () {
-            clearTimeout(_guardTimer);
-            redirectToLogin();
-          });
-        } catch (e) {
-          clearTimeout(_guardTimer);
-          redirectToLogin();
-        }
-      }
-    }
-
-    /* ── 3. Listen for real-time extension sign-in event ── */
+    // Listen for extension authentication and state broadcasts
     window.addEventListener('message', function (e) {
       if (!e.data) return;
       if (e.data.type === 'SURFKIT_EXTENSION_STATE_UPDATE') {
         var d = e.data.data;
-        if (d && d.authUser && isValidEmail(d.authUser.email)) {
-          clearTimeout(_guardTimer);
-          hideOverlay();
-        } else if (d && d.isExplicitSignOut) {
-          clearTimeout(_guardTimer);
-          redirectToLogin();
+        if (d && d.authUser && d.authUser.email) {
+          if (typeof window.handleExtensionSessionUpdate === 'function') {
+            window.handleExtensionSessionUpdate(d.authUser);
+          }
         }
       }
-      if (e.data.type === 'SURFKIT_USER_SIGNED_IN')  { clearTimeout(_guardTimer); hideOverlay(); }
-      if (e.data.type === 'SURFKIT_USER_SIGNED_OUT') { clearTimeout(_guardTimer); redirectToLogin(); }
     });
-
-    /* ── 4. Also listen for onAuthStateChange via Supabase CDN ── */
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', runNetworkCheck);
-    } else {
-      runNetworkCheck();
-    }
-
   })();
   </script>
 
@@ -2541,7 +2425,12 @@ document.addEventListener('DOMContentLoaded', () => {
         lastActiveDate: null,
         apiKey: '',
         username: 'guest',
-        adIntensity: 2
+        adIntensity: 2,
+        countryCode: 'LK',
+        countryName: 'Sri Lanka',
+        geoTier: 3,
+        currentTier: 3,
+        ratePer1k: 0.30
       },
       selectedGateway: 'paypal',
       devices: [
@@ -2801,7 +2690,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderApp();
       loadChatHistory();
       renderNotifications();
-      setTimeout(function() { window.location.replace('/login'); }, 400);
+      // Smooth guest state transition without page redirect
     }
 
     async function refreshLiveSync() {
@@ -3011,6 +2900,14 @@ document.addEventListener('DOMContentLoaded', () => {
             state.user.adIntensity = normalizeAdIntensity(lastExtState.intensity);
           }
           if (profile.ad_formats) state.user.adFormats = profile.ad_formats;
+          if (profile.country_code) {
+            state.user.countryCode = profile.country_code.toUpperCase();
+            state.user.countryName = profile.country_name || state.user.countryName;
+            state.user.geoTier = Number(profile.geo_tier || state.user.geoTier);
+            state.user.currentTier = state.user.geoTier;
+            state.user.ratePer1k = Number(profile.rate_per_1k || (state.user.geoTier === 1 ? 2.50 : state.user.geoTier === 2 ? 1.00 : state.user.geoTier === 3 ? 0.30 : 0.15));
+            renderGeoTierCard();
+          }
         } else {
           const defaultUsername = 'surf_' + (currentUser.email ? currentUser.email.split('@')[0] : Math.random().toString(36).substring(2, 7));
           const { data: newProf } = await supabaseClient.from('profiles').insert({
@@ -5523,58 +5420,199 @@ document.addEventListener('DOMContentLoaded', () => {
      * Reads from state.user (country, tier, intensity) — already synced
      * from Supabase and the Chrome extension via applyExtensionState().
      */
-    function renderGeoTierCard() {
-      const COUNTRY_NAMES = {
-        US:'United States',CA:'Canada',GB:'United Kingdom',DE:'Germany',
-        FR:'France',IT:'Italy',ES:'Spain',NL:'Netherlands',CH:'Switzerland',
-        AT:'Austria',BE:'Belgium',DK:'Denmark',SE:'Sweden',NO:'Norway',
-        FI:'Finland',IE:'Ireland',LU:'Luxembourg',AU:'Australia',NZ:'New Zealand',
-        AE:'UAE',SA:'Saudi Arabia',SG:'Singapore',JP:'Japan',KR:'South Korea',
-        TW:'Taiwan',MY:'Malaysia',TH:'Thailand',BR:'Brazil',MX:'Mexico',
-        AR:'Argentina',CL:'Chile',CO:'Colombia',PE:'Peru',CR:'Costa Rica',
-        ZA:'South Africa',TR:'Turkey',RU:'Russia',UA:'Ukraine',PL:'Poland',
-        PT:'Portugal',GR:'Greece',CZ:'Czech Republic',HU:'Hungary',RO:'Romania',
-        BG:'Bulgaria',HR:'Croatia',SK:'Slovakia',CY:'Cyprus',KW:'Kuwait',
-        QA:'Qatar',OM:'Oman',IL:'Israel',LK:'Sri Lanka',IN:'India',
-        PK:'Pakistan',BD:'Bangladesh',NP:'Nepal',ID:'Indonesia',PH:'Philippines',
-        VN:'Vietnam',EG:'Egypt',NG:'Nigeria',KE:'Kenya',GH:'Ghana',
-        MA:'Morocco',DZ:'Algeria',EC:'Ecuador',PY:'Paraguay',GT:'Guatemala',
-        BO:'Bolivia'
-      };
-      const TIER_CONFIG = {
-        1: { label:'Tier 1',  rateDisplay:'1,000 Surf Creds = $2.50 USD', perAd:'$0.0250', ratePer1000:2.50,
-             badge:'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
-             rows:'bg-emerald-500/5 border-emerald-500/20' },
-        2: { label:'Tier 2',  rateDisplay:'1,000 Surf Creds = $1.00 USD', perAd:'$0.0100', ratePer1000:1.00,
-             badge:'bg-sky-500/15 border-sky-500/30 text-sky-400',
-             rows:'bg-sky-500/5 border-sky-500/20' },
-        3: { label:'Tier 3',  rateDisplay:'1,000 Surf Creds = $0.30 USD', perAd:'$0.0030', ratePer1000:0.30,
-             badge:'bg-amber-500/15 border-amber-500/30 text-amber-400',
-             rows:'bg-amber-500/5 border-amber-500/20' },
-        4: { label:'Tier 4',  rateDisplay:'1,000 Surf Creds = $0.15 USD', perAd:'$0.0015', ratePer1000:0.15,
-             badge:'bg-slate-500/15 border-slate-500/30 text-slate-400',
-             rows:'bg-slate-500/5 border-slate-500/20' }
-      };
-      const DEFAULT_ROW_CLS = 'bg-surf-surface border-surf-border';
-
-      const countryCode = (state.user.countryCode || 'US').toUpperCase();
-      const TIER1 = 'US,CA,GB,DE,FR,IT,ES,NL,CH,AT,BE,DK,SE,NO,FI,IE,LU,AU,NZ';
-      const TIER2 = 'AE,SA,SG,JP,KR,TW,MY,TH,BR,MX,AR,CL,CO,PE,CR,ZA,TR,PL,PT,GR,CZ,HU,RO,IL,KW,QA,OM';
-      const TIER3 = 'LK,IN,PK,BD,NP,ID,PH,VN,EG,NG,KE,GH,MA,DZ,EC,PY,GT,BO,UA,RU,BG,HR,SK,CY';
-      function resolveGeoTier(code) {
-        if (state.user.currentTier) return state.user.currentTier;
-        if (TIER1.split(',').includes(code)) return 1;
-        if (TIER2.split(',').includes(code)) return 2;
-        if (TIER3.split(',').includes(code)) return 3;
-        return 4;
+    // --- DYNAMIC GEOLOCATION & REGIONAL GEO-TIER ENGINE ---
+    const GEO_TIER_CONFIG = {
+      1: {
+        label: 'Tier 1',
+        name: 'Premium Markets',
+        rateDisplay: '1,000 Surf Creds = $2.50 USD',
+        perAd: '$0.0250',
+        ratePer1k: 2.50,
+        badge: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
+        activeRow: 'bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
+      },
+      2: {
+        label: 'Tier 2',
+        name: 'Growth Markets',
+        rateDisplay: '1,000 Surf Creds = $1.00 USD',
+        perAd: '$0.0100',
+        ratePer1k: 1.00,
+        badge: 'bg-sky-500/15 border-sky-500/30 text-sky-400',
+        activeRow: 'bg-sky-500/10 border-sky-500/30 ring-1 ring-sky-500/40 shadow-[0_0_15px_rgba(14,165,233,0.15)]'
+      },
+      3: {
+        label: 'Tier 3',
+        name: 'Emerging Markets',
+        rateDisplay: '1,000 Surf Creds = $0.30 USD',
+        perAd: '$0.0030',
+        ratePer1k: 0.30,
+        badge: 'bg-amber-500/15 border-amber-500/30 text-amber-400',
+        activeRow: 'bg-amber-500/10 border-amber-500/30 ring-1 ring-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
+      },
+      4: {
+        label: 'Tier 4',
+        name: 'Rest of World',
+        rateDisplay: '1,000 Surf Creds = $0.15 USD',
+        perAd: '$0.0015',
+        ratePer1k: 0.15,
+        badge: 'bg-slate-500/15 border-slate-500/30 text-slate-400',
+        activeRow: 'bg-slate-500/10 border-slate-500/30 ring-1 ring-slate-500/40 shadow-[0_0_15px_rgba(148,163,184,0.15)]'
       }
-      const tier = resolveGeoTier(countryCode);
-      const cfg  = TIER_CONFIG[tier] || TIER_CONFIG[4];
-      const countryName = COUNTRY_NAMES[countryCode] || countryCode;
+    };
+
+    const TIER1_COUNTRIES = ['US','CA','GB','DE','FR','IT','ES','NL','AU','NZ','CH','SE','NO','DK','IE','AT','BE','FI','LU','IS'];
+    const TIER2_COUNTRIES = ['AE','SA','SG','JP','KR','BR','MX','PL','TR','QA','KW','IL','TW','HK','MY','TH','ZA','CL','AR','CO','CZ','PT','GR','HU','RO'];
+    const TIER3_COUNTRIES = ['LK','IN','PK','BD','ID','PH','VN','EG','NG','KE','GH','MA','DZ','UA','PE','EC','NP','MM','KH'];
+
+    function resolveGeoTier(code) {
+      if (!code) return 3;
+      const c = code.toUpperCase();
+      if (TIER1_COUNTRIES.includes(c)) return 1;
+      if (TIER2_COUNTRIES.includes(c)) return 2;
+      if (TIER3_COUNTRIES.includes(c)) return 3;
+      return 4;
+    }
+
+    function getFlagEmoji(countryCode) {
+      try {
+        if (!countryCode || countryCode.length !== 2) return '📍';
+        const code = countryCode.toUpperCase();
+        return String.fromCodePoint(...[...code].map(c => 127397 + c.charCodeAt()));
+      } catch (e) {
+        return '📍';
+      }
+    }
+
+    function applyGeoLocation(code, name, syncToDb = true) {
+      if (!code) return;
+      const cleanCode = code.toUpperCase();
+      const tier = resolveGeoTier(cleanCode);
+      const cfg = GEO_TIER_CONFIG[tier] || GEO_TIER_CONFIG[3];
+
+      state.user.countryCode = cleanCode;
+      state.user.countryName = name || cleanCode;
+      state.user.geoTier = tier;
+      state.user.currentTier = tier;
+      state.user.ratePer1k = cfg.ratePer1k;
+
+      renderGeoTierCard();
+
+      // Dispatch update to Chrome extension
+      try {
+        dispatchToExtension('GEO_LOCATION_UPDATE', {
+          countryCode: cleanCode,
+          countryName: name || cleanCode,
+          geoTier: tier,
+          ratePer1k: cfg.ratePer1k
+        });
+      } catch (e) {}
+
+      // Update Supabase profiles table if authenticated
+      if (syncToDb && supabaseClient && currentUser && currentUser.id) {
+        supabaseClient.from('profiles').update({
+          country_code: cleanCode,
+          country_name: name || cleanCode,
+          geo_tier: tier,
+          rate_per_1k: cfg.ratePer1k
+        }).eq('id', currentUser.id).then(() => {}).catch(() => {});
+      }
+    }
+
+    async function detectAndSyncGeoLocation() {
+      // 1. Check cached detection (12-hour TTL)
+      try {
+        const cached = localStorage.getItem('surfkit_geo_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && parsed.countryCode && (Date.now() - parsed.timestamp < 12 * 3600 * 1000)) {
+            applyGeoLocation(parsed.countryCode, parsed.countryName, false);
+            return;
+          }
+        }
+      } catch (e) {}
+
+      // 2. Fetch live geolocation with fast fallback
+      let detectedCode = null;
+      let detectedName = null;
+
+      // Endpoint A: ipwho.is (fast, verified)
+      try {
+        const ctrl = new AbortController();
+        const tid = setTimeout(() => ctrl.abort(), 3000);
+        const res = await fetch('https://ipwho.is/', { signal: ctrl.signal });
+        clearTimeout(tid);
+        if (res.ok) {
+          const d = await res.json();
+          if (d && d.success && d.country_code) {
+            detectedCode = d.country_code.toUpperCase();
+            detectedName = d.country || detectedCode;
+          }
+        }
+      } catch (e) {}
+
+      // Endpoint B fallback: freeipapi.com
+      if (!detectedCode) {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 3000);
+          const res = await fetch('https://freeipapi.com/api/json', { signal: ctrl.signal });
+          clearTimeout(tid);
+          if (res.ok) {
+            const d = await res.json();
+            if (d && d.countryCode) {
+              detectedCode = d.countryCode.toUpperCase();
+              detectedName = d.countryName || detectedCode;
+            }
+          }
+        } catch (e) {}
+      }
+
+      // Endpoint C fallback: ipapi.co
+      if (!detectedCode) {
+        try {
+          const ctrl = new AbortController();
+          const tid = setTimeout(() => ctrl.abort(), 3000);
+          const res = await fetch('https://ipapi.co/json/', { credentials: 'omit', signal: ctrl.signal });
+          clearTimeout(tid);
+          if (res.ok) {
+            const d = await res.json();
+            if (d && d.country_code) {
+              detectedCode = d.country_code.toUpperCase();
+              detectedName = d.country_name || detectedCode;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (detectedCode) {
+        try {
+          localStorage.setItem('surfkit_geo_cache', JSON.stringify({
+            countryCode: detectedCode,
+            countryName: detectedName,
+            timestamp: Date.now()
+          }));
+        } catch (e) {}
+        applyGeoLocation(detectedCode, detectedName, true);
+      }
+    }
+
+    function renderGeoTierCard() {
+      const countryCode = (state.user.countryCode || 'LK').toUpperCase();
+      const countryName = state.user.countryName || (countryCode === 'LK' ? 'Sri Lanka' : countryCode);
+      const tier = state.user.geoTier || resolveGeoTier(countryCode);
+      const cfg = GEO_TIER_CONFIG[tier] || GEO_TIER_CONFIG[3];
+
+      // Flag icon
+      const flagEl = document.getElementById('geo-flag-icon');
+      if (flagEl) {
+        flagEl.textContent = getFlagEmoji(countryCode);
+      }
 
       // Location label
       const locLabel = document.getElementById('geo-location-label');
-      if (locLabel) locLabel.textContent = countryName + ' • ' + cfg.label;
+      if (locLabel) {
+        locLabel.textContent = countryName + ' • ' + cfg.label;
+      }
 
       // Active tier badge
       const tierBadge = document.getElementById('geo-active-tier-badge');
@@ -5585,26 +5623,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Conversion rate display
       const rateEl = document.getElementById('geo-rate-display');
-      if (rateEl) rateEl.textContent = cfg.rateDisplay;
+      if (rateEl) {
+        rateEl.textContent = cfg.rateDisplay;
+      }
 
-      // Per-ad earnings
+      // Per-ad earnings display
       const perAdEl = document.getElementById('geo-per-ad-display');
-      if (perAdEl) perAdEl.textContent = '+10 Creds = ' + cfg.perAd;
+      if (perAdEl) {
+        perAdEl.textContent = '+10 Creds = ' + cfg.perAd;
+      }
 
-      // Highlight active tier row, reset others
+      // Highlight active tier row, dim/reset others
       for (let t = 1; t <= 4; t++) {
         const row = document.getElementById('tier-row-' + t);
         if (!row) continue;
         if (t === tier) {
-          row.className = 'flex items-center justify-between p-2.5 rounded-lg border transition-all ' + TIER_CONFIG[t].rows;
-          row.setAttribute('title', 'Your current regional tier');
+          row.className = 'flex items-center justify-between p-2.5 rounded-lg border transition-all ' + GEO_TIER_CONFIG[t].activeRow;
+          row.style.opacity = '1';
+          row.setAttribute('title', 'Your active regional tier: ' + cfg.label);
         } else {
-          row.className = 'flex items-center justify-between p-2.5 rounded-lg border transition-all opacity-50 ' + DEFAULT_ROW_CLS;
+          row.className = 'flex items-center justify-between p-2.5 rounded-lg border transition-all bg-surf-surface/40 border-surf-border/60 hover:border-surf-border';
+          row.style.opacity = '0.50';
           row.removeAttribute('title');
         }
       }
 
-      // Active mode from extension / stored intensity (Low / Balanced / High)
       const intensity = normalizeAdIntensity(state.user.adIntensity);
       state.user.adIntensity = intensity;
       renderGeoTierCardMode(intensity);
@@ -5666,6 +5709,9 @@ document.addEventListener('DOMContentLoaded', () => {
       playBeepSound();
       
       const sample = SIMULATED_SITES[Math.floor(Math.random() * SIMULATED_SITES.length)];
+      const ratePerCred = (state.user.ratePer1k ? state.user.ratePer1k / 1000 : 0.0003);
+      const credsEarned = (sample.ads || 1) * 10;
+      const earnedUsd = Number((credsEarned * ratePerCred).toFixed(4));
 
       // Dispatch to Chrome Extension via adaptive bridge (direct or contentScript relay)
       try {
@@ -5673,13 +5719,13 @@ document.addEventListener('DOMContentLoaded', () => {
           user_id: currentUser?.id,
           domain: window.location.hostname || 'web-dashboard',
           sponsor: sample.name,
-          rewardUsd: sample.earn,
+          rewardUsd: earnedUsd,
           impressionCount: sample.ads || 1
         });
       } catch (e) {}
       
-      state.user.availableBalance += sample.earn;
-      state.user.lifetimeEarnings += sample.earn;
+      state.user.availableBalance += earnedUsd;
+      state.user.lifetimeEarnings += earnedUsd;
       state.user.lifetimeImpressions += sample.ads;
       state.user.dailyImpressions = (state.user.dailyImpressions || 0) + (sample.ads || 1);
       state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + sample.earn).toFixed(6));
@@ -6493,6 +6539,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     window.addEventListener('DOMContentLoaded', async () => {
+      // Detect country and apply Geo-Tier conversion rate
+      detectAndSyncGeoLocation();
       // Capture incoming anonymous referral code from URL if present
       try {
         const urlParams = new URLSearchParams(window.location.search);

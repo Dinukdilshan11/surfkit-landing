@@ -476,9 +476,9 @@
 
         <!-- Right CTA & Chrome Badge -->
         <div class="hidden sm:flex items-center gap-3">
-          <a id="nav-auth-btn" href="/login" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
-            <i id="nav-auth-icon" class="ri-login-box-line text-base"></i>
-            <span id="nav-auth-text">Sign In</span>
+          <a id="nav-auth-btn" href="/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+            <i id="nav-auth-icon" class="ri-dashboard-3-line text-base text-emerald-400"></i>
+            <span id="nav-auth-text">Dashboard</span>
           </a>
           <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
              class="btn-glow inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
@@ -758,12 +758,12 @@
               </div>
 
               <!-- 7. Dashboard Button (links directly to hub.html) -->
-              <a id="mobile-auth-btn" href="/login" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
-                <svg class="w-4 h-4 text-slate-300 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <a id="mobile-auth-btn" href="/dashboard" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
+                <svg class="w-4 h-4 text-emerald-400 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke-width="2"/>
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/>
                 </svg>
-                <span id="mobile-auth-text">Sign In</span>
+                <span id="mobile-auth-text">Dashboard</span>
               </a>
 
             </div>
@@ -2673,7 +2673,7 @@
       var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
       var mBtn = getMobileBtn(),   mTxt = getMobileText();
       if (btn)  btn.href  = '/dashboard';
-      if (icon) icon.className = 'ri-dashboard-3-line text-base';
+      if (icon) icon.className = 'ri-dashboard-3-line text-base text-emerald-400';
       if (text) text.textContent = 'Dashboard';
       if (mBtn) mBtn.href = '/dashboard';
       if (mTxt) mTxt.textContent = 'Dashboard';
@@ -2682,11 +2682,11 @@
     function applySignedOut() {
       var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
       var mBtn = getMobileBtn(),   mTxt = getMobileText();
-      if (btn)  btn.href  = '/login';
-      if (icon) icon.className = 'ri-login-box-line text-base';
-      if (text) text.textContent = 'Sign In';
-      if (mBtn) mBtn.href = '/login';
-      if (mTxt) mTxt.textContent = 'Sign In';
+      if (btn)  btn.href  = '/dashboard';
+      if (icon) icon.className = 'ri-dashboard-3-line text-base text-emerald-400';
+      if (text) text.textContent = 'Dashboard';
+      if (mBtn) mBtn.href = '/dashboard';
+      if (mTxt) mTxt.textContent = 'Dashboard';
     }
 
     function quickCheck() {
