@@ -219,6 +219,16 @@
       ? window.supabase.createClient(SUPA_URL, SUPA_KEY)
       : null;
 
+    // Capture referral code if opened via /login?ref=...
+    try {
+      var sp = new URLSearchParams(window.location.search);
+      var rParam = sp.get('ref') || sp.get('r');
+      if (rParam && rParam.trim()) {
+        localStorage.setItem('surfkit_ref_code', rParam.trim());
+        localStorage.setItem('surfkit_incoming_ref', rParam.trim());
+      }
+    } catch (e) {}
+
     /* ── If already signed in, redirect straight to dashboard ── */
     if (supabase) {
       supabase.auth.getSession().then(function (res) {
@@ -277,6 +287,77 @@
         .catch(function (e) { showError(e.message || 'Failed to send reset email.'); });
     });
 
+
+    /* ── Referral Attribution Helper ── */
+    async function attributeReferral(userId, refCode, userEmail) {
+      if (!userId || !refCode || !supabase) return;
+      var cleanCode = refCode.trim();
+      try {
+        var rpcRes = await supabase.rpc('attribute_user_referral', {
+          p_new_user_id: userId,
+          p_ref_identifier: cleanCode
+        });
+        if (rpcRes && !rpcRes.error && rpcRes.data && rpcRes.data.success) {
+          console.log('[Referral] Attributed via RPC:', rpcRes.data);
+          try {
+            localStorage.removeItem('surfkit_ref_code');
+            localStorage.removeItem('surfkit_incoming_ref');
+          } catch(e) {}
+          return;
+        }
+      } catch (e) {
+        console.warn('[Referral] RPC attempt notice:', e);
+      }
+
+      // Fallback: Direct table operations
+      try {
+        var refQuery = await supabase
+          .from('profiles')
+          .select('id, referral_code, username, display_name')
+          .ilike('referral_code', cleanCode)
+          .maybeSingle();
+
+        var referrer = refQuery && refQuery.data;
+        if (!referrer) {
+          var userQuery = await supabase
+            .from('profiles')
+            .select('id, referral_code, username, display_name')
+            .or('username.ilike.' + cleanCode + ',display_name.ilike.' + cleanCode)
+            .maybeSingle();
+          referrer = userQuery && userQuery.data;
+        }
+
+        if (referrer && referrer.id && referrer.id !== userId) {
+          await supabase
+            .from('profiles')
+            .update({ referred_by: referrer.id })
+            .eq('id', userId)
+            .is('referred_by', null);
+
+          var handle = userEmail ? ('@' + userEmail.split('@')[0]) : '@crew_mate';
+          await supabase
+            .from('referrals')
+            .upsert({
+              referrer_id: referrer.id,
+              referred_id: userId,
+              referred_handle: handle,
+              commission_earned: 0.00,
+              daily_impressions: 0,
+              status: 'Active',
+              updated_at: new Date().toISOString()
+            }, { onConflict: 'referrer_id,referred_id' });
+
+          try {
+            localStorage.removeItem('surfkit_ref_code');
+            localStorage.removeItem('surfkit_incoming_ref');
+          } catch(e) {}
+          console.log('[Referral] Attributed via fallback table update');
+        }
+      } catch (err) {
+        console.warn('[Referral] Fallback attribution notice:', err);
+      }
+    }
+
     /* ── Sign-In form ── */
     var signinBtn = document.getElementById('signin-btn');
     signinBtn.dataset.label = 'Sign In';
@@ -306,6 +387,12 @@
             }));
           } catch(e) {}
           try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
+
+          var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
+          if (pRef && u && u.id) {
+            attributeReferral(u.id, pRef, u.email).catch(function(){});
+          }
+
           showSuccess('Signed in! Redirecting to your dashboard\u2026');
           setTimeout(function () { window.location.replace('/dashboard'); }, 500);
         }
@@ -344,7 +431,12 @@
 
       setLoading(signupBtn, true);
       try {
-        var res = await supabase.auth.signUp({ email: email, password: pass });
+        var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
+      var signUpOpts = { email: email, password: pass };
+      if (pRef) {
+        signUpOpts.options = { data: { referred_by: pRef } };
+      }
+      var res = await supabase.auth.signUp(signUpOpts);
         if (res.error) {
           showError(res.error.message || 'Failed to create account.');
           setLoading(signupBtn, false, 'Create Account & Sign In');
@@ -358,9 +450,17 @@
             }));
           } catch(e) {}
           try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
+
+          if (pRef && u && u.id) {
+            attributeReferral(u.id, pRef, u.email).catch(function(){});
+          }
+
           showSuccess('Account created! Redirecting\u2026');
           setTimeout(function () { window.location.replace('/dashboard'); }, 500);
         } else {
+          if (pRef && res.data && res.data.user && res.data.user.id) {
+            attributeReferral(res.data.user.id, pRef, email).catch(function(){});
+          }
           showSuccess('Account created! Check your email to confirm, then sign in.');
           setLoading(signupBtn, false, 'Create Account & Sign In');
         }

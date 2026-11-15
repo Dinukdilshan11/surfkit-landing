@@ -1756,7 +1756,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   type="text" 
                   id="referral-input" 
                   readonly 
-                  value="https://surfkit.io/join?ref=sk_8f3a9d21" 
+                  value="https://surfkit.cloud/?ref=sk_8f3a9d21" 
                   class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-4 py-3 text-sm text-surf-teal font-mono focus:outline-none select-all"
                 >
               </div>
@@ -2989,11 +2989,15 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.lifetimeImpressions = Number(profile.lifetime_impressions || 0);
           state.user.dailyImpressions = Number(profile.daily_impressions || 0);
           state.user.dailyEarnings = Number(profile.daily_earnings || 0);
-          state.user.referralBonus = Number(profile.referral_bonus || 0);
-          state.user.referralCode = profile.referral_code || ('sk_' + (profile.id ? profile.id.replace(/-/g, '').substring(0, 8) : '8f3a9d21'));
-          if (!profile.referral_code && supabaseClient && currentUser && currentUser.id) {
-            supabaseClient.from('profiles').update({ referral_code: state.user.referralCode }).eq('id', currentUser.id).then(() => {});
+          state.user.referralBonus = Number(profile.referral_bonus || profile.referral_earnings || 0);
+          let userRefCode = profile.referral_code;
+          if (!userRefCode || userRefCode.trim() === '') {
+            userRefCode = 'sk_' + (profile.id ? profile.id.replace(/-/g, '').substring(0, 8) : Array.from({length: 8}, () => Math.floor(Math.random()*16).toString(16)).join(''));
+            if (supabaseClient && currentUser && currentUser.id) {
+              supabaseClient.from('profiles').update({ referral_code: userRefCode }).eq('id', currentUser.id).then(() => {});
+            }
           }
+          state.user.referralCode = userRefCode;
           state.user.streakDays = Number(profile.streak_days || 0);
           state.user.lastActiveDate = profile.last_active_date ? String(profile.last_active_date).split('T')[0] : null;
           state.user.name = profile.display_name || profile.username || state.user.name;
@@ -3140,25 +3144,62 @@ document.addEventListener('DOMContentLoaded', () => {
           };
         });
 
-        // 5. Referrals (Crew)
-        let refRows = [];
+        // 5. Referrals (Crew) - Live Supabase Query (referrals + profiles)
+        let crewList = [];
         try {
-          const { data } = await supabaseClient
+          const { data: refRows } = await supabaseClient
             .from('referrals')
             .select('*')
             .eq('referrer_id', currentUser.id)
             .order('commission_earned', { ascending: false });
-          if (data) refRows = data;
-        } catch (e) {}
+          if (refRows && Array.isArray(refRows)) {
+            crewList = refRows.map(r => ({
+              id: r.id,
+              referred_id: r.referred_id,
+              handle: r.referred_handle || ('@crew_' + String(r.referred_id || r.id).replace(/-/g, '').substring(0, 4)),
+              joined: formatFriendlyDate(r.joined_at || r.created_at),
+              status: (r.status === 'Active' || r.status === 'online' || r.status === 'Online & Earning') ? 'Online & Earning' : (r.status || 'Active'),
+              dailyImpressions: Number(r.daily_impressions || 0),
+              earned: Number(r.commission_earned || 0)
+            }));
+          }
+        } catch (e) {
+          console.warn('Referrals table query notice:', e);
+        }
 
-        state.crewMembers = (refRows || []).map(r => ({
-          id: r.id,
-          handle: r.referred_handle || '@crew_mate',
-          joined: formatFriendlyDate(r.joined_at || r.created_at),
-          status: r.status === 'Active' ? 'Online & Earning' : 'Active',
-          dailyImpressions: r.daily_impressions || 0,
-          earned: Number(r.commission_earned || 0)
-        }));
+        // Secondary Query: Check profiles directly where referred_by = currentUser.id
+        try {
+          const { data: referredUsers } = await supabaseClient
+            .from('profiles')
+            .select('id, username, display_name, email, created_at, daily_impressions, last_active_date, available_balance, lifetime_earnings')
+            .eq('referred_by', currentUser.id);
+
+          if (referredUsers && Array.isArray(referredUsers)) {
+            const existingReferredIds = new Set(crewList.map(c => c.referred_id).filter(Boolean));
+            for (const ru of referredUsers) {
+              if (!existingReferredIds.has(ru.id)) {
+                existingReferredIds.add(ru.id);
+                let handle = ru.username ? ('@' + ru.username) : (ru.email ? ('@' + ru.email.split('@')[0]) : (ru.display_name ? ('@' + ru.display_name) : '@crew_mate'));
+                const isRecent = ru.last_active_date && (Date.now() - new Date(ru.last_active_date).getTime() < 86400000);
+                // 10% commission of their lifetime earnings if not tracked in referrals
+                const commission = Number(((Number(ru.lifetime_earnings || ru.available_balance || 0)) * 0.10).toFixed(2));
+                crewList.push({
+                  id: ru.id,
+                  referred_id: ru.id,
+                  handle: handle,
+                  joined: formatFriendlyDate(ru.created_at),
+                  status: isRecent ? 'Online & Earning' : 'Active',
+                  dailyImpressions: Number(ru.daily_impressions || 0),
+                  earned: commission
+                });
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Referred profiles query notice:', err);
+        }
+
+        state.crewMembers = crewList;
 
         // 6. Notifications - Strictly Filter by Active User Identifier (.eq('user_email', userIdentifier))
         const userIdentifier = getActiveUserEmail();
@@ -3499,28 +3540,8 @@ document.addEventListener('DOMContentLoaded', () => {
           initChart();
         }
 
-        // Live referral summary update
-        const crewCount = state.crewMembers ? state.crewMembers.length : 0;
-        const totalCrewCommissions = (state.crewMembers || []).reduce((acc, c) => acc + Number(c.earned || 0), Number(state.user.referralBonus || 0));
-
-        const invitesCountEl = document.getElementById('total-invites-count');
-        const summaryTotalRefEl = document.getElementById('summary-total-referrals');
-        const crewHeaderEl = document.getElementById('crew-count-header');
-        const crewPayoutCardEl = document.getElementById('crew-payout-total-card');
-  
-      renderGeoTierCard();
-
-      const crewPoolDescEl = document.getElementById('metric-crew-pool-desc');
-        const referralInputEl = document.getElementById('referral-input');
-
-        if (invitesCountEl) invitesCountEl.textContent = `${crewCount} Users`;
-        if (summaryTotalRefEl) summaryTotalRefEl.textContent = crewCount;
-        if (crewHeaderEl) crewHeaderEl.textContent = crewCount;
-        if (crewPayoutCardEl) crewPayoutCardEl.textContent = `$${totalCrewCommissions.toFixed(2)} USD`;
-        if (crewPoolDescEl) crewPoolDescEl.textContent = `${crewCount} registered crew member(s)`;
-
-        const refCode = state.user.referralCode || ('sk_' + (currentUser && currentUser.id ? currentUser.id.replace(/-/g, '').substring(0, 8) : '8f3a9d21'));
-        if (referralInputEl) referralInputEl.value = `https://surfkit.io/join?ref=${refCode}`;
+        renderGeoTierCard();
+        renderReferralUI();
 
         const deviceSummaryEl = document.getElementById('metric-device-summary');
         if (deviceSummaryEl) {
@@ -5067,6 +5088,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- REFERRAL & CREW LOGIC ---
+    function renderReferralUI() {
+      const crewCount = state.crewMembers ? state.crewMembers.length : 0;
+      const totalCrewCommissions = (state.crewMembers || []).reduce((acc, c) => acc + Number(c.earned || 0), 0);
+      const totalReferralBonus = Math.max(Number(state.user?.referralBonus || 0), totalCrewCommissions);
+
+      const invitesCountEl = document.getElementById('total-invites-count');
+      const summaryTotalRefEl = document.getElementById('summary-total-referrals');
+      const crewHeaderEl = document.getElementById('crew-count-header');
+      const crewPayoutCardEl = document.getElementById('crew-payout-total-card');
+      const crewPoolDescEl = document.getElementById('metric-crew-pool-desc');
+      const referralBonusMetricEl = document.getElementById('metric-referral-bonus');
+      const referralInputEl = document.getElementById('referral-input');
+
+      if (invitesCountEl) invitesCountEl.textContent = `${crewCount} Users`;
+      if (summaryTotalRefEl) summaryTotalRefEl.textContent = crewCount;
+      if (crewHeaderEl) crewHeaderEl.textContent = crewCount;
+      if (crewPayoutCardEl) crewPayoutCardEl.textContent = `$${totalReferralBonus.toFixed(2)} USD`;
+      if (crewPoolDescEl) crewPoolDescEl.textContent = `${crewCount} registered crew member(s)`;
+      if (referralBonusMetricEl) referralBonusMetricEl.textContent = `$${totalReferralBonus.toFixed(2)}`;
+
+      const refCode = state.user?.referralCode || (currentUser && currentUser.id ? 'sk_' + currentUser.id.replace(/-/g, '').substring(0, 8) : 'sk_8f3a9d21');
+      if (referralInputEl) referralInputEl.value = `https://surfkit.cloud/?ref=${refCode}`;
+
+      renderCrewTable();
+    }
+
     function copyReferralLink() {
       const input = document.getElementById('referral-input');
       const btn = document.getElementById('copy-ref-btn');
@@ -5074,51 +5121,123 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!input) return;
 
-      input.select();
-      input.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(input.value).then(() => {
-        text.textContent = 'Copied!';
-        btn.classList.add('bg-emerald-500', 'text-slate-950');
+      const refCode = state.user?.referralCode || (currentUser && currentUser.id ? 'sk_' + currentUser.id.replace(/-/g, '').substring(0, 8) : 'sk_8f3a9d21');
+      const realUrl = `https://surfkit.cloud/?ref=${refCode}`;
+      input.value = realUrl;
+
+      function onSuccess() {
+        if (text) text.textContent = 'Copied!';
+        if (btn) btn.classList.add('bg-emerald-500', 'text-slate-950');
         showToast('Referral link copied to clipboard!', 'success');
 
         setTimeout(() => {
-          text.textContent = 'Copy Link';
-          btn.classList.remove('bg-emerald-500');
+          if (text) text.textContent = 'Copy Link';
+          if (btn) btn.classList.remove('bg-emerald-500', 'text-slate-950');
         }, 2000);
-      }).catch(() => {
-        showToast('Link copied: ' + input.value, 'info');
-      });
+      }
+
+      function onFallback() {
+        input.select();
+        input.setSelectionRange(0, 99999);
+        try {
+          document.execCommand('copy');
+          onSuccess();
+        } catch (e) {
+          showToast('Referral link: ' + realUrl, 'info');
+        }
+      }
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(realUrl).then(onSuccess).catch(onFallback);
+      } else {
+        onFallback();
+      }
     }
 
     function shareSocial(network) {
-      const refCode = state.user.referralCode || ('sk_' + (state.user.id ? state.user.id.replace(/-/g, '').substring(0, 8) : '8f3a9d21'));
-      const url = encodeURIComponent(`https://surfkit.io/join?ref=${refCode}`);
+      const refCode = state.user?.referralCode || (currentUser && currentUser.id ? 'sk_' + currentUser.id.replace(/-/g, '').substring(0, 8) : 'sk_8f3a9d21');
+      const inviteUrl = `https://surfkit.cloud/?ref=${refCode}`;
+      const url = encodeURIComponent(inviteUrl);
       const msg = encodeURIComponent('Monetize your everyday web browsing with Surfkit! Join my crew:');
       let target = '';
 
-      if (network === 'twitter') target = `https://twitter.com/intent/tweet?text=${msg}&url=${url}`;
+      if (network === 'twitter' || network === 'x') target = `https://twitter.com/intent/tweet?text=${msg}&url=${url}`;
       if (network === 'telegram') target = `https://t.me/share/url?url=${url}&text=${msg}`;
       if (network === 'whatsapp') target = `https://api.whatsapp.com/send?text=${msg}%20${url}`;
 
-      if (target) window.open(target, '_blank');
+      if (target) window.open(target, '_blank', 'noopener,noreferrer');
     }
 
     /**
-     * Checks localStorage for pending incoming referral code and attributes via Supabase RPC
+     * Checks localStorage for pending incoming referral code and attributes via Supabase RPC or direct fallback
      */
     async function checkAndAttributePendingReferral(userId) {
       if (!userId || !supabaseClient) return;
       try {
-        const pendingRef = localStorage.getItem('surfkit_incoming_ref');
+        const pendingRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
         if (!pendingRef) return;
-        const { data, error } = await supabaseClient.rpc('attribute_user_referral', {
-          p_new_user_id: userId,
-          p_ref_identifier: pendingRef
-        });
-        if (!error && data && data.success) {
-          console.log('[Referral] Successfully attributed referral to crew:', data);
-          localStorage.removeItem('surfkit_incoming_ref');
-          showToast('Welcome bonus connected via referral code!', 'success');
+        const cleanRef = pendingRef.trim();
+
+        // 1. Try RPC
+        try {
+          const { data, error } = await supabaseClient.rpc('attribute_user_referral', {
+            p_new_user_id: userId,
+            p_ref_identifier: cleanRef
+          });
+          if (!error && data && data.success) {
+            console.log('[Referral] Successfully attributed referral to crew via RPC:', data);
+            localStorage.removeItem('surfkit_ref_code');
+            localStorage.removeItem('surfkit_incoming_ref');
+            showToast('Welcome bonus connected via referral code!', 'success');
+            return;
+          }
+        } catch (rpcErr) {
+          console.warn('[Referral] RPC attempt notice:', rpcErr);
+        }
+
+        // 2. Fallback: Direct table update
+        try {
+          let { data: referrer } = await supabaseClient
+            .from('profiles')
+            .select('id, referral_code, username, display_name')
+            .ilike('referral_code', cleanRef)
+            .maybeSingle();
+
+          if (!referrer) {
+            const { data: byUser } = await supabaseClient
+              .from('profiles')
+              .select('id, referral_code, username, display_name')
+              .or(`username.ilike.${cleanRef},display_name.ilike.${cleanRef}`)
+              .maybeSingle();
+            referrer = byUser;
+          }
+
+          if (referrer && referrer.id && referrer.id !== userId) {
+            await supabaseClient
+              .from('profiles')
+              .update({ referred_by: referrer.id })
+              .eq('id', userId)
+              .is('referred_by', null);
+
+            const userHandle = state.user?.username ? ('@' + state.user.username) : (state.user?.email ? ('@' + state.user.email.split('@')[0]) : '@crew_mate');
+            await supabaseClient
+              .from('referrals')
+              .upsert({
+                referrer_id: referrer.id,
+                referred_id: userId,
+                referred_handle: userHandle,
+                commission_earned: 0.00,
+                daily_impressions: 0,
+                status: 'Active',
+                updated_at: new Date().toISOString()
+              }, { onConflict: 'referrer_id,referred_id' });
+
+            localStorage.removeItem('surfkit_ref_code');
+            localStorage.removeItem('surfkit_incoming_ref');
+            showToast('Welcome bonus connected via referral code!', 'success');
+          }
+        } catch (fallbackErr) {
+          console.warn('[Referral] Fallback attribution notice:', fallbackErr);
         }
       } catch (err) {
         console.warn('[Referral] Attribution notice:', err);
@@ -5144,25 +5263,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      tbody.innerHTML = state.crewMembers.map(m => `
+      tbody.innerHTML = state.crewMembers.map(m => {
+        const initials = (m.handle || '@').replace('@', '').substring(0, 2).toUpperCase() || 'CR';
+        const isOnline = m.status.includes('Online');
+        return `
         <tr class="hover:bg-surf-surface/40 transition-colors">
           <td class="py-3 px-4 font-bold text-white flex items-center gap-2.5">
             <div class="w-6 h-6 rounded-full bg-surf-surfaceElevated border border-surf-border flex items-center justify-center text-surf-teal text-[10px]">
-              ${m.handle.substring(1, 3).toUpperCase()}
+              ${initials}
             </div>
             ${m.handle}
           </td>
           <td class="py-3 px-4 text-slate-400">${m.joined}</td>
           <td class="py-3 px-4">
-            <span class="inline-flex items-center gap-1.5 ${m.status.includes('Online') ? 'text-emerald-400' : 'text-slate-500'} font-medium">
-              <span class="w-1.5 h-1.5 rounded-full ${m.status.includes('Online') ? 'bg-emerald-400' : 'bg-slate-600'}"></span>
+            <span class="inline-flex items-center gap-1.5 ${isOnline ? 'text-emerald-400' : 'text-slate-400'} font-medium">
+              <span class="w-1.5 h-1.5 rounded-full ${isOnline ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500'}"></span>
               ${m.status}
             </span>
           </td>
           <td class="py-3 px-4 text-slate-200 font-semibold">${m.dailyImpressions} ads</td>
-          <td class="py-3 px-4 text-surf-cyan font-bold">+$${m.earned.toFixed(2)} USD</td>
+          <td class="py-3 px-4 text-surf-cyan font-bold">+$${Number(m.earned || 0).toFixed(2)} USD</td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function showInviteModal() {
@@ -6004,7 +6127,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       renderActivityTable();
       renderPayoutHistoryTable();
-      renderCrewTable();
+      renderReferralUI();
       renderDevices();
       initChart();
       renderNotifications();
@@ -6375,6 +6498,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);
         const incomingRef = urlParams.get('ref') || urlParams.get('r');
         if (incomingRef) {
+          localStorage.setItem('surfkit_ref_code', incomingRef.trim());
           localStorage.setItem('surfkit_incoming_ref', incomingRef.trim());
           console.log('[Referral] Captured incoming invite code:', incomingRef.trim());
         }

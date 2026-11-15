@@ -1,8 +1,9 @@
 /**
- * Surfkit Auth Session Manager  v1.0
+ * Surfkit Auth Session Manager  v1.1
  * ===================================
- * Shared session-detection utility for Landing Pages.
+ * Shared session-detection and referral tracking utility for Landing Pages.
  * Checks: Supabase JWT localStorage → Extension sync flag → postMessage events.
+ * Captures: ?ref= / ?r= URL parameter into localStorage for permanent attribution.
  * No external CDN dependency – runs synchronously where possible.
  *
  * Usage: included via  <script src="auth-session.js"></script>
@@ -10,6 +11,20 @@
  */
 (function (global) {
   'use strict';
+
+  /* ── 0. Automatic Referral Tracking: Capture ?ref= from URL ───── */
+  try {
+    var searchParams = new URLSearchParams(window.location.search);
+    var refParam = searchParams.get('ref') || searchParams.get('r');
+    if (refParam && typeof refParam === 'string') {
+      var cleanRef = refParam.trim();
+      if (cleanRef.length > 0 && cleanRef.length <= 64) {
+        localStorage.setItem('surfkit_ref_code', cleanRef);
+        localStorage.setItem('surfkit_incoming_ref', cleanRef);
+        console.log('[Surfkit Auth] Captured referral code from URL:', cleanRef);
+      }
+    }
+  } catch (e) {}
 
   /* ── Constants ───────────────────────────────────────────────── */
   var SUPA_REF  = 'kpvrewhmnrifsnkgswdt';
@@ -118,13 +133,31 @@
     try { localStorage.removeItem(LS_EXT); } catch (e) {}
   }
 
+  /* ── Public: Referral helpers ───────────────────────────────── */
+  function getPendingReferralCode() {
+    try {
+      return localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref') || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function clearPendingReferralCode() {
+    try {
+      localStorage.removeItem('surfkit_ref_code');
+      localStorage.removeItem('surfkit_incoming_ref');
+    } catch (e) {}
+  }
+
   /* ── Expose ───────────────────────────────────────────────────── */
   global.SurfkitAuth = {
-    getActiveSession:      getActiveSession,
-    checkSupabaseLS:       checkSupabaseLS,
-    checkExtLS:            checkExtLS,
-    setExtensionSession:   setExtensionSession,
-    clearExtensionSession: clearExtensionSession,
+    getActiveSession:        getActiveSession,
+    checkSupabaseLS:         checkSupabaseLS,
+    checkExtLS:              checkExtLS,
+    setExtensionSession:     setExtensionSession,
+    clearExtensionSession:   clearExtensionSession,
+    getPendingReferralCode:  getPendingReferralCode,
+    clearPendingReferralCode:clearPendingReferralCode,
     SUPA_URL: SUPA_URL,
     SUPA_KEY: SUPA_KEY
   };
