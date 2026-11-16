@@ -1325,7 +1325,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div>
                   <div class="flex items-center justify-between mb-1.5">
                     <label class="text-xs font-semibold text-slate-300">Withdrawal Amount ($ USD)</label>
-                    <span class="text-xs text-slate-400">Available: <span id="form-available-max" class="text-surf-teal font-bold">$14.85</span></span>
+                    <span class="text-xs text-slate-400">Available: <span id="form-available-max" class="text-surf-teal font-bold">$0.00</span></span>
                   </div>
                   
                   <div class="relative rounded-xl">
@@ -1370,8 +1370,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   <input 
                     type="email" 
                     id="cashout-destination" 
-                    placeholder="e.g. dinukdilshan19@gmail.com" 
-                    value="dinukdilshan19@gmail.com"
+                    placeholder="e.g. yourname@example.com" 
+                    value=""
                     oninput="validateCashoutForm()"
                     class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors"
                     required
@@ -2183,7 +2183,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <h3 class="text-xl font-bold text-white">Cashout Request Submitted!</h3>
       <p class="text-xs text-slate-300">
-        Your transfer of <span id="modal-success-amount" class="text-surf-teal font-bold">$5.00 USD</span> has been queued. Funds are being dispatched to <span id="modal-success-destination" class="text-white font-mono font-medium">dinukdilshan19@gmail.com</span>.
+        Your transfer of <span id="modal-success-amount" class="text-surf-teal font-bold">$5.00 USD</span> has been queued. Funds are being dispatched to <span id="modal-success-destination" class="text-white font-mono font-medium">your payment account</span>.
       </p>
       
       <div class="p-3 rounded-xl bg-[#0C1426] border border-surf-border text-left text-xs space-y-1.5 font-mono text-slate-400">
@@ -2290,11 +2290,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
         <div class="flex items-center gap-3">
           <div id="auth-modal-avatar" class="w-9 h-9 rounded-full bg-surf-surfaceElevated border border-surf-teal text-surf-teal font-bold flex items-center justify-center text-xs">
-            D
+            ?
           </div>
           <div class="min-w-0 flex-1">
-            <p id="auth-modal-name" class="text-xs font-bold text-white truncate">dinukdilshan19</p>
-            <p id="auth-modal-email" class="text-[11px] text-slate-400 font-mono truncate">dinukdilshan19@gmail.com</p>
+            <p id="auth-modal-name" class="text-xs font-bold text-white truncate"></p>
+            <p id="auth-modal-email" class="text-[11px] text-slate-400 font-mono truncate"></p>
           </div>
         </div>
         <div class="text-[10px] font-mono text-slate-500 pt-1.5 border-t border-surf-border/50 truncate">
@@ -2393,20 +2393,7 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(d => { if (d && d.ip) detectedClientIp = d.ip; })
       .catch(() => {});
 
-    const DEFAULT_STARTER_LEDGER = [
-      { id: 'act-1', type: 'Ad Earnings', amount: 0.024, method: 'YouTube Video (2 slices)', date: 'Today', rawDate: Date.now() - 3600000, status: 'Credited' },
-      { id: 'act-2', type: 'Ad Earnings', amount: 0.015, method: 'Google Search (3 slices)', date: 'Today', rawDate: Date.now() - 7200000, status: 'Credited' },
-      { id: 'act-3', type: 'Ad Earnings', amount: 0.008, method: 'GitHub Repo (1 slice)', date: 'Today', rawDate: Date.now() - 14400000, status: 'Credited' },
-      { id: 'act-4', type: 'Ad Earnings', amount: 0.028, method: 'Twitter/X Feed (4 slices)', date: 'Yesterday', rawDate: Date.now() - 86400000, status: 'Credited' },
-      { id: 'act-5', type: 'Ad Earnings', amount: 0.012, method: 'TechCrunch Article (2 slices)', date: 'Yesterday', rawDate: Date.now() - 100000000, status: 'Credited' },
-      { id: 'act-6', type: 'Referral Bonus', amount: 0.050, method: 'Commission (@mate_crypto)', date: '2 days ago', rawDate: Date.now() - 172800000, status: 'Credited' },
-      { id: 'act-7', type: 'Ad Earnings', amount: 0.018, method: 'Reddit Community (3 slices)', date: '3 days ago', rawDate: Date.now() - 259200000, status: 'Credited' },
-      { id: 'act-8', type: 'Ad Earnings', amount: 0.021, method: 'Amazon Store (2 slices)', date: '3 days ago', rawDate: Date.now() - 270000000, status: 'Credited' },
-      { id: 'act-9', type: 'Ad Earnings', amount: 0.022, method: 'Stack Overflow (3 slices)', date: '4 days ago', rawDate: Date.now() - 345600000, status: 'Credited' },
-      { id: 'act-10', type: 'Ad Earnings', amount: 0.014, method: 'Wikipedia Research (2 slices)', date: '5 days ago', rawDate: Date.now() - 432000000, status: 'Credited' },
-      { id: 'act-11', type: 'Ad Earnings', amount: 0.016, method: 'Hacker News (2 slices)', date: '6 days ago', rawDate: Date.now() - 518400000, status: 'Credited' },
-      { id: 'act-12', type: 'Ad Earnings', amount: 0.009, method: 'Substack Article (1 slice)', date: '7 days ago', rawDate: Date.now() - 604800000, status: 'Credited' }
-    ];
+    const DEFAULT_STARTER_LEDGER = [];
 
     // Clean initial state (populated directly from active user session)
     const INITIAL_STATE = {
@@ -2443,7 +2430,7 @@ document.addEventListener('DOMContentLoaded', () => {
           isCurrent: true
         }
       ],
-      activityLedger: DEFAULT_STARTER_LEDGER,
+      activityLedger: [],
       payoutHistory: [],
       crewMembers: [],
       notifications: [],
@@ -2456,12 +2443,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
-          // Purge stale hardcoded values ($4.59, 622 impressions) from local cache
-          if (parsed.user && (parsed.user.availableBalance === 4.59 || parsed.user.lifetimeImpressions === 622 || (parsed.user.email && (parsed.user.email.includes('alex.mercer') || parsed.user.name === 'Alex Mercer')))) {
-            parsed.user.availableBalance = 0.00;
-            parsed.user.lifetimeEarnings = 0.00;
-            parsed.user.lifetimeImpressions = 0;
-            parsed.user.streakDays = 0;
+          // Purge stale hardcoded values, mock users, and personal addresses from local cache
+          if (parsed.user) {
+            const uName = String(parsed.user.name || '');
+            const uUser = String(parsed.user.username || '');
+            const uEmail = String(parsed.user.email || '');
+            if (parsed.user.availableBalance === 4.59 || parsed.user.lifetimeImpressions === 622 ||
+                uEmail.includes('alex.mercer') || uEmail.includes('dinukdilshan') ||
+                uName === 'Alex Mercer' || uName === 'dinukdilshan19' ||
+                uUser === 'dinukdilshan19' || uUser === 'dinukdilshan49') {
+              parsed.user.name = 'Guest User';
+              parsed.user.username = 'guest';
+              parsed.user.email = '';
+              parsed.user.availableBalance = 0.00;
+              parsed.user.lifetimeEarnings = 0.00;
+              parsed.user.lifetimeImpressions = 0;
+              parsed.user.streakDays = 0;
+            }
           }
           if (Array.isArray(parsed.payoutHistory)) {
             parsed.payoutHistory.forEach(tx => {
@@ -2470,8 +2468,12 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             });
           }
-          if (!parsed.activityLedger || parsed.activityLedger.length === 0) {
-            parsed.activityLedger = JSON.parse(JSON.stringify(DEFAULT_STARTER_LEDGER));
+          if (Array.isArray(parsed.activityLedger)) {
+            parsed.activityLedger = parsed.activityLedger.filter(item => 
+              item && !String(item.id || '').startsWith('act-seed') && !String(item.method || '').includes('@mate_crypto')
+            );
+          } else {
+            parsed.activityLedger = [];
           }
           if (parsed.chartData30d && (!Array.isArray(parsed.chartData30d.labels) || parsed.chartData30d.labels.length !== 30)) {
             parsed.chartData30d = generateZeroChartData(30);
@@ -2703,35 +2705,76 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initSupabaseAuth() {
       if (!supabaseClient) return null;
       try {
-        const { data: { session } } = await supabaseClient.auth.getSession();
-        if (session && session.user) {
-          currentUser = session.user;
+        // Dynamic verification using supabase.auth.getUser()
+        const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
+        let authUser = (!userErr && userData && userData.user) ? userData.user : null;
+
+        if (!authUser) {
+          const { data: sessionData } = await supabaseClient.auth.getSession();
+          if (sessionData && sessionData.session && sessionData.session.user) {
+            authUser = sessionData.session.user;
+          }
+        }
+
+        if (authUser) {
+          currentUser = authUser;
           if (currentUser.email) {
             window.currentUserEmail = currentUser.email.trim().toLowerCase();
           }
-          state.user.email = currentUser.email || state.user.email;
-          state.user.name = state.user.name || (currentUser.email ? currentUser.email.split('@')[0] : 'dinukdilshan19');
-          state.user.username = state.user.username || state.user.name;
-          // Persistent listener: re-hydrates currentUser on JWT refresh — prevents random logouts
+          state.user.id = currentUser.id;
+          state.user.email = currentUser.email || '';
+          state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
+            || (currentUser.email ? currentUser.email.split('@')[0] : 'Surfkit User');
+          state.user.username = state.user.name;
+
+          // Persistent listener: re-hydrates currentUser on JWT refresh
           if (!window.__supabaseAuthListenerSet__) {
             window.__supabaseAuthListenerSet__ = true;
             supabaseClient.auth.onAuthStateChange((event, newSession) => {
               if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 if (newSession && newSession.user) {
                   currentUser = newSession.user;
-                  state.user.email = currentUser.email || state.user.email;
-                  state.user.name = state.user.name || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
-                  state.user.username = state.user.username || state.user.name;
+                  state.user.id = currentUser.id;
+                  state.user.email = currentUser.email || '';
+                  state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
+                    || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
+                  state.user.username = state.user.name;
+                  saveState();
+                  renderApp();
                 }
               } else if (event === 'SIGNED_OUT') {
-                // Only act on actual Supabase-initiated signout, not stale extension polls
                 if (currentUser) {
                   currentUser = null;
                   window.currentUserEmail = null;
                   state.notifications = [];
-                  state.user = { name: 'Guest User', email: '', avatar: null, availableBalance: 0.00, lifetimeEarnings: 0.00, lifetimeImpressions: 0, referralBonus: 0.00, streakDays: 0, apiKey: '', username: 'guest', adIntensity: 2 };
-                  state.devices = []; state.activityLedger = []; state.payoutHistory = []; state.crewMembers = [];
-                  saveState(); renderApp();
+                  state.user = {
+                    id: '',
+                    name: 'Guest User',
+                    email: '',
+                    avatar: null,
+                    availableBalance: 0.00,
+                    lockedBalance: 0.00,
+                    lifetimeEarnings: 0.00,
+                    lifetimeImpressions: 0,
+                    referralBonus: 0.00,
+                    referralCode: '',
+                    streakDays: 0,
+                    lastActiveDate: null,
+                    apiKey: '',
+                    username: 'guest',
+                    adIntensity: 2,
+                    countryCode: state.user.countryCode || 'LK',
+                    countryName: state.user.countryName || 'Sri Lanka',
+                    geoTier: state.user.geoTier || 3,
+                    currentTier: state.user.geoTier || 3,
+                    ratePer1k: state.user.ratePer1k || 0.30
+                  };
+                  state.devices = [];
+                  state.activityLedger = [];
+                  state.payoutHistory = [];
+                  state.crewMembers = [];
+                  saveState();
+                  renderApp();
                   loadChatHistory();
                   renderNotifications();
                 }
@@ -2741,53 +2784,12 @@ document.addEventListener('DOMContentLoaded', () => {
           return currentUser;
         }
 
-        // Auth guard ensures only authenticated users reach here.
-        // No auto-discovery needed – return null if no JWT session.
-        try {
-          return null; // Let the guard handle unauthenticated users
-          const targetEmail = state.user?.email || 'dinukdilshan19@gmail.com';
-          const { data: pEmail } = await supabaseClient.from('profiles').select('*').ilike('email', targetEmail).maybeSingle();
-          if (pEmail && pEmail.id) {
-            currentUser = { id: pEmail.id, email: pEmail.email || targetEmail };
-            state.user.id = pEmail.id;
-            state.user.email = currentUser.email;
-            state.user.name = pEmail.display_name || pEmail.username || 'dinukdilshan19';
-            state.user.username = pEmail.username || 'dinukdilshan19';
-            return currentUser;
-          }
-
-          const { data: pUser } = await supabaseClient.from('profiles').select('*').eq('username', 'dinukdilshan19').maybeSingle();
-          if (pUser && pUser.id) {
-            currentUser = { id: pUser.id, email: pUser.email || 'dinukdilshan19@gmail.com' };
-            state.user.id = pUser.id;
-            state.user.email = currentUser.email;
-            state.user.name = pUser.display_name || pUser.username || 'dinukdilshan19';
-            state.user.username = pUser.username || 'dinukdilshan19';
-            return currentUser;
-          }
-
-          const { data: pFirst } = await supabaseClient.from('profiles').select('*').order('created_at', { ascending: true }).limit(1).maybeSingle();
-          if (pFirst && pFirst.id) {
-            currentUser = { id: pFirst.id, email: pFirst.email || 'dinukdilshan19@gmail.com' };
-            state.user.id = pFirst.id;
-            state.user.email = currentUser.email;
-            state.user.name = pFirst.display_name || pFirst.username || 'dinukdilshan19';
-            state.user.username = pFirst.username || 'dinukdilshan19';
-            return currentUser;
-          }
-        } catch (e) {
-          console.warn('Auto profile resolution warning:', e);
-        }
-
-        // Canonical UUID fallback
-        currentUser = {
-          id: (state.user?.id && state.user.id.includes('-')) ? state.user.id : '211900a5-854a-471d-9635-378ac44b7c85',
-          email: state.user?.email || 'dinukdilshan19@gmail.com'
-        };
-        state.user.id = currentUser.id;
-        state.user.email = currentUser.email;
-        return currentUser;
+        // Unauthenticated guest user: strictly return null (no mock account fallback)
+        currentUser = null;
+        return null;
       } catch (err) {
+        console.warn('initSupabaseAuth error:', err);
+        currentUser = null;
         return null;
       }
     }
@@ -2856,16 +2858,14 @@ document.addEventListener('DOMContentLoaded', () => {
             .maybeSingle();
           profile = pData;
         }
-        if (!profile) {
-          const targetUsername = state.user.username || state.user.name || (currentUser.email ? currentUser.email.split('@')[0] : 'dinukdilshan49');
-          if (targetUsername) {
-            const { data: pData } = await supabaseClient
-              .from('profiles')
-              .select('*')
-              .eq('username', targetUsername)
-              .maybeSingle();
-            profile = pData;
-          }
+        if (!profile && currentUser.email) {
+          const userPrefix = currentUser.email.split('@')[0];
+          const { data: pData } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .or(`email.ilike.${currentUser.email},username.eq.${userPrefix}`)
+            .maybeSingle();
+          profile = pData;
         }
 
         if (profile) {
@@ -2921,7 +2921,7 @@ document.addEventListener('DOMContentLoaded', () => {
             daily_impressions: 0,
             referral_bonus: 0.00,
             referral_code: 'sk_' + Array.from({length: 8}, () => Math.floor(Math.random()*16).toString(16)).join(''),
-            streak_days: 1,
+            streak_days: 0,
             selected_gateway: 'paypal',
             ad_intensity: 2
           }).select().single();
@@ -2993,7 +2993,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let payRows = [];
         const payoutUserId = (currentUser && currentUser.id && currentUser.id.includes('-'))
           ? currentUser.id
-          : (state.user?.id && state.user.id.includes('-') ? state.user.id : '211900a5-854a-471d-9635-378ac44b7c85');
+          : (state.user?.id && state.user.id.includes('-') ? state.user.id : null);
 
         try {
           const { data: reqPayouts } = await supabaseClient
@@ -3224,67 +3224,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Sort descending by date
         combinedLedger.sort((a, b) => (b.rawDate || 0) - (a.rawDate || 0));
-        // If no ledger activity in database yet for this user, populate starter records reflecting user balance
-        if (combinedLedger.length === 0) {
-          const sampleSites = [
-            { domain: 'Google Search', slices: 3, earn: 0.015, hoursAgo: 1 },
-            { domain: 'YouTube Video', slices: 2, earn: 0.024, hoursAgo: 3 },
-            { domain: 'GitHub Repo', slices: 1, earn: 0.008, hoursAgo: 6 },
-            { domain: 'TechCrunch Article', slices: 2, earn: 0.012, hoursAgo: 14 },
-            { domain: 'Twitter/X Feed', slices: 4, earn: 0.028, hoursAgo: 22 },
-            { domain: 'Reddit Community', slices: 3, earn: 0.018, hoursAgo: 36 },
-            { domain: 'Amazon Store', slices: 2, earn: 0.021, hoursAgo: 48 },
-            { domain: 'Stack Overflow', slices: 3, earn: 0.022, hoursAgo: 65 },
-            { domain: 'Wikipedia Research', slices: 2, earn: 0.014, hoursAgo: 84 },
-            { domain: 'Medium Article', slices: 1, earn: 0.010, hoursAgo: 102 },
-            { domain: 'Hacker News Thread', slices: 2, earn: 0.016, hoursAgo: 120 },
-            { domain: 'Substack Publication', slices: 1, earn: 0.009, hoursAgo: 140 }
-          ];
-
-          const now = Date.now();
-          sampleSites.forEach((s, idx) => {
-            const itemTime = new Date(now - s.hoursAgo * 3600000);
-            combinedLedger.push({
-              id: `act-seed-${idx}`,
-              type: 'Ad Earnings',
-              amount: s.earn,
-              method: `${s.domain} (${s.slices} slices)`,
-              date: formatFriendlyDate(itemTime),
-              rawDate: itemTime.getTime(),
-              status: 'Credited'
-            });
-          });
-
-          // Also include a referral commission record
-          const refTime = new Date(now - 48 * 3600000);
-          combinedLedger.push({
-            id: 'act-seed-ref-1',
-            type: 'Referral Bonus',
-            amount: 0.050,
-            method: 'Crew Commission (@mate_crypto)',
-            date: formatFriendlyDate(refTime),
-            rawDate: refTime.getTime(),
-            status: 'Credited'
-          });
-
-          // Asynchronously insert baseline impressions into Supabase ad_impressions for this user
-          if (supabaseClient && currentUser && currentUser.id) {
-            (async () => {
-              try {
-                const inserts = sampleSites.slice(0, 6).map(s => ({
-                  user_id: currentUser.id,
-                  website_domain: s.domain,
-                  slices_earned: s.slices,
-                  reward_usd: s.earn,
-                  multiplier: 1.2,
-                  created_at: new Date(now - s.hoursAgo * 3600000).toISOString()
-                }));
-                await supabaseClient.from('ad_impressions').insert(inserts);
-              } catch (e) {}
-            })();
-          }
-        }
-
+        // Real dynamic activity ledger (empty if brand new user)
         state.activityLedger = combinedLedger;
 
         // ── 7. LOAD PAST CHART DATA EXCLUSIVELY FROM daily_earnings_history ──────
@@ -4125,8 +4065,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const paginationEl = document.getElementById('activity-pagination');
       if (!tbody) return;
 
-      if (!state.activityLedger || state.activityLedger.length === 0) {
-        state.activityLedger = JSON.parse(JSON.stringify(DEFAULT_STARTER_LEDGER));
+      if (!state.activityLedger) {
+        state.activityLedger = [];
       }
       let filtered = state.activityLedger || [];
       if (currentActivityFilter === 'earnings') {
@@ -4297,8 +4237,8 @@ document.addEventListener('DOMContentLoaded', () => {
         name: 'PayPal Transfer',
         minAmount: 5.00,
         destLabel: 'Destination PayPal Email Address',
-        destPlaceholder: 'e.g. dinukdilshan19@gmail.com',
-        destDefault: 'dinukdilshan19@gmail.com',
+        destPlaceholder: 'e.g. yourname@example.com',
+        destDefault: '',
         hint: 'Funds will be deposited directly to your verified PayPal email address.'
       },
       bank: {
@@ -4620,7 +4560,7 @@ document.addEventListener('DOMContentLoaded', () => {
         structuredDetails.destination = destination;
       } else {
         const destInput = document.getElementById('cashout-destination');
-        const paypalEmail = destInput ? destInput.value.trim() : (state.user.email || 'dinukdilshan19@gmail.com');
+        const paypalEmail = destInput ? destInput.value.trim() : (state.user.email || '');
         destination = paypalEmail;
         structuredDetails = {
           transfer_type: 'paypal',
@@ -4646,14 +4586,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Aggressive User UUID resolution so userUuid is NEVER null
         if (!userUuid) {
           try {
-            const targetEmail = state.user?.email || currentUser?.email || 'dinukdilshan19@gmail.com';
+            const targetEmail = state.user?.email || currentUser?.email || '';
             const { data: profByEmail } = await supabaseClient.from('profiles').select('id, available_balance, locked_balance').ilike('email', targetEmail).maybeSingle();
             if (profByEmail && profByEmail.id) userUuid = profByEmail.id;
           } catch (e) {}
 
           if (!userUuid) {
             try {
-              const targetUsername = state.user?.username || 'dinukdilshan19';
+              const targetUsername = state.user?.username || '';
               const { data: profByUser } = await supabaseClient.from('profiles').select('id, available_balance, locked_balance').eq('username', targetUsername).maybeSingle();
               if (profByUser && profByUser.id) userUuid = profByUser.id;
             } catch (e) {}
@@ -4667,7 +4607,11 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           if (!userUuid) {
-            userUuid = '211900a5-854a-471d-9635-378ac44b7c85';
+            // No valid session - require sign-in
+            resetSubmitBtn();
+            showToast('Please sign in to submit a cashout request.', 'error');
+            openAuthModal();
+            return;
           }
 
           if (currentUser) currentUser.id = userUuid;
@@ -6375,14 +6319,14 @@ document.addEventListener('DOMContentLoaded', () => {
           showToast(`Synchronized session with extension: ${state.user.email}`, 'success');
         }
       } else if (state.user.name === 'Guest User' && (state.user.email || extBalance > 0)) {
-        // Recover user name from known email or default account
+        // Recover user name from known email or authenticated session
         if (state.user.email) {
           state.user.name = state.user.email.split('@')[0];
           state.user.username = state.user.name;
-        } else {
-          state.user.name = 'dinukdilshan19';
-          state.user.username = 'dinukdilshan19';
-          state.user.email = 'dinukdilshan19@gmail.com';
+        } else if (currentUser && currentUser.email) {
+          state.user.email = currentUser.email;
+          state.user.name = currentUser.email.split('@')[0];
+          state.user.username = state.user.name;
         }
       } else if (extState.isExplicitSignOut && !extState.authUser && currentUser && extBalance === 0) {
         // ONLY sign out if the extension explicitly has NO user and 0 balance
@@ -7128,7 +7072,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function getOfferwallUserId() {
       if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) return currentUser.id;
       if (typeof state !== 'undefined' && state.user && state.user.id && state.user.id.includes('-')) return state.user.id;
-      return '211900a5-854a-471d-9635-378ac44b7c85';
+      return null; // Require real auth session for offerwall
     }
 
     function getSurveyTitleByIndex(i) {
@@ -7241,7 +7185,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
               <span>Direct Session</span>
               <span>•</span>
-              <span class="text-emerald-400 font-mono font-bold" id="offerwall-modal-reward">+$0.90 USD</span>
+              <span class="text-emerald-400 font-mono font-bold" id="offerwall-modal-reward">+$0.00 USD</span>
               <span>•</span>
               <span class="text-slate-500 font-mono text-[10px]" id="offerwall-modal-uid">UID: ...</span>
             </p>

@@ -244,12 +244,12 @@
         if (cachedSession) {
           try {
             const parsed = JSON.parse(cachedSession);
-            userId = parsed.userId || parsed.username || 'dinukdilshan39';
+            userId = parsed.userId || parsed.username || 'guest_user';
           } catch(e) {
-            userId = 'dinukdilshan39';
+            userId = 'guest_user';
           }
         } else {
-          userId = 'dinukdilshan39';
+          userId = 'guest_user';
         }
       }
 

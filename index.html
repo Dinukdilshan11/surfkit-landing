@@ -2672,21 +2672,21 @@
     function applySignedIn() {
       var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
       var mBtn = getMobileBtn(),   mTxt = getMobileText();
-      if (btn)  btn.href  = '/dashboard';
+      if (btn)  btn.href  = '/dashboard/';
       if (icon) icon.className = 'ri-dashboard-3-line text-base text-emerald-400';
       if (text) text.textContent = 'Dashboard';
-      if (mBtn) mBtn.href = '/dashboard';
+      if (mBtn) mBtn.href = '/dashboard/';
       if (mTxt) mTxt.textContent = 'Dashboard';
     }
 
     function applySignedOut() {
       var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
       var mBtn = getMobileBtn(),   mTxt = getMobileText();
-      if (btn)  btn.href  = '/dashboard';
-      if (icon) icon.className = 'ri-dashboard-3-line text-base text-emerald-400';
-      if (text) text.textContent = 'Dashboard';
-      if (mBtn) mBtn.href = '/dashboard';
-      if (mTxt) mTxt.textContent = 'Dashboard';
+      if (btn)  btn.href  = '/login';
+      if (icon) icon.className = 'ri-login-box-line text-base text-emerald-400';
+      if (text) text.textContent = 'Sign In';
+      if (mBtn) mBtn.href = '/login';
+      if (mTxt) mTxt.textContent = 'Sign In';
     }
 
     function quickCheck() {
