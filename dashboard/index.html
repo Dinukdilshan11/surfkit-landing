@@ -1697,7 +1697,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <th scope="col" class="py-3 px-4">CREW MEMBER</th>
                     <th scope="col" class="py-3 px-4">JOIN DATE</th>
                     <th scope="col" class="py-3 px-4">STATUS</th>
-                    <th scope="col" class="py-3 px-4">24H IMPRESSIONS</th>
                     <th scope="col" class="py-3 px-4">EARNINGS CONTRIBUTED</th>
                   </tr>
                 </thead>
@@ -4080,7 +4079,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="py-10 text-center text-slate-400">
+            <td colspan="4" class="py-10 text-center text-slate-400">
               <div class="flex flex-col items-center justify-center gap-2">
                 <span class="text-3xl">📋</span>
                 <span class="font-semibold text-white">No ledger activity records</span>
@@ -5092,7 +5091,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!state.crewMembers || state.crewMembers.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="py-10 text-center text-slate-400">
+            <td colspan="4" class="py-10 text-center text-slate-400">
               <div class="flex flex-col items-center justify-center gap-2">
                 <span class="text-3xl">👥</span>
                 <span class="font-semibold text-white">No crew members joined yet</span>
@@ -5122,7 +5121,6 @@ document.addEventListener('DOMContentLoaded', () => {
               ${m.status}
             </span>
           </td>
-          <td class="py-3 px-4 text-slate-200 font-semibold">${m.dailyImpressions} ads</td>
           <td class="py-3 px-4 text-surf-cyan font-bold">+$${Number(m.earned || 0).toFixed(2)} USD</td>
         </tr>
       `;
@@ -5868,6 +5866,89 @@ document.addEventListener('DOMContentLoaded', () => {
             last_active_date: todayDateStr
           }).eq('id', currentUser.id);
         } catch (e) {}
+
+        // ── 10% Referral Commission Credit ──────────────────────────────
+        // If this user was referred by someone, credit 10% of this impression's
+        // earning to the referrer's available_balance and referrals.commission_earned.
+        try {
+          const earnVal = Number(sample.earn || 0);
+          if (earnVal > 0 && currentUser && currentUser.id) {
+            // Look up the referrer via the profiles.referred_by column
+            const { data: myProfile } = await supabaseClient
+              .from('profiles')
+              .select('referred_by')
+              .eq('id', currentUser.id)
+              .maybeSingle();
+
+            const referrerId = myProfile?.referred_by;
+            if (referrerId) {
+              const commission = Number((earnVal * 0.10).toFixed(6));
+
+              // 1. Try server-side RPC first (atomic)
+              const { error: rpcCommErr } = await supabaseClient.rpc('credit_referral_commission', {
+                p_referrer_id: referrerId,
+                p_referred_id: currentUser.id,
+                p_commission: commission
+              });
+
+              if (rpcCommErr) {
+                // 2. Fallback: direct table updates
+                // Update referrals.commission_earned
+                await supabaseClient.rpc('increment_referral_commission', {
+                  p_referrer_id: referrerId,
+                  p_referred_id: currentUser.id,
+                  p_amount: commission
+                }).catch(() => {});
+
+                // Update referrer profile balance directly
+                const { data: refProf } = await supabaseClient
+                  .from('profiles')
+                  .select('available_balance, lifetime_earnings, referral_bonus')
+                  .eq('id', referrerId)
+                  .maybeSingle();
+                if (refProf) {
+                  await supabaseClient.from('profiles').update({
+                    available_balance: Number(((refProf.available_balance || 0) + commission).toFixed(6)),
+                    lifetime_earnings: Number(((refProf.lifetime_earnings || 0) + commission).toFixed(6)),
+                    referral_bonus: Number(((refProf.referral_bonus || 0) + commission).toFixed(6)),
+                    updated_at: new Date().toISOString()
+                  }).eq('id', referrerId);
+
+                  // Update referrals table commission_earned
+                  const { data: refRow } = await supabaseClient
+                    .from('referrals')
+                    .select('commission_earned')
+                    .eq('referrer_id', referrerId)
+                    .eq('referred_id', currentUser.id)
+                    .maybeSingle();
+                  if (refRow) {
+                    await supabaseClient.from('referrals').update({
+                      commission_earned: Number(((refRow.commission_earned || 0) + commission).toFixed(6)),
+                      status: 'Active',
+                      updated_at: new Date().toISOString()
+                    })
+                    .eq('referrer_id', referrerId)
+                    .eq('referred_id', currentUser.id);
+                  } else {
+                    // Upsert a new referrals row if missing
+                    await supabaseClient.from('referrals').upsert({
+                      referrer_id: referrerId,
+                      referred_id: currentUser.id,
+                      referred_handle: state.user?.username ? ('@' + state.user.username) : '@crew_mate',
+                      commission_earned: commission,
+                      status: 'Active',
+                      updated_at: new Date().toISOString()
+                    }, { onConflict: 'referrer_id,referred_id' });
+                  }
+                }
+              }
+              console.log(`[Referral] +$${commission.toFixed(6)} commission credited to referrer ${referrerId}`);
+            }
+          }
+        } catch (commErr) {
+          console.warn('[Referral Commission] Credit notice:', commErr);
+        }
+        // ── End Referral Commission ──────────────────────────────────────
       }
     }
 
