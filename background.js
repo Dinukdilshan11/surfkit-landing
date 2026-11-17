@@ -15,16 +15,32 @@ const DEFAULT_STATE = {
   masterEnabled: true,
   isExplicitSignOut: false,
   intensity: 'balanced', // 'low' | 'balanced' | 'high'
+  hourlyLimits: {
+    low: 2,        // Exactly 2 impressions / hour
+    balanced: 4,   // Exactly 4 impressions / hour
+    high: 6        // Exactly 6 impressions / hour
+  },
+  // Exact hourly intervals: Low = 30m, Balanced = 15m, High = 10m
+  adIntervals: {
+    low: 1800000,     // 30 min (2 / hr)
+    balanced: 900000, // 15 min (4 / hr)
+    high: 600000      // 10 min (6 / hr)
+  },
   multipliers: {
     low: 1.0,
     balanced: 1.2,
     high: 2.0
   },
-  adIntervals: {
-    low: 60000,     // 60s
-    balanced: 30000, // 30s
-    high: 15000     // 15s
+  geoTier: 3,         // Default Tier 3 (e.g. LK / Sri Lanka)
+  countryCode: 'LK',
+  countryName: 'Sri Lanka',
+  geoTierRates: {
+    1: 0.0025,  // Tier 1 (USA, UK, etc.): ~$0.0025 per ad view
+    2: 0.0010,  // Tier 2 (Growth markets): ~$0.0010 per ad view
+    3: 0.0003,  // Tier 3 (LK / Sri Lanka, IN, etc.): ~$0.0003 per ad view
+    4: 0.00015  // Tier 4 (Rest of World): ~$0.00015 per ad view
   },
+  recentImpressionTimestamps: [],
   balanceUsd: 0.000,
   dailyEarnings: 0.000,
   tokensEarned: 0,
@@ -82,6 +98,68 @@ function calculateUpdatedStreak(lastActiveDate, currentStreak) {
   }
 }
 
+// Geo-Tier Country Definitions & Dynamic Rate Calculations
+const TIER1_COUNTRIES = ['US','CA','GB','DE','FR','IT','ES','NL','AU','NZ','CH','SE','NO','DK','IE','AT','BE','FI','LU','IS'];
+const TIER2_COUNTRIES = ['AE','SA','SG','JP','KR','BR','MX','PL','TR','QA','KW','IL','TW','HK','MY','TH','ZA','CL','AR','CO','CZ','PT','GR','HU','RO'];
+const TIER3_COUNTRIES = ['LK','IN','PK','BD','ID','PH','VN','EG','NG','KE','GH','MA','DZ','UA','PE','EC','NP','MM','KH'];
+
+function resolveGeoTier(code) {
+  if (!code) return 3;
+  const c = String(code).toUpperCase().trim();
+  if (TIER1_COUNTRIES.includes(c)) return 1;
+  if (TIER2_COUNTRIES.includes(c)) return 2;
+  if (TIER3_COUNTRIES.includes(c)) return 3;
+  return 4;
+}
+
+const GEO_TIER_RATES = {
+  1: 0.0025,  // Tier 1 (USA, UK, etc.): ~$0.0025 per ad view
+  2: 0.0010,  // Tier 2 (Growth markets): ~$0.0010 per ad view
+  3: 0.0003,  // Tier 3 (LK, IN, etc.): ~$0.0003 per ad view
+  4: 0.00015  // Tier 4 (Rest of World): ~$0.00015 per ad view
+};
+
+function calculateGeoTierReward(state) {
+  const tier = Number(state.geoTier || resolveGeoTier(state.countryCode) || 3);
+  return GEO_TIER_RATES[tier] || 0.0003;
+}
+
+async function detectAndStoreGeoLocation() {
+  try {
+    const current = await chrome.storage.local.get(['countryCode', 'geoTier', 'countryName']);
+    if (current && current.countryCode && current.geoTier) {
+      return;
+    }
+    const res = await fetch('https://ipapi.co/json/').catch(() => null);
+    let countryCode = null;
+    let countryName = null;
+    if (res && res.ok) {
+      const d = await res.json().catch(() => null);
+      if (d && d.country_code) {
+        countryCode = d.country_code.toUpperCase();
+        countryName = d.country_name || countryCode;
+      }
+    }
+    if (!countryCode) {
+      const fb = await fetch('https://ipwho.is/').catch(() => null);
+      if (fb && fb.ok) {
+        const d2 = await fb.json().catch(() => null);
+        if (d2 && d2.country_code) {
+          countryCode = d2.country_code.toUpperCase();
+          countryName = d2.country || countryCode;
+        }
+      }
+    }
+    countryCode = countryCode || 'LK';
+    const tier = resolveGeoTier(countryCode);
+    await chrome.storage.local.set({
+      countryCode: countryCode,
+      countryName: countryName || countryCode,
+      geoTier: tier
+    });
+  } catch (e) {}
+}
+
 async function getFullState() {
   const current = await chrome.storage.local.get(null);
   const state = { ...DEFAULT_STATE, ...(current || {}) };
@@ -97,6 +175,9 @@ async function getFullState() {
     state.isExplicitSignOut = false;
   }
   state.pausedDomains = Array.isArray(state.pausedDomains) ? state.pausedDomains : [];
+  state.geoTier = typeof state.geoTier === 'number' ? state.geoTier : 3;
+  state.countryCode = state.countryCode ? String(state.countryCode).toUpperCase() : 'LK';
+  state.recentImpressionTimestamps = Array.isArray(state.recentImpressionTimestamps) ? state.recentImpressionTimestamps : [];
 
   return state;
 }
@@ -362,6 +443,7 @@ async function checkAndPerformDailyReset() {
 
 chrome.runtime.onInstalled.addListener(async () => {
   console.log('[Surfkit Background] Extension installed/updated.');
+  await detectAndStoreGeoLocation();
   await syncFromSupabase();
   const state = await getFullState();
   updateBadge(state.masterEnabled, state.balanceUsd);
@@ -559,33 +641,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             sendResponse({ success: false, error: 'Sign in required to view ads and earn rewards' });
             break;
           }
-          // Preserving daily earnings/impressions monotonically
 
           const domain = (payload && (payload.website_domain || payload.domain)) || 'web';
-          const multiplier = state.multipliers[state.intensity] || 1.2;
-          const rewardUsd = parseFloat((state.baseRewardPerAd * multiplier).toFixed(4));
-          const slicesEarned = Math.round(rewardUsd / state.conversionRate);
+          // Geo-Tier based dynamic reward calculation (Tier 1: ~$0.0025, Tier 3: ~$0.0003)
+          const rewardUsd = parseFloat(calculateGeoTierReward(state).toFixed(6));
+          const slicesEarned = 10; // Standard 10 Surf Creds per ad impression
 
-          let newBal = parseFloat((state.balanceUsd + rewardUsd).toFixed(4));
-          let newDaily = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(4));
+          let newBal = parseFloat((state.balanceUsd + rewardUsd).toFixed(6));
+          let newDaily = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(6));
           let newDailyImp = (state.adsSeenToday || 0) + 1;
           let newLifetimeImp = ((state.stats && state.stats.totalImpressions) || 0) + 1;
           const streakRes = calculateUpdatedStreak(state.lastActiveDate, state.activeStreakDays);
           let newStreak = streakRes.streak;
           state.lastActiveDate = streakRes.lastActiveDate;
 
+          // Track hourly impression timestamps for strict frequency limit enforcement
+          const nowTs = Date.now();
+          state.recentImpressionTimestamps = (state.recentImpressionTimestamps || [])
+            .filter(ts => (nowTs - ts) < 3600000);
+          state.recentImpressionTimestamps.push(nowTs);
+
           state.balanceUsd = newBal;
           state.dailyEarnings = newDaily;
-          state.tokensEarned = Math.round(newBal / state.conversionRate);
+          state.tokensEarned = (state.tokensEarned || 0) + slicesEarned;
           state.adsSeenToday = newDailyImp;
           state.activeStreakDays = newStreak;
+          state.stats = state.stats || {};
           state.stats.totalImpressions = newLifetimeImp;
-          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(4));
+          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(6));
 
           await chrome.storage.local.set(state);
           updateBadge(state.masterEnabled, state.balanceUsd);
 
-          // Persist to Supabase atomically (updates profiles daily_impressions, ad_impressions, activity_ledger, daily_earnings_history)
+          // Persist to Supabase atomically
           if (currentUser && currentUser.id) {
             SurfkitSupabase.recordAdImpression(
               currentUser.id,
@@ -605,7 +693,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             dailyEarnings: state.dailyEarnings,
             tokensEarned: state.tokensEarned,
             adsSeenToday: state.adsSeenToday,
-            activeStreakDays: state.activeStreakDays
+            activeStreakDays: state.activeStreakDays,
+            geoTier: state.geoTier || 3
           });
           break;
         }
@@ -625,8 +714,42 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         case 'CHECK_TAB_STATUS': {
           const reqDomain = (payload && payload.domain) ? payload.domain.toLowerCase() : '';
           const isPaused = state.pausedDomains.includes(reqDomain);
-          const intervalMs = state.adIntervals[state.intensity] || 30000;
-          const mult = state.multipliers[state.intensity] || 1.2;
+          const intensity = state.intensity || 'balanced';
+
+          // Strict hourly frequency by intensity:
+          // Low: Exactly 2/hr (30m interval)
+          // Balanced: Exactly 4/hr (15m interval)
+          // High: Exactly 6/hr (10m interval)
+          const hourlyLimits = { low: 2, balanced: 4, high: 6 };
+          const minIntervals = { low: 1800000, balanced: 900000, high: 600000 };
+
+          const maxPerHour = hourlyLimits[intensity] || 4;
+          const minIntervalMs = minIntervals[intensity] || 900000;
+
+          // Prune timestamps older than 1 rolling hour
+          const now = Date.now();
+          state.recentImpressionTimestamps = (state.recentImpressionTimestamps || [])
+            .filter(ts => (now - ts) < 3600000);
+
+          const countInPastHour = state.recentImpressionTimestamps.length;
+          const lastImpressionTs = state.recentImpressionTimestamps.length > 0
+            ? Math.max(...state.recentImpressionTimestamps)
+            : 0;
+
+          const timeSinceLast = now - lastImpressionTs;
+          const underHourlyLimit = countInPastHour < maxPerHour;
+          const intervalElapsed = timeSinceLast >= minIntervalMs;
+
+          // Ad is allowed right now only if under hourly cap and interval has elapsed
+          const canShowNow = underHourlyLimit && (lastImpressionTs === 0 || intervalElapsed);
+
+          let nextDelayMs = minIntervalMs;
+          if (!underHourlyLimit && state.recentImpressionTimestamps.length > 0) {
+            const oldestTs = Math.min(...state.recentImpressionTimestamps);
+            nextDelayMs = Math.max(5000, 3600000 - (now - oldestTs) + 1000);
+          } else if (!intervalElapsed && lastImpressionTs > 0) {
+            nextDelayMs = Math.max(5000, minIntervalMs - timeSinceLast);
+          }
 
           sendResponse({
             success: true,
@@ -634,11 +757,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             isOperational: Boolean(currentUser && currentUser.id) && state.masterEnabled && !isPaused,
             masterEnabled: state.masterEnabled,
             isDomainPaused: isPaused,
-            intervalMs: intervalMs,
-            multiplier: mult,
-            intensity: state.intensity || 'balanced',
-            baseReward: state.baseRewardPerAd || 0.024,
-            conversionRate: state.conversionRate || 0.001
+            intensity: intensity,
+            hourlyLimit: maxPerHour,
+            intervalMs: minIntervalMs,
+            nextDelayMs: nextDelayMs,
+            canShowNow: canShowNow,
+            geoTier: state.geoTier || 3,
+            countryCode: state.countryCode || 'LK'
           });
           break;
         }
@@ -679,7 +804,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }).catch(() => {});
           }
 
-          broadcastToAllTabs({ action: 'INTENSITY_CHANGED', payload: { intensity, interval: state.adIntervals[intensity], multiplier: state.multipliers[intensity] } });
+          const newHourlyInterval = { low: 1800000, balanced: 900000, high: 600000 }[intensity] || 900000;
+          broadcastToAllTabs({ action: 'INTENSITY_CHANGED', payload: { intensity, interval: newHourlyInterval, hourlyLimit: { low: 2, balanced: 4, high: 6 }[intensity] } });
           broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
           sendResponse({ success: true, intensity });
           break;
@@ -814,23 +940,25 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
             sendResponse({ success: false, error: 'Sign in required to view ads and earn rewards' });
             break;
           }
-          // Preserving daily earnings/impressions monotonically
 
           const domain = (payload && (payload.domain || payload.website_domain)) || 'web-dashboard';
-          const multiplier = state.multipliers[state.intensity] || 1.2;
-          const rewardUsd = parseFloat((state.baseRewardPerAd * multiplier).toFixed(4));
-          const slicesEarned = Math.round(rewardUsd / state.conversionRate);
+          const rewardUsd = parseFloat(calculateGeoTierReward(state).toFixed(6));
+          const slicesEarned = 10;
 
-          state.balanceUsd = parseFloat((state.balanceUsd + rewardUsd).toFixed(4));
-          state.dailyEarnings = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(4));
-          state.tokensEarned = Math.round(state.balanceUsd / state.conversionRate);
+          state.balanceUsd = parseFloat((state.balanceUsd + rewardUsd).toFixed(6));
+          state.dailyEarnings = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(6));
+          state.tokensEarned = (state.tokensEarned || 0) + slicesEarned;
           state.adsSeenToday = (state.adsSeenToday || 0) + 1;
           const extStreakRes = calculateUpdatedStreak(state.lastActiveDate, state.activeStreakDays);
           state.activeStreakDays = extStreakRes.streak;
           state.lastActiveDate = extStreakRes.lastActiveDate;
           state.stats = state.stats || {};
           state.stats.totalImpressions = (state.stats.totalImpressions || 0) + 1;
-          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(4));
+          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(6));
+
+          const nowExt = Date.now();
+          state.recentImpressionTimestamps = (state.recentImpressionTimestamps || []).filter(ts => (nowExt - ts) < 3600000);
+          state.recentImpressionTimestamps.push(nowExt);
 
           await chrome.storage.local.set(state);
           updateBadge(state.masterEnabled, state.balanceUsd);
@@ -865,7 +993,8 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
           if (currentUser && currentUser.id) {
             SurfkitSupabase.updateProfileSetting(currentUser.id, { ad_intensity: intensity }).catch(() => {});
           }
-          broadcastToAllTabs({ action: 'INTENSITY_CHANGED', payload: { intensity, interval: state.adIntervals[intensity], multiplier: state.multipliers[intensity] } });
+          const newHourlyInterval = { low: 1800000, balanced: 900000, high: 600000 }[intensity] || 900000;
+          broadcastToAllTabs({ action: 'INTENSITY_CHANGED', payload: { intensity, interval: newHourlyInterval, hourlyLimit: { low: 2, balanced: 4, high: 6 }[intensity] } });
           broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
           sendResponse({ success: true, intensity });
           break;

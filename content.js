@@ -1,37 +1,43 @@
 /**
  * Surfkit - Injected Content Script (Manifest V3)
- * Implements attention verification, Shadow DOM isolated ad slice injection,
- * real-time reward countdowns, dynamic frequency/intensity rotation,
- * and hosted A-Ads frame integration.
+ * Implements:
+ * 1. Bottom-right positioning (bottom: 20px; right: 20px) with compact 300x250 wrapped layout.
+ * 2. Header with SURFKIT branding and close (×) button ONLY (no cash/earning counter badge).
+ * 3. Strict hourly frequency adherence by intensity (Low: 2/hr, Balanced: 4/hr, High: 6/hr).
+ * 4. Manual close cooldown (card will not pop up again until the scheduled interval elapses).
+ * 5. Full Shadow DOM style isolation to prevent host page CSS interference.
  */
 
 (() => {
   'use strict';
 
-  // Prevent duplicate execution on the same frame or document
+  // Prevent duplicate execution on the same document or frame
   if (window.__SURFKIT_INITIALIZED__) return;
   window.__SURFKIT_INITIALIZED__ = true;
 
   const currentDomain = window.location.hostname.toLowerCase();
 
-  // Cross-browser API adapter (Chrome & Firefox)
+  // Cross-browser runtime adapter (Chrome & Firefox)
   const browserAPI = typeof chrome !== 'undefined' && chrome.runtime ? chrome : (typeof browser !== 'undefined' ? browser : null);
 
-  // Frequency and intensity timing & multiplier configuration
-  const INTENSITY_CONFIG = {
+  // Strict hourly frequency configuration:
+  // Low: Exactly 2 impressions / hour (30-minute interval = 1,800,000 ms)
+  // Balanced: Exactly 4 impressions / hour (15-minute interval = 900,000 ms)
+  // High: Exactly 6 impressions / hour (10-minute interval = 600,000 ms)
+  const HOURLY_CONFIG = {
     low: {
-      intervalMs: 60000, // 60s between impressions
-      multiplier: 1.0,
+      maxPerHour: 2,
+      intervalMs: 1800000, // 30 min
       label: 'Low'
     },
     balanced: {
-      intervalMs: 30000, // 30s standard interval
-      multiplier: 1.2,
+      maxPerHour: 4,
+      intervalMs: 900000,  // 15 min
       label: 'Balanced'
     },
     high: {
-      intervalMs: 15000, // 15s frequent rotation
-      multiplier: 2.0,
+      maxPerHour: 6,
+      intervalMs: 600000,  // 10 min
       label: 'High'
     }
   };
@@ -43,19 +49,18 @@
     masterEnabled: true,
     isDomainPaused: false,
     intensity: 'balanced',
-    intervalMs: 30000,
-    multiplier: 1.2,
-    baseReward: 0.024,
-    conversionRate: 0.001
+    intervalMs: 900000,
+    hourlyLimit: 4
   };
 
   let scheduleTimer = null;
   let activeAdElement = null;
   let activeCountdownTimer = null;
+  let localCooldownUntil = 0; // Timestamp when next ad is permitted after close or view
 
   /**
    * Safe wrapper around browser messaging.
-   * Protects against "Extension context invalidated" errors when tabs outlive service worker cycles.
+   * Protects against "Extension context invalidated" errors across service worker recycles.
    */
   function safeSendMessage(message, callback) {
     try {
@@ -66,7 +71,6 @@
       if (typeof callback === 'function') {
         browserAPI.runtime.sendMessage(message, (res) => {
           if (browserAPI.runtime.lastError) {
-            // Ignore benign disconnection errors
             callback(null);
             return;
           }
@@ -94,26 +98,27 @@
   }
 
   /**
-   * Initialize tab configuration and start attention scheduling loop
+   * Initialize tab configuration and check hourly eligibility
    */
   async function init() {
     try {
-      // 1. Direct storage read for fast warm start
+      // 1. Warm start from storage
       if (browserAPI && browserAPI.storage && browserAPI.storage.local) {
-        browserAPI.storage.local.get(['intensity', 'masterEnabled', 'pausedDomains', 'authUser', 'baseRewardPerAd', 'conversionRate'], (stored) => {
+        browserAPI.storage.local.get(['intensity', 'masterEnabled', 'pausedDomains', 'authUser', 'ad_cooldown_until'], (stored) => {
           if (stored) {
-            if (stored.intensity && INTENSITY_CONFIG[stored.intensity]) {
+            if (stored.intensity && HOURLY_CONFIG[stored.intensity]) {
               config.intensity = stored.intensity;
-              config.intervalMs = INTENSITY_CONFIG[stored.intensity].intervalMs;
-              config.multiplier = INTENSITY_CONFIG[stored.intensity].multiplier;
+              config.intervalMs = HOURLY_CONFIG[stored.intensity].intervalMs;
+              config.hourlyLimit = HOURLY_CONFIG[stored.intensity].maxPerHour;
             }
             if (typeof stored.masterEnabled === 'boolean') {
               config.masterEnabled = stored.masterEnabled;
             }
-            if (stored.baseRewardPerAd) config.baseReward = Number(stored.baseRewardPerAd);
-            if (stored.conversionRate) config.conversionRate = Number(stored.conversionRate);
             if (Array.isArray(stored.pausedDomains)) {
               config.isDomainPaused = stored.pausedDomains.includes(currentDomain);
+            }
+            if (stored.ad_cooldown_until && typeof stored.ad_cooldown_until === 'number') {
+              localCooldownUntil = Math.max(localCooldownUntil, stored.ad_cooldown_until);
             }
             config.hasAuthUser = Boolean(stored.authUser && stored.authUser.id);
             config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
@@ -121,7 +126,7 @@
         });
       }
 
-      // 2. Query background service worker for authoritative operational status
+      // 2. Query background service worker for authoritative tab status & hourly eligibility
       const response = await safeSendMessage({
         action: 'CHECK_TAB_STATUS',
         payload: { domain: currentDomain }
@@ -129,15 +134,22 @@
 
       if (response && response.success) {
         config = { ...config, ...response };
-        if (response.intensity && INTENSITY_CONFIG[response.intensity]) {
+        if (response.intensity && HOURLY_CONFIG[response.intensity]) {
           config.intensity = response.intensity;
-          config.intervalMs = INTENSITY_CONFIG[response.intensity].intervalMs;
-          config.multiplier = INTENSITY_CONFIG[response.intensity].multiplier;
+          config.intervalMs = HOURLY_CONFIG[response.intensity].intervalMs;
+          config.hourlyLimit = HOURLY_CONFIG[response.intensity].maxPerHour;
         }
         config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
 
         if (config.isOperational) {
-          scheduleNextAd(config.intervalMs);
+          if (response.canShowNow && Date.now() >= localCooldownUntil) {
+            // Can show ad right now
+            scheduleNextAd(1500); // 1.5s initial settle delay
+          } else {
+            // Schedule for the remaining wait duration
+            const waitMs = Math.max(5000, Math.max(response.nextDelayMs || 0, localCooldownUntil - Date.now()));
+            scheduleNextAd(waitMs);
+          }
         } else {
           clearTimersAndAd();
         }
@@ -148,7 +160,7 @@
   }
 
   /**
-   * Schedule the next periodic attention ad based on active intensity
+   * Schedule the next periodic attention ad based on strict hourly interval
    */
   function scheduleNextAd(delayMs) {
     clearTimeout(scheduleTimer);
@@ -160,19 +172,33 @@
 
     const waitTime = typeof delayMs === 'number' ? delayMs : config.intervalMs;
 
-    scheduleTimer = setTimeout(() => {
-      // Only render if document is currently focused/visible and no ad is currently displayed
-      if (document.visibilityState === 'visible' && !activeAdElement) {
-        renderFloatingAd({ simulated: false });
-      } else {
-        // Tab is hidden or ad is currently showing; retry after short interval
-        scheduleNextAd(Math.min(10000, config.intervalMs));
+    scheduleTimer = setTimeout(async () => {
+      // Re-verify with background service worker to enforce strict hourly limits
+      const statusRes = await safeSendMessage({
+        action: 'CHECK_TAB_STATUS',
+        payload: { domain: currentDomain }
+      });
+
+      if (statusRes && statusRes.success) {
+        config.isOperational = Boolean(statusRes.isOperational);
+        config.masterEnabled = statusRes.masterEnabled;
+        config.isDomainPaused = statusRes.isDomainPaused;
+
+        if (statusRes.canShowNow && Date.now() >= localCooldownUntil) {
+          if (document.visibilityState === 'visible' && !activeAdElement) {
+            renderFloatingAd({ simulated: false });
+            return;
+          }
+        }
+        // If limit reached, paused, or tab hidden, reschedule for the recommended next delay
+        const nextDelay = Math.max(10000, statusRes.nextDelayMs || config.intervalMs);
+        scheduleNextAd(nextDelay);
       }
     }, waitTime);
   }
 
   /**
-   * Clears all pending timers and removes active ad element
+   * Clear all pending timers and remove active ad slice
    */
   function clearTimersAndAd() {
     if (scheduleTimer) {
@@ -192,10 +218,11 @@
   }
 
   /**
-   * Render isolated floating ad slice card via Shadow DOM in the bottom-left corner
+   * Render isolated floating ad slice card via Shadow DOM in the BOTTOM-RIGHT corner.
+   * Compact 300x250 wrapped container, clean header with SURFKIT branding + close button ONLY.
    */
   function renderFloatingAd(options = {}) {
-    // Strict guard: only render when extension is active, user is authenticated, and no ad is currently displayed
+    // Guard: only render when operational, logged in, and no active ad is visible
     if (!options.simulated && (!config.hasAuthUser || !config.isOperational || activeAdElement)) {
       return;
     }
@@ -204,28 +231,22 @@
       activeAdElement = null;
     }
 
-    // Dynamic reward calculation based on user's active intensity
-    const intensitySetting = INTENSITY_CONFIG[config.intensity] || INTENSITY_CONFIG.balanced;
-    const currentMultiplier = intensitySetting.multiplier || config.multiplier || 1.2;
-    const estimatedReward = (config.baseReward * currentMultiplier).toFixed(3);
-    const estimatedTokens = Math.round(parseFloat(estimatedReward) / config.conversionRate);
-
-    // Host element placed in bottom-left corner with highest z-index
+    // Host element strictly anchored to the BOTTOM-RIGHT corner
     const host = document.createElement('div');
     host.id = 'surfkit-ad-slice-host';
     host.style.position = 'fixed';
     host.style.bottom = '20px';
-    host.style.left = '20px';
+    host.style.right = '20px';
     host.style.width = '300px';
-    host.style.height = '250px';
+    host.style.height = '280px';
     host.style.zIndex = '2147483647';
     host.style.pointerEvents = 'auto';
     host.style.colorScheme = 'dark';
 
-    // Attach open Shadow DOM for complete CSS isolation from host webpage
+    // Attach open Shadow DOM for complete CSS isolation from the host page
     const shadow = host.attachShadow({ mode: 'open' });
 
-    // Scoped Stylesheet for the Ad Slice Card
+    // Scoped Stylesheet for the Compact Bottom-Right Card
     const style = document.createElement('style');
     style.textContent = `
       :host {
@@ -241,22 +262,22 @@
       }
       .surfkit-card {
         width: 300px;
-        height: 250px;
+        height: 280px;
         background: #0c121e;
         border: 1px solid #1e2d42;
-        border-radius: 12px;
-        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 210, 147, 0.25), 0 0 24px rgba(0, 210, 147, 0.08);
+        border-radius: 10px;
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(0, 210, 147, 0.22);
         color: #e2e8f0;
         overflow: hidden;
         display: flex;
         flex-direction: column;
-        animation: surfkitSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        animation: surfkitSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         transition: transform 0.22s ease, opacity 0.22s ease;
       }
       @keyframes surfkitSlideIn {
         from {
           opacity: 0;
-          transform: translateY(25px) scale(0.96);
+          transform: translateY(20px) scale(0.96);
         }
         to {
           opacity: 1;
@@ -267,8 +288,8 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        height: 32px;
-        padding: 0 10px;
+        height: 28px;
+        padding: 0 8px;
         background: #111a2b;
         border-bottom: 1px solid #1a273b;
         flex-shrink: 0;
@@ -279,15 +300,15 @@
         gap: 6px;
       }
       .logo-pill {
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         background: linear-gradient(135deg, #00d293, #06b6d4);
         border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 800;
-        font-size: 10px;
+        font-size: 9px;
         color: #0b111d;
       }
       .brand-title {
@@ -296,29 +317,6 @@
         color: #ffffff;
         letter-spacing: 0.6px;
         text-transform: uppercase;
-      }
-      .header-actions {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .reward-pill {
-        font-size: 10px;
-        font-weight: 700;
-        color: #00d293;
-        background: rgba(0, 210, 147, 0.12);
-        border: 1px solid rgba(0, 210, 147, 0.3);
-        padding: 1.5px 6px;
-        border-radius: 9999px;
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        transition: all 0.2s ease;
-      }
-      .reward-pill.awarded {
-        color: #0b111d;
-        background: #00d293;
-        border-color: #00d293;
       }
       .close-btn {
         background: transparent;
@@ -340,22 +338,22 @@
         background: rgba(255, 255, 255, 0.08);
       }
       .surfkit-body {
-        flex: 1;
-        width: 100%;
-        height: calc(250px - 35px);
+        width: 300px;
+        height: 250px;
         background: #090e17;
         overflow: hidden;
         position: relative;
+        flex-shrink: 0;
       }
       .aads-frame {
-        width: 100%;
-        height: 100%;
+        width: 300px;
+        height: 250px;
         border: 0;
         display: block;
         background: transparent;
       }
       .progress-track {
-        height: 3px;
+        height: 2px;
         width: 100%;
         background: #172338;
         overflow: hidden;
@@ -369,7 +367,7 @@
       }
     `;
 
-    // HTML Structure
+    // HTML Structure: Header has ONLY branding and close button. ZERO cash/earning badge.
     const card = document.createElement('div');
     card.className = 'surfkit-card';
     card.innerHTML = `
@@ -378,10 +376,7 @@
           <div class="logo-pill">S</div>
           <span class="brand-title">SURFKIT</span>
         </div>
-        <div class="header-actions">
-          <span class="reward-pill" id="reward-pill">+ $${estimatedReward}</span>
-          <button class="close-btn" id="close-btn" title="Dismiss Ad Slice" aria-label="Close">&times;</button>
-        </div>
+        <button class="close-btn" id="close-btn" title="Dismiss Ad Slice" aria-label="Close">&times;</button>
       </div>
       <div class="surfkit-body">
         <iframe class="aads-frame"
@@ -401,29 +396,37 @@
     document.documentElement.appendChild(host);
     activeAdElement = host;
 
-    // Attention verification timer logic
-    const durationMs = 5000; // 5 seconds view attention
+    // Attention verification timer (5 seconds active visible attention)
+    const durationMs = 5000;
     const intervalTick = 50;
     let elapsedMs = 0;
     let rewardDispatched = false;
 
-    const rewardPill = shadow.getElementById('reward-pill');
     const progressFill = shadow.getElementById('progress-fill');
     const closeBtn = shadow.getElementById('close-btn');
 
-    // Dismissal handler (immediately hides and cleans up)
-    function dismissAd(completed) {
+    /**
+     * Dismiss the ad card and enforce strict cooldown until the next scheduled interval
+     */
+    function dismissAd(wasCompleted) {
       if (activeCountdownTimer) {
         clearInterval(activeCountdownTimer);
         activeCountdownTimer = null;
       }
+
+      // Enforce cooldown: do NOT pop up again until the full scheduled interval has elapsed
+      localCooldownUntil = Date.now() + config.intervalMs;
+      if (browserAPI && browserAPI.storage && browserAPI.storage.local) {
+        browserAPI.storage.local.set({ ad_cooldown_until: localCooldownUntil }).catch(() => {});
+      }
+
       if (host && host.parentNode) {
         card.style.opacity = '0';
-        card.style.transform = 'translateY(20px) scale(0.95)';
+        card.style.transform = 'translateY(15px) scale(0.96)';
         setTimeout(() => {
           if (host.parentNode) host.parentNode.removeChild(host);
           activeAdElement = null;
-          // Reschedule next regular ad interval
+          // Reschedule next check strictly after the full interval
           scheduleNextAd(config.intervalMs);
         }, 220);
       } else {
@@ -432,7 +435,7 @@
       }
     }
 
-    // Close button click listener: immediately dismiss without reward
+    // Manual close action: immediately dismiss without reward, start full interval cooldown
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
@@ -440,7 +443,7 @@
     });
 
     activeCountdownTimer = setInterval(() => {
-      // Pause countdown if user switches tabs or window loses focus
+      // Pause countdown if user minimizes or switches away from the active tab
       if (document.visibilityState !== 'visible') return;
 
       elapsedMs += intervalTick;
@@ -452,31 +455,23 @@
         clearInterval(activeCountdownTimer);
         activeCountdownTimer = null;
 
-        if (rewardPill) {
-          rewardPill.textContent = `✓ +${estimatedTokens} SKIT Credited!`;
-          rewardPill.classList.add('awarded');
-        }
-
-        // Notify background service worker of verified impression
+        // Dispatch impression to background service worker for Geo-Tier calculation
         safeSendMessage({
           action: 'RECORD_AD_IMPRESSION',
           payload: {
             domain: currentDomain,
-            website_domain: currentDomain,
-            slices_earned: estimatedTokens,
-            reward_usd: parseFloat(estimatedReward),
-            multiplier: currentMultiplier
+            website_domain: currentDomain
           }
         }, (res) => {
           if (res && res.success) {
-            console.log('[Surfkit Content] Impression credited live! New balance: $' + res.balanceUsd);
+            console.log('[Surfkit Content] Verified impression recorded cleanly.');
           }
         });
 
-        // Auto-dismiss 1.8 seconds after rewarding
+        // Smoothly dismiss 1.2s after completion
         setTimeout(() => {
           dismissAd(true);
-        }, 1800);
+        }, 1200);
       }
     }, intervalTick);
   }
@@ -497,15 +492,16 @@
         }
 
         case 'INTENSITY_CHANGED': {
-          if (payload && payload.intensity && INTENSITY_CONFIG[payload.intensity]) {
-            const setting = INTENSITY_CONFIG[payload.intensity];
+          if (payload && payload.intensity && HOURLY_CONFIG[payload.intensity]) {
+            const setting = HOURLY_CONFIG[payload.intensity];
             config.intensity = payload.intensity;
-            config.intervalMs = payload.interval || setting.intervalMs;
-            config.multiplier = payload.multiplier || setting.multiplier;
+            config.intervalMs = setting.intervalMs;
+            config.hourlyLimit = setting.maxPerHour;
 
-            // Reschedule next ad with new frequency if no ad is currently displayed
+            // If no ad is showing, reschedule for the new interval
             if (!activeAdElement && config.isOperational) {
-              scheduleNextAd(config.intervalMs);
+              const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+              scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
             }
           }
           sendResponse({ success: true, intensity: config.intensity, interval: config.intervalMs });
@@ -530,19 +526,20 @@
           if (payload && typeof payload.masterEnabled === 'boolean') {
             config.masterEnabled = payload.masterEnabled;
           }
-          if (payload && payload.intensity && INTENSITY_CONFIG[payload.intensity]) {
+          if (payload && payload.intensity && HOURLY_CONFIG[payload.intensity]) {
             config.intensity = payload.intensity;
-            config.intervalMs = INTENSITY_CONFIG[payload.intensity].intervalMs;
-            config.multiplier = INTENSITY_CONFIG[payload.intensity].multiplier;
+            config.intervalMs = HOURLY_CONFIG[payload.intensity].intervalMs;
+            config.hourlyLimit = HOURLY_CONFIG[payload.intensity].maxPerHour;
           }
 
           config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
 
-          // If extension turned off or logged out, immediately hide card and cancel timers
+          // If turned off or signed out, immediately hide card and cancel timers
           if (!config.isOperational) {
             clearTimersAndAd();
           } else if (!scheduleTimer && !activeAdElement) {
-            scheduleNextAd(config.intervalMs);
+            const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+            scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
           }
           break;
         }
@@ -555,7 +552,8 @@
             if (!config.isOperational) {
               clearTimersAndAd();
             } else if (!scheduleTimer && !activeAdElement) {
-              scheduleNextAd(config.intervalMs);
+              const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+              scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
             }
           }
           break;
@@ -565,18 +563,19 @@
     });
   }
 
-  // Live storage change sync
+  // Storage changes synchronization
   if (browserAPI && browserAPI.storage && browserAPI.storage.onChanged) {
     browserAPI.storage.onChanged.addListener((changes, area) => {
       if (area !== 'local' || !changes) return;
 
-      if (changes.intensity && changes.intensity.newValue && INTENSITY_CONFIG[changes.intensity.newValue]) {
+      if (changes.intensity && changes.intensity.newValue && HOURLY_CONFIG[changes.intensity.newValue]) {
         const val = changes.intensity.newValue;
         config.intensity = val;
-        config.intervalMs = INTENSITY_CONFIG[val].intervalMs;
-        config.multiplier = INTENSITY_CONFIG[val].multiplier;
+        config.intervalMs = HOURLY_CONFIG[val].intervalMs;
+        config.hourlyLimit = HOURLY_CONFIG[val].maxPerHour;
         if (!activeAdElement && config.isOperational) {
-          scheduleNextAd(config.intervalMs);
+          const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+          scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
         }
       }
 
@@ -586,7 +585,8 @@
         if (!config.isOperational) {
           clearTimersAndAd();
         } else if (!scheduleTimer && !activeAdElement) {
-          scheduleNextAd(config.intervalMs);
+          const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+          scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
         }
       }
 
@@ -596,7 +596,8 @@
         if (!config.isOperational) {
           clearTimersAndAd();
         } else if (!scheduleTimer && !activeAdElement) {
-          scheduleNextAd(config.intervalMs);
+          const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+          scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
         }
       }
 
@@ -606,15 +607,14 @@
         if (!config.isOperational) {
           clearTimersAndAd();
         } else if (!scheduleTimer && !activeAdElement) {
-          scheduleNextAd(config.intervalMs);
+          const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+          scheduleNextAd(Math.max(remainingCooldown, config.intervalMs));
         }
       }
     });
   }
 
-  // ========================================================
-  // BIDIRECTIONAL WEB DASHBOARD BRIDGE (surfkit.cloud)
-  // ========================================================
+  // Window bridge for web dashboard communication (surfkit.cloud)
   window.addEventListener('message', async (event) => {
     if (event.source !== window || !event.data || typeof event.data !== 'object') return;
     const { type, action, payload } = event.data;
@@ -655,11 +655,12 @@
     });
   } catch (e) {}
 
-  // Document visibility change listener to pause/resume scheduling
+  // Visibility change listener to resume checks when user returns to tab
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       if (config.isOperational && !scheduleTimer && !activeAdElement) {
-        scheduleNextAd(config.intervalMs);
+        const remainingCooldown = Math.max(0, localCooldownUntil - Date.now());
+        scheduleNextAd(Math.max(remainingCooldown, 2000));
       }
     }
   });
