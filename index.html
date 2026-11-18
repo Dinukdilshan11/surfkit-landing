@@ -2267,18 +2267,18 @@
         });
       }
 
-      // 2. Extension Live State Sync (Real dynamic data from background storage & extension)
+      // 2. Real Extension Popup Interactivity
+      // A. Live Balance & Ads Increment Ticker
       const balanceEl = document.getElementById('mockup-balance');
       const tokensEl = document.getElementById('mockup-tokens');
       const adsCountEl = document.getElementById('mockup-ads-count');
       const pinBadge = document.getElementById('pin-badge');
 
-            let currentUsd = 8.170;
+      let currentUsd = 8.170;
       let currentTokens = 8170;
       let currentAds = 180;
       let isExtensionActive = true;
 
-      // Interactive preview simulation ticker (smooth preview during local testing)
       setInterval(() => {
         if (!isExtensionActive) return;
         const deltaUsd = 0.005;
@@ -2295,34 +2295,6 @@
         if (adsCountEl) adsCountEl.textContent = `${currentAds}`;
         if (pinBadge) pinBadge.textContent = '$' + currentUsd.toFixed(2);
       }, 4000);
-
-
-      function updateMockupPreview(data) {
-        if (!data) return;
-        const bal = typeof data.balanceUsd === 'number' ? data.balanceUsd : parseFloat(data.balanceUsd || 0);
-        const tokens = typeof data.tokensEarned === 'number' ? data.tokensEarned : (data.tokens || Math.round(bal / 0.001));
-        const ads = typeof data.adsSeenToday === 'number' ? data.adsSeenToday : (data.totalImpressions || data.lifetimeImpressions || 0);
-
-        if (balanceEl && !isNaN(bal) && bal > 0) balanceEl.textContent = '$' + bal.toFixed(3);
-        if (tokensEl && !isNaN(tokens) && tokens > 0) tokensEl.textContent = `${tokens.toLocaleString()} SKIT`;
-        if (adsCountEl && !isNaN(ads) && ads > 0) adsCountEl.textContent = ${ads};
-        if (pinBadge && !isNaN(bal) && bal > 0) pinBadge.textContent = '$' + bal.toFixed(2);
-      }
-
-      // Listen for real state updates from extension
-      window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'SURFKIT_EXTENSION_STATE_UPDATE') {
-          updateMockupPreview(event.data.data);
-        }
-      });
-
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        try {
-          chrome.storage.local.get(['balanceUsd', 'tokensEarned', 'adsSeenToday', 'stats'], (res) => {
-            if (res) updateMockupPreview(res);
-          });
-        } catch (e) {}
-      }
 
       // B. Toggle Switch (Active & Ready vs Paused)
       const toggleBtn = document.getElementById('extension-toggle-btn');

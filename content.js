@@ -186,7 +186,7 @@
 
         if (statusRes.canShowNow && Date.now() >= localCooldownUntil) {
           if (document.visibilityState === 'visible' && !activeAdElement) {
-            renderFloatingAd({ forced: false });
+            renderFloatingAd({ simulated: false });
             return;
           }
         }
@@ -223,10 +223,10 @@
    */
   function renderFloatingAd(options = {}) {
     // Guard: only render when operational, logged in, and no active ad is visible
-    if (!options.forced && (!config.hasAuthUser || !config.isOperational || activeAdElement)) {
+    if (!options.simulated && (!config.hasAuthUser || !config.isOperational || activeAdElement)) {
       return;
     }
-    if (options.forced && activeAdElement) {
+    if (options.simulated && activeAdElement) {
       try { activeAdElement.remove(); } catch (e) {}
       activeAdElement = null;
     }
@@ -486,7 +486,7 @@
 
       switch (action) {
         case 'INJECT_AD_UNIT': {
-          renderFloatingAd({ forced: true });
+          renderFloatingAd({ simulated: true });
           sendResponse({ success: true, message: 'Ad slice injected' });
           break;
         }

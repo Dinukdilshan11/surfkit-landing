@@ -199,7 +199,7 @@
               <span id="ext-status-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-500"></span>
             </div>
             <div>
-              <p id="ext-status-text" class="text-xs font-semibold text-white">Checking...</p>
+              <p id="ext-status-text" class="text-xs font-semibold text-white">Connecting...</p>
               <p id="ext-status-sub" class="text-[10px] text-slate-400 font-medium">Detecting extension</p>
             </div>
           </div>
@@ -719,50 +719,43 @@ async function loadChartDataFromSupabase() {
     const liveEarn = Number(window._surfkitLiveTodayEarn ?? state?.user?.dailyEarnings ?? state?.dailyEarnings ?? 0);
     const liveImp  = Number(window._surfkitLiveTodayImp  ?? state?.user?.dailyImpressions ?? state?.dailyImpressions ?? 0);
 
-    // ── 3. Chart Assembly & Fallback Trend: 7-Day Window ────────────────────────
-    const hasHistory = Object.keys(dailyStatsMap).length > 0;
-    const samplePast7Earnings = [0.038, 0.052, 0.046, 0.078, 0.064, 0.089];
-    const samplePast7Imps     = [3, 5, 4, 7, 6, 8];
-
+    // ── 3. Chart Assembly & Zero-Filling: 7-Day Window ────────────────────────
     const labels7d = [];
     const earnings7d = [];
     const impressions7d = [];
+    // Past historical dates come exclusively from daily_earnings_history
     for (let i = 6; i >= 1; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dateKey = d.toISOString().substring(0, 10);
         labels7d.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
-        let past = dailyStatsMap[dateKey];
-        if (!past) {
-            past = hasHistory ? { earnings: 0, impressions: 0 } : { earnings: samplePast7Earnings[6 - i] || 0.04, impressions: samplePast7Imps[6 - i] || 4 };
-        }
+        const past = dailyStatsMap[dateKey] || { earnings: 0, impressions: 0 };
         earnings7d.push(Number(Number(past.earnings || 0).toFixed(4)));
         impressions7d.push(Number(past.impressions || 0));
     }
+    // Final data point (Today) pushed directly from fetched profiles row
     labels7d.push('Today');
-    earnings7d.push(Number((liveEarn > 0 ? liveEarn : (hasHistory ? 0 : 0.096)).toFixed(4)));
-    impressions7d.push(Number(liveImp > 0 ? liveImp : (hasHistory ? 0 : 9)));
+    earnings7d.push(Number(liveEarn.toFixed(4)));
+    impressions7d.push(Number(liveImp));
 
-    // ── 3b. Chart Assembly & Fallback Trend: 30-Day Window ───────────────────────
+    // ── 3b. Chart Assembly & Zero-Filling: 30-Day Window ───────────────────────
     const labels30d = [];
     const earnings30d = [];
     const impressions30d = [];
+    // Past historical dates come exclusively from daily_earnings_history
     for (let i = 29; i >= 1; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dateKey = d.toISOString().substring(0, 10);
         labels30d.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-        let past = dailyStatsMap[dateKey];
-        if (!past) {
-            const cycle = (i % 6);
-            past = hasHistory ? { earnings: 0, impressions: 0 } : { earnings: Number((0.035 + cycle * 0.012).toFixed(4)), impressions: 3 + cycle };
-        }
+        const past = dailyStatsMap[dateKey] || { earnings: 0, impressions: 0 };
         earnings30d.push(Number(Number(past.earnings || 0).toFixed(4)));
         impressions30d.push(Number(past.impressions || 0));
     }
+    // Final data point (Today) pushed directly from fetched profiles row
     labels30d.push('Today');
-    earnings30d.push(Number((liveEarn > 0 ? liveEarn : (hasHistory ? 0 : 0.096)).toFixed(4)));
-    impressions30d.push(Number(liveImp > 0 ? liveImp : (hasHistory ? 0 : 9)));
+    earnings30d.push(Number(liveEarn.toFixed(4)));
+    impressions30d.push(Number(liveImp));
 
     if (typeof state !== 'undefined') {
         state.chartData7d = { labels: labels7d, earnings: earnings7d, impressions: impressions7d };
@@ -1010,39 +1003,28 @@ async function loadLeaderboardData() {
     const listContainer = document.getElementById('leaderboard-list');
     if (!listContainer) return;
 
-    const SAMPLE_LEADERBOARD = [
-        { id: 'usr-1', username: 'CryptoSurfer_99', display_name: 'CryptoSurfer_99', daily_earnings: 1.4820 },
-        { id: 'usr-2', username: 'Alex_Vortex', display_name: 'Alex_Vortex', daily_earnings: 1.2450 },
-        { id: 'usr-3', username: 'WebNode_Alpha', display_name: 'WebNode_Alpha', daily_earnings: 0.9850 },
-        { id: 'usr-4', username: 'SkitCollector', display_name: 'SkitCollector', daily_earnings: 0.8120 },
-        { id: 'usr-5', username: 'Neo_Matrix', display_name: 'Neo_Matrix', daily_earnings: 0.6540 },
-        { id: 'usr-6', username: 'AdStream_Pro', display_name: 'AdStream_Pro', daily_earnings: 0.5400 },
-        { id: 'usr-7', username: 'ZenithSurfer', display_name: 'ZenithSurfer', daily_earnings: 0.4280 },
-        { id: 'usr-8', username: 'PixelMaster', display_name: 'PixelMaster', daily_earnings: 0.3890 },
-        { id: 'usr-9', username: 'CyberWave', display_name: 'CyberWave', daily_earnings: 0.2950 },
-        { id: 'usr-10', username: 'EtherSurfer', display_name: 'EtherSurfer', daily_earnings: 0.2100 }
-    ];
-
     try {
-        let displayData = SAMPLE_LEADERBOARD;
-        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-            try {
-                const { data, error } = await supabaseClient
-                    .from('profiles')
-                    .select('id, username, display_name, daily_earnings')
-                    .order('daily_earnings', { ascending: false })
-                    .limit(10);
-                if (!error && data && data.length > 0) {
-                    displayData = data;
-                }
-            } catch (qErr) {
-                console.warn("[Leaderboard] Using fallback standings:", qErr);
-            }
+        // Fetching top 10 earners directly from profiles table using daily_earnings
+        const { data, error } = await supabaseClient
+            .from('profiles')
+            .select('id, username, display_name, daily_earnings')
+            .order('daily_earnings', { ascending: false })
+            .limit(10);
+
+        if (error) {
+            console.error("Profiles Leaderboard Error:", error.message);
+            listContainer.innerHTML = `<div class="text-center py-8 text-xs text-rose-400">Failed to load leaderboard standings.</div>`;
+            return;
+        }
+
+        if (!data || data.length === 0) {
+            listContainer.innerHTML = `<div class="text-center py-8 text-xs text-slate-500">No active surfers found on the leaderboard yet.</div>`;
+            return;
         }
 
         listContainer.innerHTML = '';
 
-        displayData.forEach((user, index) => {
+        data.forEach((user, index) => {
             const rank = index + 1;
             const displayName = user.display_name || user.username || `Surfer_${user.id.substring(0, 6)}...`;
             const earnings = parseFloat(user.daily_earnings || 0);
@@ -1089,13 +1071,8 @@ async function loadLeaderboardData() {
         });
 
     } catch (err) {
-        // Graceful catch: show neutral placeholder, never an error
-        console.warn("[Leaderboard] Load notice:", err && err.message ? err.message : err);
-        listContainer.innerHTML = `<div class="text-center py-8 text-slate-500">
-          <div class="text-2xl mb-2">🏄</div>
-          <div class="text-xs font-semibold text-slate-400">Leaderboard syncing...</div>
-          <div class="text-[10px] text-slate-500 mt-1">Rankings update daily. Check back soon.</div>
-        </div>`;
+        console.error("Leaderboard Profiles Catch Error:", err);
+        listContainer.innerHTML = `<div class="text-center py-8 text-xs text-rose-400">Failed to load leaderboard standings.</div>`;
     }
 }
 
@@ -3423,26 +3400,7 @@ document.addEventListener('DOMContentLoaded', () => {
           trendChartInstance.update('none'); // instant live update
         }
       } catch (err) {
-        console.warn('[Dashboard] Data sync notice:', err && err.message ? err.message : err);
-        // Even if Supabase sync fails, ensure UI renders with whatever state we have
-        if (typeof renderApp === 'function') {
-          saveState();
-          renderApp();
-        }
-        // Ensure chart always shows something — zero baseline at minimum
-        if (typeof trendChartInstance !== 'undefined' && trendChartInstance) {
-          if (!state.chartData7d || !Array.isArray(state.chartData7d.labels)) {
-            state.chartData7d = generateZeroChartData(7);
-            state.chartData30d = generateZeroChartData(30);
-          }
-          const dataToUse = state.chartData7d;
-          trendChartInstance.data.labels = dataToUse.labels;
-          trendChartInstance.data.datasets[0].data = [...dataToUse.earnings];
-          trendChartInstance.data.datasets[1].data = [...dataToUse.impressions];
-          trendChartInstance.update('none');
-        } else if (typeof initChart === 'function') {
-          initChart();
-        }
+        console.error('Data sync error:', err);
       }
     }
 
@@ -4119,13 +4077,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       if (filtered.length === 0) {
-        // Fallback sample activities during initial load / local testing
-        filtered = [
-          { id: 'act-sample-1', type: 'Ad Earnings', amount: 0.015, method: 'Google Search - 3 Ads', date: 'Today', status: 'Credited' },
-          { id: 'act-sample-2', type: 'Ad Earnings', amount: 0.024, method: 'YouTube Video - 2 Sponsored Slices', date: 'Today', status: 'Credited' },
-          { id: 'act-sample-3', type: 'Ad Earnings', amount: 0.018, method: 'Reddit Feed - 3 In-Text Units', date: 'Yesterday', status: 'Credited' },
-          { id: 'act-sample-4', type: 'Ad Earnings', amount: 0.028, method: 'Twitter/X Feed - 4 Impression Nodes', date: '2 days ago', status: 'Credited' }
-        ];
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" class="py-10 text-center text-slate-400">
+              <div class="flex flex-col items-center justify-center gap-2">
+                <span class="text-3xl">📋</span>
+                <span class="font-semibold text-white">No ledger activity records</span>
+                <span class="text-xs text-slate-500">Surf pages or trigger ad yield slices to generate live database transactions.</span>
+              </div>
+            </td>
+          </tr>
+        `;
+        if (paginationEl) paginationEl.innerHTML = '';
+        return;
       }
 
       // Calculate pagination slice
@@ -5655,7 +5619,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Security Vault preferences saved', 'success');
     }
 
-    // --- INTERACTIVE SIMULATOR (Real-Time Earning Simulation & Testing) ---
+    // --- INTERACTIVE SIMULATOR (Real-Time Earning Simulation) ---
     const SIMULATED_SITES = [
       { name: 'Google Search - 3 Ads', earn: 0.015, ads: 3 },
       { name: 'GitHub Repo - 1 Banner Slice', earn: 0.008, ads: 1 },
@@ -5683,16 +5647,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function simulateAdImpression() {
+      if (!currentUser || !currentUser.email) return; // No ads until user signs in
       playBeepSound();
       
       const sample = SIMULATED_SITES[Math.floor(Math.random() * SIMULATED_SITES.length)];
-      const ratePerCred = (state.user?.ratePer1k ? state.user.ratePer1k / 1000 : 0.0003);
+      const ratePerCred = (state.user.ratePer1k ? state.user.ratePer1k / 1000 : 0.0003);
       const credsEarned = (sample.ads || 1) * 10;
-      const earnedUsd = sample.earn || Number((credsEarned * ratePerCred).toFixed(4));
+      const earnedUsd = Number((credsEarned * ratePerCred).toFixed(4));
 
+      // Dispatch to Chrome Extension via adaptive bridge (direct or contentScript relay)
       try {
         dispatchToExtension('RECORD_AD_IMPRESSION', {
-          user_id: currentUser?.id || state.user?.id,
+          user_id: currentUser?.id,
           domain: window.location.hostname || 'web-dashboard',
           sponsor: sample.name,
           rewardUsd: earnedUsd,
@@ -5700,103 +5666,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       } catch (e) {}
       
-      state.user.availableBalance = Number(((state.user.availableBalance || 0) + earnedUsd).toFixed(4));
-      state.user.lifetimeEarnings = Number(((state.user.lifetimeEarnings || 0) + earnedUsd).toFixed(4));
-      state.user.lifetimeImpressions = (state.user.lifetimeImpressions || 0) + sample.ads;
+      state.user.availableBalance += earnedUsd;
+      state.user.lifetimeEarnings += earnedUsd;
+      state.user.lifetimeImpressions += sample.ads;
       state.user.dailyImpressions = (state.user.dailyImpressions || 0) + (sample.ads || 1);
-      state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + earnedUsd).toFixed(4));
-
-      const todayDateStr = new Date().toISOString().substring(0, 10);
-      let newStreak = state.user.streakDays || 1;
-      if (state.user.lastActiveDate !== todayDateStr) {
-        if (state.user.lastActiveDate) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yestDateStr = yesterday.toISOString().substring(0, 10);
-          if (state.user.lastActiveDate === yestDateStr) {
-            newStreak += 1;
-          } else {
-            newStreak = 1;
-          }
-        }
-        state.user.streakDays = newStreak;
-        state.user.lastActiveDate = todayDateStr;
-      }
-
-      state.activityLedger.unshift({
-        id: 'act-' + Date.now(),
-        type: 'Ad Earnings',
-        amount: earnedUsd,
-        method: sample.name,
-        date: 'Today',
-        status: 'Credited'
-      });
-
-      const lastIndex7 = state.chartData7d?.earnings ? state.chartData7d.earnings.length - 1 : -1;
-      if (lastIndex7 >= 0) {
-        state.chartData7d.earnings[lastIndex7] = Number(((state.chartData7d.earnings[lastIndex7] || 0) + earnedUsd).toFixed(4));
-        state.chartData7d.impressions[lastIndex7] = (state.chartData7d.impressions[lastIndex7] || 0) + sample.ads;
-      }
-      const lastIndex30 = state.chartData30d?.earnings ? state.chartData30d.earnings.length - 1 : -1;
-      if (lastIndex30 >= 0) {
-        state.chartData30d.earnings[lastIndex30] = Number(((state.chartData30d.earnings[lastIndex30] || 0) + earnedUsd).toFixed(4));
-        state.chartData30d.impressions[lastIndex30] = (state.chartData30d.impressions[lastIndex30] || 0) + sample.ads;
-      }
-
-      state.notifications.unshift({
-        id: Date.now(),
-        title: 'Ad Slice Credited',
-        message: `+$${earnedUsd.toFixed(3)} earned on ${sample.name}`,
-        time: 'Just now',
-        read: false
-      });
-
-      saveState();
-      renderApp();
-
-      if (trendChartInstance && currentChartTimeframe === '7d') {
-        trendChartInstance.data.datasets[0].data = [...state.chartData7d.earnings];
-        trendChartInstance.data.datasets[1].data = [...state.chartData7d.impressions];
-        trendChartInstance.update('none');
-      } else if (!trendChartInstance) {
-        initChart();
-      }
-
-      showToast(`+ $${earnedUsd.toFixed(3)} Credited • ${sample.name}`, 'earnings');
-
-      if (supabaseClient && currentUser) {
-        try {
-          await supabaseClient.from('ad_impressions').insert({
-            user_id: currentUser.id,
-            website_domain: sample.name,
-            slices_earned: sample.ads || Math.round(earnedUsd / 0.001),
-            reward_usd: earnedUsd,
-            multiplier: 1.2,
-            created_at: new Date().toISOString()
-          });
-        } catch (dbErr) {
-          console.warn('Supabase activity log notice:', dbErr);
-        }
-      }
-    }
-
-    // --- REAL AD IMPRESSION & EARNINGS ENGINE (Zero Mockups / Real Slices Only) ---
-    /**
-     * Record a real verified ad impression from active ad slices (A-Ads / ad-frame)
-     * and update stats dynamically with actual Geo-Tier rewards.
-     */
-    async function recordRealAdImpression(impressionData = {}) {
-      if (!currentUser || !currentUser.email) return;
-
-      const domain = impressionData.domain || impressionData.website_domain || 'surfkit.cloud/ad-frame';
-      const earnedUsd = typeof impressionData.rewardUsd === 'number' ? impressionData.rewardUsd : 0.0003;
-      const credsEarned = impressionData.impressionCount || 10;
-
-      state.user.availableBalance = Number(((state.user.availableBalance || 0) + earnedUsd).toFixed(6));
-      state.user.lifetimeEarnings = Number(((state.user.lifetimeEarnings || 0) + earnedUsd).toFixed(6));
-      state.user.lifetimeImpressions = (state.user.lifetimeImpressions || 0) + 1;
-      state.user.dailyImpressions = (state.user.dailyImpressions || 0) + 1;
-      state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + earnedUsd).toFixed(6));
+      state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + sample.earn).toFixed(6));
 
       // Dynamic Daily Streak check (UTC calendar day)
       const todayDateStr = new Date().toISOString().substring(0, 10);
@@ -5825,28 +5699,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       state.activityLedger.unshift({
         id: 'act-' + Date.now(),
-        type: 'Ad Slice Reward',
-        amount: earnedUsd,
-        method: domain,
+        type: 'Ad Earnings',
+        amount: sample.earn,
+        method: sample.name,
         date: 'Today',
         status: 'Credited'
       });
 
       const lastIndex7 = state.chartData7d?.earnings ? state.chartData7d.earnings.length - 1 : -1;
       if (lastIndex7 >= 0) {
-        state.chartData7d.earnings[lastIndex7] = Number(((state.chartData7d.earnings[lastIndex7] || 0) + earnedUsd).toFixed(6));
-        state.chartData7d.impressions[lastIndex7] = (state.chartData7d.impressions[lastIndex7] || 0) + 1;
+        state.chartData7d.earnings[lastIndex7] += sample.earn;
+        state.chartData7d.impressions[lastIndex7] += sample.ads;
       }
       const lastIndex30 = state.chartData30d?.earnings ? state.chartData30d.earnings.length - 1 : -1;
       if (lastIndex30 >= 0) {
-        state.chartData30d.earnings[lastIndex30] = Number(((state.chartData30d.earnings[lastIndex30] || 0) + earnedUsd).toFixed(6));
-        state.chartData30d.impressions[lastIndex30] = (state.chartData30d.impressions[lastIndex30] || 0) + 1;
+        state.chartData30d.earnings[lastIndex30] += sample.earn;
+        state.chartData30d.impressions[lastIndex30] += sample.ads;
       }
 
       state.notifications.unshift({
         id: Date.now(),
         title: 'Ad Slice Credited',
-        message: +{earnedUsd.toFixed(4)} earned on ,
+        message: `+$${sample.earn.toFixed(3)} earned on ${sample.name}`,
         time: 'Just now',
         read: false
       });
@@ -5854,24 +5728,33 @@ document.addEventListener('DOMContentLoaded', () => {
       saveState();
       renderApp();
 
+      // Update chart immediately after renderApp() — use 'none' for instant live update without animation lag.
+      // Re-initialize from the canvas element in case renderApp destroyed and recreated the DOM.
       if (trendChartInstance && currentChartTimeframe === '7d') {
         trendChartInstance.data.datasets[0].data = [...state.chartData7d.earnings];
         trendChartInstance.data.datasets[1].data = [...state.chartData7d.impressions];
-        trendChartInstance.update('none');
+        trendChartInstance.options.scales.y.suggestedMax = Math.max(...state.chartData7d.earnings, 0.1) * 1.25;
+        trendChartInstance.options.scales.y1.suggestedMax = Math.max(...state.chartData7d.impressions, 5) * 1.25;
+        trendChartInstance.update('none'); // 'none' = no animation, instant live update
       } else if (!trendChartInstance) {
+        // Chart was lost — re-init it
         initChart();
+      } else if (currentChartTimeframe === '30d' && trendChartInstance) {
+        trendChartInstance.data.datasets[0].data = [...state.chartData30d.earnings];
+        trendChartInstance.data.datasets[1].data = [...state.chartData30d.impressions];
+        trendChartInstance.update('none');
       }
 
-      showToast(+ {earnedUsd.toFixed(4)} Credited • Verified Ad Slice, 'earnings');
+      showToast(`+ $${sample.earn.toFixed(3)} Credited • ${sample.name}`, 'earnings');
 
       // Persist to Supabase Database: ad_impressions table and RPC
       if (supabaseClient && currentUser) {
         try {
           await supabaseClient.from('ad_impressions').insert({
             user_id: currentUser.id,
-            website_domain: domain,
-            slices_earned: credsEarned,
-            reward_usd: earnedUsd,
+            website_domain: sample.name,
+            slices_earned: sample.ads || Math.round(sample.earn / 0.001),
+            reward_usd: sample.earn,
             multiplier: 1.2,
             created_at: new Date().toISOString()
           });
@@ -5880,66 +5763,144 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-          await supabaseClient.rpc('record_impression', {
+          const { error: rpcErr } = await supabaseClient.rpc('record_impression', {
             p_user_id: currentUser.id,
-            p_site_name: domain,
-            p_ad_count: 1,
-            p_earn: earnedUsd
+            p_site_name: sample.name,
+            p_ad_count: sample.ads,
+            p_earn: sample.earn
           });
-        } catch (e) {
-          console.warn('RPC record_impression error:', e);
-        }
-
-        // Direct profile increment fallback
-        try {
-          const { data: curProf } = await supabaseClient
-            .from('profiles')
-            .select('available_balance, lifetime_earnings, lifetime_impressions, daily_earnings, daily_impressions')
-            .eq('id', currentUser.id)
-            .maybeSingle();
-
-          if (curProf) {
-            await supabaseClient.from('profiles').update({
-              available_balance: Number(((curProf.available_balance || 0) + earnedUsd).toFixed(6)),
-              lifetime_earnings: Number(((curProf.lifetime_earnings || 0) + earnedUsd).toFixed(6)),
-              lifetime_impressions: (curProf.lifetime_impressions || 0) + 1,
-              daily_earnings: Number(((curProf.daily_earnings || 0) + earnedUsd).toFixed(6)),
-              daily_impressions: (curProf.daily_impressions || 0) + 1,
-              updated_at: new Date().toISOString()
-            }).eq('id', currentUser.id);
-          }
+          if (rpcErr) console.warn('Supabase record_impression error:', rpcErr);
         } catch (dbErr) {
-          console.warn('Direct profile increment notice:', dbErr);
+          console.warn('Supabase activity log error:', dbErr);
         }
 
-        // ── Referral Passive Commission (10%) ────────────────────────────
+        // Atomically increment today's daily_stats row using the actual earned amount.
+        // todayAccum* tracks the REAL cumulative total for the current calendar day,
+        // resets automatically at midnight.
         try {
-          const { data: myProfile } = await supabaseClient
-            .from('profiles')
-            .select('referred_by')
-            .eq('id', currentUser.id)
+          const todayKey = new Date().toISOString().substring(0, 10);
+
+          // Reset accumulator if date has changed (new day)
+          if (window._surfkitAccumDate !== todayKey) {
+            window._surfkitAccumDate     = todayKey;
+            window._surfkitAccumEarnings = 0;
+            window._surfkitAccumImps     = 0;
+            // Removed rogue client-side midnight trigger (handled strictly at 00:00 UTC)
+          }
+          window._surfkitAccumEarnings = Number(((window._surfkitAccumEarnings || 0) + sample.earn).toFixed(6));
+          window._surfkitAccumImps     = (window._surfkitAccumImps || 0) + (sample.ads || 1);
+
+          // Read current stored value and add the new increment
+          const { data: existingRow } = await supabaseClient
+            .from('daily_stats')
+            .select('earnings, impressions')
+            .eq('user_id', currentUser.id)
+            .eq('stat_date', todayKey)
             .maybeSingle();
 
-          let referrerId = myProfile?.referred_by || null;
-          if (!referrerId) {
-            const { data: refRowLookup } = await supabaseClient
-              .from('referrals')
-              .select('referrer_id')
-              .eq('referred_id', currentUser.id)
-              .maybeSingle();
-            if (refRowLookup?.referrer_id) referrerId = refRowLookup.referrer_id;
-          }
+          const prevEarnings    = Number((existingRow && existingRow.earnings)    || 0);
+          const prevImpressions = Number((existingRow && existingRow.impressions) || 0);
 
-          if (referrerId && referrerId !== currentUser.id) {
-            const commission = Number((earnedUsd * 0.10).toFixed(6));
-            if (commission > 0) {
+          await supabaseClient.from('daily_stats').upsert({
+            user_id:     currentUser.id,
+            stat_date:   todayKey,
+            earnings:    Number((prevEarnings    + sample.earn).toFixed(6)),
+            impressions: prevImpressions + (sample.ads || 1)
+          }, { onConflict: 'user_id,stat_date' });
+
+          // Also reflect today's real total in chartData7d & chartData30d for live chart update
+          const lastIdx7 = state.chartData7d?.earnings ? state.chartData7d.earnings.length - 1 : -1;
+          if (lastIdx7 >= 0) {
+            state.chartData7d.earnings[lastIdx7]    = Number((prevEarnings + sample.earn).toFixed(6));
+            state.chartData7d.impressions[lastIdx7] = prevImpressions + (sample.ads || 1);
+          }
+          const lastIdx30 = state.chartData30d?.earnings ? state.chartData30d.earnings.length - 1 : -1;
+          if (lastIdx30 >= 0) {
+            state.chartData30d.earnings[lastIdx30]    = Number((prevEarnings + sample.earn).toFixed(6));
+            state.chartData30d.impressions[lastIdx30] = prevImpressions + (sample.ads || 1);
+          }
+        } catch (e) {
+          console.warn('[daily_stats upsert error]', e);
+        }
+
+        // Atomically increment profiles daily_impressions, daily_earnings, lifetime stats
+        try {
+          const impCount = sample.ads || 1;
+          const earnVal = Number(sample.earn || 0);
+          const { data: statsRes, error: statsErr } = await supabaseClient.rpc('increment_user_stats', {
+            user_id: currentUser.id,
+            impression_increment: impCount,
+            earning_increment: earnVal
+          });
+          if (!statsErr && statsRes) {
+            if (typeof statsRes.daily_impressions === 'number') state.user.dailyImpressions = statsRes.daily_impressions;
+            if (typeof statsRes.daily_earnings === 'number') state.user.dailyEarnings = statsRes.daily_earnings;
+            if (typeof statsRes.lifetime_impressions === 'number') state.user.lifetimeImpressions = statsRes.lifetime_impressions;
+            if (typeof statsRes.available_balance === 'number') state.user.availableBalance = statsRes.available_balance;
+          } else {
+            // Fallback direct update on profiles
+            const { data: curProf } = await supabaseClient
+              .from('profiles')
+              .select('daily_impressions, daily_earnings, lifetime_impressions, lifetime_earnings, available_balance')
+              .eq('id', currentUser.id)
+              .maybeSingle();
+            if (curProf) {
+              await supabaseClient.from('profiles').update({
+                daily_impressions: (curProf.daily_impressions || 0) + impCount,
+                daily_earnings: Number(((curProf.daily_earnings || 0) + earnVal).toFixed(6)),
+                lifetime_impressions: (curProf.lifetime_impressions || 0) + impCount,
+                lifetime_earnings: Number(((curProf.lifetime_earnings || 0) + earnVal).toFixed(6)),
+                available_balance: Number(((curProf.available_balance || 0) + earnVal).toFixed(6)),
+                updated_at: new Date().toISOString()
+              }).eq('id', currentUser.id);
+            }
+          }
+        } catch (profStatErr) {
+          console.warn('[Profiles Stats Increment Error]:', profStatErr);
+        }
+
+        // Update daily streak and last_active_date in profiles table
+        try {
+          await supabaseClient.from('profiles').update({
+            streak_days: newStreak,
+            last_active_date: todayDateStr
+          }).eq('id', currentUser.id);
+        } catch (e) {}
+
+        // ── 10% Referral Commission Credit ──────────────────────────────
+        // If this user was referred by someone, credit 10% of this impression's
+        // earning to the referrer's available_balance and referrals.commission_earned.
+        try {
+          const earnVal = Number(sample.earn || 0);
+          if (earnVal > 0 && currentUser && currentUser.id) {
+            // Look up the referrer via the profiles.referred_by column
+            const { data: myProfile } = await supabaseClient
+              .from('profiles')
+              .select('referred_by')
+              .eq('id', currentUser.id)
+              .maybeSingle();
+
+            const referrerId = myProfile?.referred_by;
+            if (referrerId) {
+              const commission = Number((earnVal * 0.10).toFixed(6));
+
+              // 1. Try server-side RPC first (atomic)
               const { error: rpcCommErr } = await supabaseClient.rpc('credit_referral_commission', {
                 p_referrer_id: referrerId,
                 p_referred_id: currentUser.id,
-                p_amount: commission
+                p_commission: commission
               });
 
               if (rpcCommErr) {
+                // 2. Fallback: direct table updates
+                // Update referrals.commission_earned
+                await supabaseClient.rpc('increment_referral_commission', {
+                  p_referrer_id: referrerId,
+                  p_referred_id: currentUser.id,
+                  p_amount: commission
+                }).catch(() => {});
+
+                // Update referrer profile balance directly
                 const { data: refProf } = await supabaseClient
                   .from('profiles')
                   .select('available_balance, lifetime_earnings, referral_bonus')
@@ -5953,6 +5914,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     updated_at: new Date().toISOString()
                   }).eq('id', referrerId);
 
+                  // Update referrals table commission_earned
                   const { data: refRow } = await supabaseClient
                     .from('referrals')
                     .select('commission_earned')
@@ -5968,6 +5930,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     .eq('referrer_id', referrerId)
                     .eq('referred_id', currentUser.id);
                   } else {
+                    // Upsert a new referrals row if missing
                     await supabaseClient.from('referrals').upsert({
                       referrer_id: referrerId,
                       referred_id: currentUser.id,
@@ -5979,44 +5942,40 @@ document.addEventListener('DOMContentLoaded', () => {
                   }
                 }
               }
-              console.log([Referral] +{commission.toFixed(6)} commission credited to referrer );
+              console.log(`[Referral] +$${commission.toFixed(6)} commission credited to referrer ${referrerId}`);
             }
           }
         } catch (commErr) {
           console.warn('[Referral Commission] Credit notice:', commErr);
         }
+        // ── End Referral Commission ──────────────────────────────────────
       }
     }
+
 
     // --- REAL-TIME AUTO-SURF ENGINE ---
     let autoSurfInterval = null;
     function toggleAutoSurf(enabled) {
+      if (enabled && (!currentUser || !currentUser.email)) {
+        showToast('Please sign in first to enable Auto-Surf', 'info');
+        const autoSurfToggle = document.getElementById('auto-surf-toggle');
+        if (autoSurfToggle) autoSurfToggle.checked = false;
+        return;
+      }
       const indicator = document.getElementById('auto-surf-indicator');
-      const autoSurfToggle = document.getElementById('auto-surf-toggle');
-      if (autoSurfToggle) autoSurfToggle.checked = enabled;
-
       // Sync master switch state to the extension background
       dispatchToExtension('TOGGLE_MASTER', { enabled });
 
-      // Update auto_surf_enabled in Supabase profile
-      if (currentUser && currentUser.id && supabaseClient) {
-        supabaseClient.from('profiles').update({ auto_surf_enabled: enabled }).eq('id', currentUser.id).then().catch(() => {});
-      }
-
       if (enabled) {
         if (indicator) indicator.classList.remove('hidden');
-        showToast('Auto-Surf active — simulation & extension active', 'info');
-        if (!autoSurfInterval) {
-          autoSurfInterval = setInterval(() => {
-            simulateAdImpression();
-          }, 4000);
-        }
+        showToast('Auto-Surf active — synced with extension', 'info');
+        autoSurfInterval = setInterval(() => {
+          simulateAdImpression();
+        }, 4000);
       } else {
         if (indicator) indicator.classList.add('hidden');
-        if (autoSurfInterval) {
-          clearInterval(autoSurfInterval);
-          autoSurfInterval = null;
-        }
+        clearInterval(autoSurfInterval);
+        autoSurfInterval = null;
         showToast('Auto-Surf paused — extension master OFF', 'info');
       }
     }
@@ -6617,77 +6576,32 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log('[Referral] Captured incoming invite code:', incomingRef.trim());
         }
       } catch (e) {}
-      // Ensure chart data is always initialized before first render
-      if (typeof state !== 'undefined') {
-        if (!state.chartData7d || !Array.isArray(state.chartData7d.labels) || state.chartData7d.labels.length !== 7) {
-          state.chartData7d = generateZeroChartData(7);
-        }
-        if (!state.chartData30d || !Array.isArray(state.chartData30d.labels) || state.chartData30d.labels.length !== 30) {
-          state.chartData30d = generateZeroChartData(30);
-        }
-      }
       renderApp();
-      initChart(); // Renders zero-baseline — overwritten after Supabase auth
-
-      // ── Chrome Storage pre-hydration: if extension is running, seed the UI
-      // with live stats BEFORE Supabase auth resolves (reduces perceived load time)
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        try {
-          chrome.storage.local.get(
-            ['balanceUsd', 'dailyEarnings', 'tokensEarned', 'adsSeenToday', 'activeStreakDays', 'stats', 'masterEnabled', 'intensity'],
-            (stored) => {
-              if (!stored) return;
-              const bal = Number(stored.balanceUsd || 0);
-              const streak = Number(stored.activeStreakDays || 0);
-              const imp = Number((stored.stats && stored.stats.totalImpressions) || stored.adsSeenToday || 0);
-              if (bal > 0 && state && state.user) {
-                state.user.availableBalance = Math.max(state.user.availableBalance || 0, bal);
-                state.user.lifetimeEarnings = Math.max(state.user.lifetimeEarnings || 0, Number((stored.stats && stored.stats.lifetimeEarnedUsd) || bal));
-                state.user.dailyEarnings = Math.max(state.user.dailyEarnings || 0, Number(stored.dailyEarnings || 0));
-                state.user.streakDays = Math.max(state.user.streakDays || 0, streak);
-                state.user.lifetimeImpressions = Math.max(state.user.lifetimeImpressions || 0, imp);
-                if (stored.intensity) state.user.adIntensity = normalizeAdIntensity(stored.intensity);
-                renderApp();
-              }
-              // If extension has a live master state, immediately mark as connected
-              if (typeof stored.masterEnabled === 'boolean') {
-                extConnected = true;
-                updateExtStatusBanner(true, stored.intensity || 'balanced', stored.masterEnabled);
-              }
-            }
-          );
-        } catch (e) { /* chrome.storage not available outside extension context */ }
+      // initChart is called by loadChartDataFromSupabase() after auth check.
+      // We call it here ONLY with forced-zero data so the chart is never blank
+      // on page load, but immediately overwritten by the auth-gated fetch.
+      if (typeof state !== 'undefined') {
+        state.chartData7d = generateZeroChartData(7);
+        state.chartData30d = generateZeroChartData(30);
       }
+      initChart(); // Renders flat $0 baseline — overwritten by auth-gated load below
 
       // Start extension connection attempts
       // Poll immediately, then back off to every 3s to avoid spam
       updateExtStatusBanner(false, 'balanced', true); // show "Connecting..."
       pollExtensionSync(); // First immediate poll
 
-      // Adaptive polling: start at 2s, slow down to 8s after 10 fast polls
+      // Adaptive polling: start at 1.2s, slow down to 3s after 10 fast polls
       let fastPollCount = 0;
       const fastPoll = setInterval(async () => {
         await pollExtensionSync();
         fastPollCount++;
         if (fastPollCount >= 10) {
           clearInterval(fastPoll);
-          // If still not connected after 10 fast polls (~20s), mark as Offline
-          // so the UI never stays stuck at "Connecting..." indefinitely.
-          if (!extConnected) {
-            updateExtStatusBanner(false, 'balanced', false);
-          }
-          // Switch to slower background polling (keeps checking in case extension is installed later)
-          extPollInterval = setInterval(async () => {
-            const wasConnected = extConnected;
-            await pollExtensionSync();
-            // If extension just came online, banner already updated by applyExtensionState.
-            // If still offline, ensure banner shows "Extension Offline" (not "Connecting...")
-            if (!extConnected && !wasConnected) {
-              updateExtStatusBanner(false, 'balanced', false);
-            }
-          }, 8000);
+          // Switch to slower background polling once stable
+          extPollInterval = setInterval(pollExtensionSync, 8000); // Slower poll: MV3 worker restarts every ~30s; 8s avoids false authUser=null flooding
         }
-      }, 2000); // 2s fast-poll — stable for MV3 cold starts
+      }, 2000); // 2s fast-poll (was 1.2s) — more stable for MV3 cold starts
 
       // Connect and sync with Cloud Database & Realtime
       if (supabaseClient) {

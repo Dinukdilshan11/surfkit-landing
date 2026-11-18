@@ -589,6 +589,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         case 'TRIGGER_SIMULATE_AD': {
+          if (!currentUser || !currentUser.id) {
+            sendResponse({ success: false, error: 'Sign in required' });
+            break;
+          }
+          // Preserving daily earnings/impressions monotonically
+
           const mult = state.multipliers[state.intensity] || 1.2;
           const rewardUsd = parseFloat((state.baseRewardPerAd * mult).toFixed(4));
           const slicesEarned = Math.round(rewardUsd / state.conversionRate);
@@ -612,7 +618,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           await chrome.storage.local.set(state);
           updateBadge(state.masterEnabled, state.balanceUsd);
 
-          if (currentUser && currentUser.id && typeof SurfkitSupabase !== 'undefined') {
+          if (currentUser && currentUser.id) {
             SurfkitSupabase.recordAdImpression(currentUser.id, 'extension-popup', slicesEarned, rewardUsd).catch(() => {});
           }
 
@@ -629,6 +635,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         }
 
+        // Real Ad Impression Logging (Action 3a & 3b)
         case 'RECORD_AD_IMPRESSION': {
           if (!currentUser || !currentUser.id) {
             sendResponse({ success: false, error: 'Sign in required to view ads and earn rewards' });
