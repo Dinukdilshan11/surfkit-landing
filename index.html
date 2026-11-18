@@ -2279,22 +2279,6 @@
       let currentAds = 180;
       let isExtensionActive = true;
 
-      setInterval(() => {
-        if (!isExtensionActive) return;
-        const deltaUsd = 0.005;
-        currentUsd += deltaUsd;
-        currentTokens += 5;
-        currentAds += 1;
-
-        if (balanceEl) {
-          balanceEl.textContent = '$' + currentUsd.toFixed(3);
-          balanceEl.classList.add('text-emerald-300');
-          setTimeout(() => balanceEl.classList.remove('text-emerald-300'), 300);
-        }
-        if (tokensEl) tokensEl.textContent = `${currentTokens.toLocaleString()} SKIT`;
-        if (adsCountEl) adsCountEl.textContent = `${currentAds}`;
-        if (pinBadge) pinBadge.textContent = '$' + currentUsd.toFixed(2);
-      }, 4000);
 
       // B. Toggle Switch (Active & Ready vs Paused)
       const toggleBtn = document.getElementById('extension-toggle-btn');

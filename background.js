@@ -588,54 +588,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         }
 
-        case 'TRIGGER_SIMULATE_AD': {
-          if (!currentUser || !currentUser.id) {
-            sendResponse({ success: false, error: 'Sign in required' });
-            break;
-          }
-          // Preserving daily earnings/impressions monotonically
-
-          const mult = state.multipliers[state.intensity] || 1.2;
-          const rewardUsd = parseFloat((state.baseRewardPerAd * mult).toFixed(4));
-          const slicesEarned = Math.round(rewardUsd / state.conversionRate);
-
-          let newBal = parseFloat((state.balanceUsd + rewardUsd).toFixed(4));
-          let newDaily = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(4));
-          let newDailyImp = (state.adsSeenToday || 0) + 1;
-          let newLifetimeImp = ((state.stats && state.stats.totalImpressions) || 0) + 1;
-          const streakRes = calculateUpdatedStreak(state.lastActiveDate, state.activeStreakDays);
-          let newStreak = streakRes.streak;
-          state.lastActiveDate = streakRes.lastActiveDate;
-
-          state.balanceUsd = newBal;
-          state.dailyEarnings = newDaily;
-          state.tokensEarned = Math.round(newBal / state.conversionRate);
-          state.adsSeenToday = newDailyImp;
-          state.activeStreakDays = newStreak;
-          state.stats.totalImpressions = newLifetimeImp;
-          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(4));
-
-          await chrome.storage.local.set(state);
-          updateBadge(state.masterEnabled, state.balanceUsd);
-
-          if (currentUser && currentUser.id) {
-            SurfkitSupabase.recordAdImpression(currentUser.id, 'extension-popup', slicesEarned, rewardUsd).catch(() => {});
-          }
-
-          broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
-          sendResponse({
-            success: true,
-            rewardUsd: rewardUsd,
-            tokensAwarded: slicesEarned,
-            balanceUsd: state.balanceUsd,
-            dailyEarnings: state.dailyEarnings,
-            tokensEarned: state.tokensEarned,
-            adsSeenToday: state.adsSeenToday
-          });
-          break;
-        }
-
-        // Real Ad Impression Logging (Action 3a & 3b)
         case 'RECORD_AD_IMPRESSION': {
           if (!currentUser || !currentUser.id) {
             sendResponse({ success: false, error: 'Sign in required to view ads and earn rewards' });
