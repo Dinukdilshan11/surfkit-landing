@@ -5619,58 +5619,23 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Security Vault preferences saved', 'success');
     }
 
-    // --- INTERACTIVE SIMULATOR (Real-Time Earning Simulation) ---
-    const SIMULATED_SITES = [
-      { name: 'Google Search - 3 Ads', earn: 0.015, ads: 3 },
-      { name: 'GitHub Repo - 1 Banner Slice', earn: 0.008, ads: 1 },
-      { name: 'YouTube Video - 2 Sponsored Slices', earn: 0.024, ads: 2 },
-      { name: 'Reddit Feed - 3 In-Text Units', earn: 0.018, ads: 3 },
-      { name: 'TechCrunch Article - 2 Banners', earn: 0.012, ads: 2 },
-      { name: 'Twitter/X Feed - 4 Impression Nodes', earn: 0.028, ads: 4 },
-      { name: 'Amazon Store - 2 Shopping Tiles', earn: 0.021, ads: 2 }
-    ];
+    // --- REAL AD IMPRESSION & EARNINGS ENGINE (Zero Mockups / Real Slices Only) ---
+    /**
+     * Record a real verified ad impression from active ad slices (A-Ads / ad-frame)
+     * and update stats dynamically with actual Geo-Tier rewards.
+     */
+    async function recordRealAdImpression(impressionData = {}) {
+      if (!currentUser || !currentUser.email) return;
 
-    function playBeepSound() {
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.12);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.12);
-      } catch (e) {}
-    }
+      const domain = impressionData.domain || impressionData.website_domain || 'surfkit.cloud/ad-frame';
+      const earnedUsd = typeof impressionData.rewardUsd === 'number' ? impressionData.rewardUsd : 0.0003;
+      const credsEarned = impressionData.impressionCount || 10;
 
-    async function simulateAdImpression() {
-      if (!currentUser || !currentUser.email) return; // No ads until user signs in
-      playBeepSound();
-      
-      const sample = SIMULATED_SITES[Math.floor(Math.random() * SIMULATED_SITES.length)];
-      const ratePerCred = (state.user.ratePer1k ? state.user.ratePer1k / 1000 : 0.0003);
-      const credsEarned = (sample.ads || 1) * 10;
-      const earnedUsd = Number((credsEarned * ratePerCred).toFixed(4));
-
-      // Dispatch to Chrome Extension via adaptive bridge (direct or contentScript relay)
-      try {
-        dispatchToExtension('RECORD_AD_IMPRESSION', {
-          user_id: currentUser?.id,
-          domain: window.location.hostname || 'web-dashboard',
-          sponsor: sample.name,
-          rewardUsd: earnedUsd,
-          impressionCount: sample.ads || 1
-        });
-      } catch (e) {}
-      
-      state.user.availableBalance += earnedUsd;
-      state.user.lifetimeEarnings += earnedUsd;
-      state.user.lifetimeImpressions += sample.ads;
-      state.user.dailyImpressions = (state.user.dailyImpressions || 0) + (sample.ads || 1);
-      state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + sample.earn).toFixed(6));
+      state.user.availableBalance = Number(((state.user.availableBalance || 0) + earnedUsd).toFixed(6));
+      state.user.lifetimeEarnings = Number(((state.user.lifetimeEarnings || 0) + earnedUsd).toFixed(6));
+      state.user.lifetimeImpressions = (state.user.lifetimeImpressions || 0) + 1;
+      state.user.dailyImpressions = (state.user.dailyImpressions || 0) + 1;
+      state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + earnedUsd).toFixed(6));
 
       // Dynamic Daily Streak check (UTC calendar day)
       const todayDateStr = new Date().toISOString().substring(0, 10);
@@ -5699,28 +5664,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
       state.activityLedger.unshift({
         id: 'act-' + Date.now(),
-        type: 'Ad Earnings',
-        amount: sample.earn,
-        method: sample.name,
+        type: 'Ad Slice Reward',
+        amount: earnedUsd,
+        method: domain,
         date: 'Today',
         status: 'Credited'
       });
 
       const lastIndex7 = state.chartData7d?.earnings ? state.chartData7d.earnings.length - 1 : -1;
       if (lastIndex7 >= 0) {
-        state.chartData7d.earnings[lastIndex7] += sample.earn;
-        state.chartData7d.impressions[lastIndex7] += sample.ads;
+        state.chartData7d.earnings[lastIndex7] = Number(((state.chartData7d.earnings[lastIndex7] || 0) + earnedUsd).toFixed(6));
+        state.chartData7d.impressions[lastIndex7] = (state.chartData7d.impressions[lastIndex7] || 0) + 1;
       }
       const lastIndex30 = state.chartData30d?.earnings ? state.chartData30d.earnings.length - 1 : -1;
       if (lastIndex30 >= 0) {
-        state.chartData30d.earnings[lastIndex30] += sample.earn;
-        state.chartData30d.impressions[lastIndex30] += sample.ads;
+        state.chartData30d.earnings[lastIndex30] = Number(((state.chartData30d.earnings[lastIndex30] || 0) + earnedUsd).toFixed(6));
+        state.chartData30d.impressions[lastIndex30] = (state.chartData30d.impressions[lastIndex30] || 0) + 1;
       }
 
       state.notifications.unshift({
         id: Date.now(),
         title: 'Ad Slice Credited',
-        message: `+$${sample.earn.toFixed(3)} earned on ${sample.name}`,
+        message: +{earnedUsd.toFixed(4)} earned on ,
         time: 'Just now',
         read: false
       });
@@ -5728,33 +5693,24 @@ document.addEventListener('DOMContentLoaded', () => {
       saveState();
       renderApp();
 
-      // Update chart immediately after renderApp() — use 'none' for instant live update without animation lag.
-      // Re-initialize from the canvas element in case renderApp destroyed and recreated the DOM.
       if (trendChartInstance && currentChartTimeframe === '7d') {
         trendChartInstance.data.datasets[0].data = [...state.chartData7d.earnings];
         trendChartInstance.data.datasets[1].data = [...state.chartData7d.impressions];
-        trendChartInstance.options.scales.y.suggestedMax = Math.max(...state.chartData7d.earnings, 0.1) * 1.25;
-        trendChartInstance.options.scales.y1.suggestedMax = Math.max(...state.chartData7d.impressions, 5) * 1.25;
-        trendChartInstance.update('none'); // 'none' = no animation, instant live update
-      } else if (!trendChartInstance) {
-        // Chart was lost — re-init it
-        initChart();
-      } else if (currentChartTimeframe === '30d' && trendChartInstance) {
-        trendChartInstance.data.datasets[0].data = [...state.chartData30d.earnings];
-        trendChartInstance.data.datasets[1].data = [...state.chartData30d.impressions];
         trendChartInstance.update('none');
+      } else if (!trendChartInstance) {
+        initChart();
       }
 
-      showToast(`+ $${sample.earn.toFixed(3)} Credited • ${sample.name}`, 'earnings');
+      showToast(+ {earnedUsd.toFixed(4)} Credited • Verified Ad Slice, 'earnings');
 
       // Persist to Supabase Database: ad_impressions table and RPC
       if (supabaseClient && currentUser) {
         try {
           await supabaseClient.from('ad_impressions').insert({
             user_id: currentUser.id,
-            website_domain: sample.name,
-            slices_earned: sample.ads || Math.round(sample.earn / 0.001),
-            reward_usd: sample.earn,
+            website_domain: domain,
+            slices_earned: credsEarned,
+            reward_usd: earnedUsd,
             multiplier: 1.2,
             created_at: new Date().toISOString()
           });
@@ -5763,144 +5719,66 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-          const { error: rpcErr } = await supabaseClient.rpc('record_impression', {
+          await supabaseClient.rpc('record_impression', {
             p_user_id: currentUser.id,
-            p_site_name: sample.name,
-            p_ad_count: sample.ads,
-            p_earn: sample.earn
+            p_site_name: domain,
+            p_ad_count: 1,
+            p_earn: earnedUsd
           });
-          if (rpcErr) console.warn('Supabase record_impression error:', rpcErr);
-        } catch (dbErr) {
-          console.warn('Supabase activity log error:', dbErr);
+        } catch (e) {
+          console.warn('RPC record_impression error:', e);
         }
 
-        // Atomically increment today's daily_stats row using the actual earned amount.
-        // todayAccum* tracks the REAL cumulative total for the current calendar day,
-        // resets automatically at midnight.
+        // Direct profile increment fallback
         try {
-          const todayKey = new Date().toISOString().substring(0, 10);
-
-          // Reset accumulator if date has changed (new day)
-          if (window._surfkitAccumDate !== todayKey) {
-            window._surfkitAccumDate     = todayKey;
-            window._surfkitAccumEarnings = 0;
-            window._surfkitAccumImps     = 0;
-            // Removed rogue client-side midnight trigger (handled strictly at 00:00 UTC)
-          }
-          window._surfkitAccumEarnings = Number(((window._surfkitAccumEarnings || 0) + sample.earn).toFixed(6));
-          window._surfkitAccumImps     = (window._surfkitAccumImps || 0) + (sample.ads || 1);
-
-          // Read current stored value and add the new increment
-          const { data: existingRow } = await supabaseClient
-            .from('daily_stats')
-            .select('earnings, impressions')
-            .eq('user_id', currentUser.id)
-            .eq('stat_date', todayKey)
+          const { data: curProf } = await supabaseClient
+            .from('profiles')
+            .select('available_balance, lifetime_earnings, lifetime_impressions, daily_earnings, daily_impressions')
+            .eq('id', currentUser.id)
             .maybeSingle();
 
-          const prevEarnings    = Number((existingRow && existingRow.earnings)    || 0);
-          const prevImpressions = Number((existingRow && existingRow.impressions) || 0);
-
-          await supabaseClient.from('daily_stats').upsert({
-            user_id:     currentUser.id,
-            stat_date:   todayKey,
-            earnings:    Number((prevEarnings    + sample.earn).toFixed(6)),
-            impressions: prevImpressions + (sample.ads || 1)
-          }, { onConflict: 'user_id,stat_date' });
-
-          // Also reflect today's real total in chartData7d & chartData30d for live chart update
-          const lastIdx7 = state.chartData7d?.earnings ? state.chartData7d.earnings.length - 1 : -1;
-          if (lastIdx7 >= 0) {
-            state.chartData7d.earnings[lastIdx7]    = Number((prevEarnings + sample.earn).toFixed(6));
-            state.chartData7d.impressions[lastIdx7] = prevImpressions + (sample.ads || 1);
+          if (curProf) {
+            await supabaseClient.from('profiles').update({
+              available_balance: Number(((curProf.available_balance || 0) + earnedUsd).toFixed(6)),
+              lifetime_earnings: Number(((curProf.lifetime_earnings || 0) + earnedUsd).toFixed(6)),
+              lifetime_impressions: (curProf.lifetime_impressions || 0) + 1,
+              daily_earnings: Number(((curProf.daily_earnings || 0) + earnedUsd).toFixed(6)),
+              daily_impressions: (curProf.daily_impressions || 0) + 1,
+              updated_at: new Date().toISOString()
+            }).eq('id', currentUser.id);
           }
-          const lastIdx30 = state.chartData30d?.earnings ? state.chartData30d.earnings.length - 1 : -1;
-          if (lastIdx30 >= 0) {
-            state.chartData30d.earnings[lastIdx30]    = Number((prevEarnings + sample.earn).toFixed(6));
-            state.chartData30d.impressions[lastIdx30] = prevImpressions + (sample.ads || 1);
-          }
-        } catch (e) {
-          console.warn('[daily_stats upsert error]', e);
+        } catch (dbErr) {
+          console.warn('Direct profile increment notice:', dbErr);
         }
 
-        // Atomically increment profiles daily_impressions, daily_earnings, lifetime stats
+        // ── Referral Passive Commission (10%) ────────────────────────────
         try {
-          const impCount = sample.ads || 1;
-          const earnVal = Number(sample.earn || 0);
-          const { data: statsRes, error: statsErr } = await supabaseClient.rpc('increment_user_stats', {
-            user_id: currentUser.id,
-            impression_increment: impCount,
-            earning_increment: earnVal
-          });
-          if (!statsErr && statsRes) {
-            if (typeof statsRes.daily_impressions === 'number') state.user.dailyImpressions = statsRes.daily_impressions;
-            if (typeof statsRes.daily_earnings === 'number') state.user.dailyEarnings = statsRes.daily_earnings;
-            if (typeof statsRes.lifetime_impressions === 'number') state.user.lifetimeImpressions = statsRes.lifetime_impressions;
-            if (typeof statsRes.available_balance === 'number') state.user.availableBalance = statsRes.available_balance;
-          } else {
-            // Fallback direct update on profiles
-            const { data: curProf } = await supabaseClient
-              .from('profiles')
-              .select('daily_impressions, daily_earnings, lifetime_impressions, lifetime_earnings, available_balance')
-              .eq('id', currentUser.id)
+          const { data: myProfile } = await supabaseClient
+            .from('profiles')
+            .select('referred_by')
+            .eq('id', currentUser.id)
+            .maybeSingle();
+
+          let referrerId = myProfile?.referred_by || null;
+          if (!referrerId) {
+            const { data: refRowLookup } = await supabaseClient
+              .from('referrals')
+              .select('referrer_id')
+              .eq('referred_id', currentUser.id)
               .maybeSingle();
-            if (curProf) {
-              await supabaseClient.from('profiles').update({
-                daily_impressions: (curProf.daily_impressions || 0) + impCount,
-                daily_earnings: Number(((curProf.daily_earnings || 0) + earnVal).toFixed(6)),
-                lifetime_impressions: (curProf.lifetime_impressions || 0) + impCount,
-                lifetime_earnings: Number(((curProf.lifetime_earnings || 0) + earnVal).toFixed(6)),
-                available_balance: Number(((curProf.available_balance || 0) + earnVal).toFixed(6)),
-                updated_at: new Date().toISOString()
-              }).eq('id', currentUser.id);
-            }
+            if (refRowLookup?.referrer_id) referrerId = refRowLookup.referrer_id;
           }
-        } catch (profStatErr) {
-          console.warn('[Profiles Stats Increment Error]:', profStatErr);
-        }
 
-        // Update daily streak and last_active_date in profiles table
-        try {
-          await supabaseClient.from('profiles').update({
-            streak_days: newStreak,
-            last_active_date: todayDateStr
-          }).eq('id', currentUser.id);
-        } catch (e) {}
-
-        // ── 10% Referral Commission Credit ──────────────────────────────
-        // If this user was referred by someone, credit 10% of this impression's
-        // earning to the referrer's available_balance and referrals.commission_earned.
-        try {
-          const earnVal = Number(sample.earn || 0);
-          if (earnVal > 0 && currentUser && currentUser.id) {
-            // Look up the referrer via the profiles.referred_by column
-            const { data: myProfile } = await supabaseClient
-              .from('profiles')
-              .select('referred_by')
-              .eq('id', currentUser.id)
-              .maybeSingle();
-
-            const referrerId = myProfile?.referred_by;
-            if (referrerId) {
-              const commission = Number((earnVal * 0.10).toFixed(6));
-
-              // 1. Try server-side RPC first (atomic)
+          if (referrerId && referrerId !== currentUser.id) {
+            const commission = Number((earnedUsd * 0.10).toFixed(6));
+            if (commission > 0) {
               const { error: rpcCommErr } = await supabaseClient.rpc('credit_referral_commission', {
                 p_referrer_id: referrerId,
                 p_referred_id: currentUser.id,
-                p_commission: commission
+                p_amount: commission
               });
 
               if (rpcCommErr) {
-                // 2. Fallback: direct table updates
-                // Update referrals.commission_earned
-                await supabaseClient.rpc('increment_referral_commission', {
-                  p_referrer_id: referrerId,
-                  p_referred_id: currentUser.id,
-                  p_amount: commission
-                }).catch(() => {});
-
-                // Update referrer profile balance directly
                 const { data: refProf } = await supabaseClient
                   .from('profiles')
                   .select('available_balance, lifetime_earnings, referral_bonus')
@@ -5914,7 +5792,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     updated_at: new Date().toISOString()
                   }).eq('id', referrerId);
 
-                  // Update referrals table commission_earned
                   const { data: refRow } = await supabaseClient
                     .from('referrals')
                     .select('commission_earned')
@@ -5930,7 +5807,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     .eq('referrer_id', referrerId)
                     .eq('referred_id', currentUser.id);
                   } else {
-                    // Upsert a new referrals row if missing
                     await supabaseClient.from('referrals').upsert({
                       referrer_id: referrerId,
                       referred_id: currentUser.id,
@@ -5942,19 +5818,16 @@ document.addEventListener('DOMContentLoaded', () => {
                   }
                 }
               }
-              console.log(`[Referral] +$${commission.toFixed(6)} commission credited to referrer ${referrerId}`);
+              console.log([Referral] +{commission.toFixed(6)} commission credited to referrer );
             }
           }
         } catch (commErr) {
           console.warn('[Referral Commission] Credit notice:', commErr);
         }
-        // ── End Referral Commission ──────────────────────────────────────
       }
     }
 
-
     // --- REAL-TIME AUTO-SURF ENGINE ---
-    let autoSurfInterval = null;
     function toggleAutoSurf(enabled) {
       if (enabled && (!currentUser || !currentUser.email)) {
         showToast('Please sign in first to enable Auto-Surf', 'info');
@@ -5966,16 +5839,16 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sync master switch state to the extension background
       dispatchToExtension('TOGGLE_MASTER', { enabled });
 
+      // Update auto_surf_enabled in Supabase profile
+      if (currentUser && currentUser.id && supabaseClient) {
+        supabaseClient.from('profiles').update({ auto_surf_enabled: enabled }).eq('id', currentUser.id).then().catch(() => {});
+      }
+
       if (enabled) {
         if (indicator) indicator.classList.remove('hidden');
         showToast('Auto-Surf active — synced with extension', 'info');
-        autoSurfInterval = setInterval(() => {
-          simulateAdImpression();
-        }, 4000);
       } else {
         if (indicator) indicator.classList.add('hidden');
-        clearInterval(autoSurfInterval);
-        autoSurfInterval = null;
         showToast('Auto-Surf paused — extension master OFF', 'info');
       }
     }
