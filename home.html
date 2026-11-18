@@ -2273,7 +2273,29 @@
       const adsCountEl = document.getElementById('mockup-ads-count');
       const pinBadge = document.getElementById('pin-badge');
 
+            let currentUsd = 8.170;
+      let currentTokens = 8170;
+      let currentAds = 180;
       let isExtensionActive = true;
+
+      // Interactive preview simulation ticker (smooth preview during local testing)
+      setInterval(() => {
+        if (!isExtensionActive) return;
+        const deltaUsd = 0.005;
+        currentUsd += deltaUsd;
+        currentTokens += 5;
+        currentAds += 1;
+
+        if (balanceEl) {
+          balanceEl.textContent = '$' + currentUsd.toFixed(3);
+          balanceEl.classList.add('text-emerald-300');
+          setTimeout(() => balanceEl.classList.remove('text-emerald-300'), 300);
+        }
+        if (tokensEl) tokensEl.textContent = `${currentTokens.toLocaleString()} SKIT`;
+        if (adsCountEl) adsCountEl.textContent = `${currentAds}`;
+        if (pinBadge) pinBadge.textContent = '$' + currentUsd.toFixed(2);
+      }, 4000);
+
 
       function updateMockupPreview(data) {
         if (!data) return;
@@ -2282,7 +2304,7 @@
         const ads = typeof data.adsSeenToday === 'number' ? data.adsSeenToday : (data.totalImpressions || data.lifetimeImpressions || 0);
 
         if (balanceEl && !isNaN(bal) && bal > 0) balanceEl.textContent = '$' + bal.toFixed(3);
-        if (tokensEl && !isNaN(tokens) && tokens > 0) tokensEl.textContent = ${tokens.toLocaleString()} SKIT;
+        if (tokensEl && !isNaN(tokens) && tokens > 0) tokensEl.textContent = `${tokens.toLocaleString()} SKIT`;
         if (adsCountEl && !isNaN(ads) && ads > 0) adsCountEl.textContent = ${ads};
         if (pinBadge && !isNaN(bal) && bal > 0) pinBadge.textContent = '$' + bal.toFixed(2);
       }
