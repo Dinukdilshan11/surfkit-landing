@@ -1280,8 +1280,42 @@ document.addEventListener('DOMContentLoaded', () => {
 
           <!-- Payout Gateways Selection Cards -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <!-- Gateway 1: PayPal -->
-            <div id="card-gateway-paypal" onclick="selectGateway('paypal')" class="gateway-card cursor-pointer bg-surf-surfaceCard border-2 border-surf-teal rounded-2xl p-5 relative transition-all hover:border-surf-teal shadow-glow-teal">
+
+            <!-- Gateway 1: FaucetPay (Crypto) — RECOMMENDED -->
+            <div id="card-gateway-faucetpay" onclick="selectGateway('faucetpay')" class="gateway-card cursor-pointer bg-surf-surfaceCard border-2 border-emerald-500 rounded-2xl p-5 relative transition-all hover:border-emerald-400" style="box-shadow:0 0 18px 2px rgba(16,185,129,0.22);">
+              <!-- RECOMMENDED badge -->
+              <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span class="inline-flex items-center gap-1 px-3 py-0.5 rounded-full text-[11px] font-extrabold tracking-wide bg-emerald-500 text-slate-950 shadow-lg" style="box-shadow:0 0 10px 2px rgba(16,185,129,0.45);">
+                  ⚡ RECOMMENDED — 0% FEE
+                </span>
+              </div>
+              <div class="flex items-center justify-between mt-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center font-black text-lg text-emerald-400">
+                  ₿
+                </div>
+                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Min $1.00
+                </span>
+              </div>
+              <h4 class="text-base font-bold text-white mt-4">FaucetPay <span class="text-emerald-400">(Crypto)</span></h4>
+              <p class="text-xs text-slate-400 mt-1">Instant crypto payout via FaucetPay. Zero fees, seconds to arrive.</p>
+              <div class="mt-3 space-y-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Transfer Fee:</span>
+                  <span class="text-emerald-400 font-bold">$0.00 (100% Free)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Speed:</span>
+                  <span class="text-emerald-400 font-semibold">⚡ Instant (Seconds)</span>
+                </div>
+              </div>
+              <div class="mt-3 pt-2.5 border-t border-emerald-500/20">
+                <p class="text-[11px] text-emerald-300 font-semibold">🎁 +5% Bonus SKIT on your first FaucetPay cashout!</p>
+              </div>
+            </div>
+
+            <!-- Gateway 2: PayPal (Standard) -->
+            <div id="card-gateway-paypal" onclick="selectGateway('paypal')" class="gateway-card cursor-pointer bg-surf-surfaceCard border-2 border-surf-border rounded-2xl p-5 relative transition-all hover:border-surf-borderLight">
               <div class="flex items-center justify-between">
                 <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 font-black text-lg">
                   P
@@ -1290,31 +1324,29 @@ document.addEventListener('DOMContentLoaded', () => {
                   Min $5.00
                 </span>
               </div>
-              <h4 class="text-base font-bold text-white mt-4">PayPal Transfer</h4>
-              <p class="text-xs text-slate-400 mt-1">Direct deposit to your linked PayPal email address. Clean and instant payout.</p>
-              <div class="mt-4 pt-3 border-t border-surf-border flex items-center justify-between text-xs">
-                <span class="text-slate-400">Transfer Fee:</span>
-                <span class="text-emerald-400 font-semibold">$0.00 (Zero Fee)</span>
+              <h4 class="text-base font-bold text-white mt-4">PayPal <span class="text-slate-400">(Standard)</span></h4>
+              <p class="text-xs text-slate-400 mt-1">Send to your PayPal email. Subject to processing fees and business-day delays.</p>
+              <div class="mt-3 space-y-1.5 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Transfer Fee:</span>
+                  <span class="text-amber-400 font-semibold">~$0.50 (10–15% Fee)</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-slate-400">Speed:</span>
+                  <span class="text-slate-300">3–5 Business Days</span>
+                </div>
               </div>
             </div>
 
-            <!-- Gateway 2: Direct Bank Transfer -->
-            <div id="card-gateway-bank" onclick="selectGateway('bank')" class="gateway-card cursor-pointer bg-surf-surfaceCard border-2 border-surf-border rounded-2xl p-5 relative transition-all hover:border-surf-borderLight">
-              <div class="flex items-center justify-between">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-lg">
-                  🏦
-                </div>
-                <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Min $5.00
-                </span>
-              </div>
-              <h4 class="text-base font-bold text-white mt-4">Direct Bank Transfer</h4>
-              <p class="text-xs text-slate-400 mt-1">Direct wire/ACH settlement straight to your domestic or international bank account.</p>
-              <div class="mt-4 pt-3 border-t border-surf-border flex items-center justify-between text-xs">
-                <span class="text-slate-400">Transfer Fee:</span>
-                <span class="text-emerald-400 font-semibold">$0.00 (Zero Fee)</span>
-            </div>
           </div>
+
+          <!-- PayPal Warning Banner (shown when PayPal is selected) -->
+          <div id="paypal-warning-banner" class="hidden mt-1 flex items-start gap-3 p-4 rounded-xl border border-amber-500/40 bg-amber-500/8" style="background:rgba(245,158,11,0.07);">
+            <span class="text-amber-400 text-lg shrink-0 mt-0.5">⚠️</span>
+            <p class="text-xs text-amber-200 leading-relaxed">
+              <span class="font-bold text-amber-300">High fees apply for small PayPal withdrawals ($5.00 minimum).</span>
+              Switch to <button onclick="selectGateway('faucetpay')" class="underline font-bold text-emerald-400 hover:text-emerald-300 transition-colors">FaucetPay</button> to keep 100% of your earnings with 0% fees and instant payout!
+            </p>
           </div>
 
           <!-- Payout Request Form & Balance Validation -->
@@ -1323,9 +1355,9 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="border-b border-surf-border pb-3 flex items-center justify-between">
                 <div>
                   <h3 class="text-lg font-bold text-white tracking-tight">Request Payout</h3>
-                  <p class="text-xs text-slate-400">Selected Gateway: <span id="selected-gateway-label" class="text-surf-teal font-semibold">PayPal Transfer</span></p>
+                  <p class="text-xs text-slate-400">Selected Gateway: <span id="selected-gateway-label" class="text-surf-teal font-semibold">FaucetPay (Crypto)</span></p>
                 </div>
-                <span id="gateway-min-badge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surf-surface border border-surf-border text-slate-300">Min $5.00</span>
+                <span id="gateway-min-badge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surf-surface border border-surf-border text-slate-300">Min $1.00</span>
               </div>
 
               <form id="cashout-form" onsubmit="handleCashoutSubmit(event)" class="space-y-4">
@@ -1342,9 +1374,9 @@ document.addEventListener('DOMContentLoaded', () => {
                       type="number" 
                       id="cashout-amount" 
                       step="0.01" 
-                      min="5.00" 
-                      placeholder="5.00" 
-                      value="5.00"
+                      min="1.00" 
+                      placeholder="1.00" 
+                      value="1.00"
                       oninput="validateCashoutForm()"
                       class="w-full bg-[#090E1C] border border-surf-border rounded-xl pl-8 pr-20 py-2.5 text-white font-bold text-sm focus:outline-none focus:border-surf-teal transition-colors"
                       required
@@ -1372,8 +1404,51 @@ document.addEventListener('DOMContentLoaded', () => {
                   </p>
                 </div>
 
+                <!-- Form Section 0: FaucetPay Onboarding Guide (shown when FaucetPay selected) -->
+                <div id="faucetpay-guide-card" class="rounded-xl border border-emerald-500/30 bg-emerald-500/6 p-4 space-y-3" style="background:rgba(16,185,129,0.06);">
+                  <div class="flex items-center gap-2">
+                    <span class="text-emerald-400 text-base">🚀</span>
+                    <p class="text-xs font-bold text-emerald-300">Don't have a FaucetPay account? Create one in 30 seconds for 0% fees:</p>
+                  </div>
+                  <ol class="space-y-1.5 text-xs text-slate-300 pl-1">
+                    <li class="flex items-start gap-2">
+                      <span class="text-emerald-400 font-black shrink-0">1.</span>
+                      <span>Click the button below to register free on FaucetPay.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-emerald-400 font-black shrink-0">2.</span>
+                      <span>Enter your FaucetPay Email address in the field below.</span>
+                    </li>
+                    <li class="flex items-start gap-2">
+                      <span class="text-emerald-400 font-black shrink-0">3.</span>
+                      <span>Click <span class="font-bold text-white">Withdraw</span> and receive funds instantly!</span>
+                    </li>
+                  </ol>
+                  <a href="https://faucetpay.io/r/10337010" target="_blank" rel="noopener noreferrer"
+                    class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all active:scale-95 shadow-md">
+                    Create Free FaucetPay Account ↗
+                  </a>
+                </div>
+
+                <!-- Form Section: FaucetPay Email Field -->
+                <div id="fields-faucetpay" class="space-y-2">
+                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Your FaucetPay Email Address</label>
+                  <input 
+                    type="email" 
+                    id="cashout-faucetpay-email" 
+                    placeholder="e.g. yourname@example.com" 
+                    value=""
+                    oninput="validateCashoutForm()"
+                    class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+                  >
+                  <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
+                    <span class="text-emerald-400">⚡</span>
+                    Funds arrive to your FaucetPay wallet within seconds. Zero processing fee.
+                  </p>
+                </div>
+
                 <!-- Form Section 1: PayPal Transfer Fields -->
-                <div id="fields-paypal" class="space-y-2">
+                <div id="fields-paypal" class="space-y-2 hidden">
                   <label id="destination-label" class="block text-xs font-semibold text-slate-300 mb-1.5">Destination PayPal Email Address</label>
                   <input 
                     type="email" 
@@ -1551,16 +1626,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="w-10 h-10 rounded-xl bg-surf-teal/15 border border-surf-teal/30 flex items-center justify-center text-surf-teal mb-3">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                 </div>
-                <h4 class="text-sm font-bold text-white">Manual Payout Processing</h4>
+                <h4 class="text-sm font-bold text-white">Secure Payout Processing</h4>
                 <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Payout requests are reviewed and processed manually within 24 to 48 hours to your verified PayPal or Bank account.
+                  FaucetPay payouts are instant with 0% fees. PayPal requests are reviewed and processed within 24–48 hours.
                 </p>
               </div>
 
               <div class="space-y-2 text-xs border-t border-surf-border pt-4">
                 <div class="flex items-center justify-between text-slate-400">
                   <span>Supported Gateways</span>
-                  <span class="text-white font-medium">PayPal & Direct Bank</span>
+                  <span class="text-white font-medium">FaucetPay & PayPal</span>
                 </div>
                 <div class="flex items-center justify-between text-slate-400">
                   <span>Account Status</span>
@@ -2426,7 +2501,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentTier: 3,
         ratePer1k: 0.30
       },
-      selectedGateway: 'paypal',
+      selectedGateway: 'faucetpay',
       devices: [
         {
           id: 'dev-1',
@@ -2899,7 +2974,7 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.name = profile.display_name || profile.username || state.user.name;
           state.user.username = profile.username || state.user.username;
           state.user.email = currentUser.email || state.user.email;
-          if (profile.selected_gateway && (profile.selected_gateway === 'paypal' || profile.selected_gateway === 'bank')) {
+          if (profile.selected_gateway && (profile.selected_gateway === 'faucetpay' || profile.selected_gateway === 'paypal' || profile.selected_gateway === 'bank')) {
             state.selectedGateway = profile.selected_gateway;
           }
           if (profile.ad_intensity) state.user.adIntensity = normalizeAdIntensity(profile.ad_intensity);
@@ -3031,11 +3106,12 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           const rawMethod = String(p.payment_method || p.gateway || (details && (details.gateway || details.transfer_type)) || '').toLowerCase().trim();
           const isBank = rawMethod === 'bank' || rawMethod.includes('bank') || rawMethod.includes('wire');
-          const method = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : 'PayPal Transfer');
+          const isFaucetPay = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
+          const method = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : (isFaucetPay ? 'FaucetPay (Crypto)' : 'PayPal Transfer'));
 
           let destination = p.destination || '';
           if (!destination && details && typeof details === 'object') {
-            destination = details.destination || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
+            destination = details.destination || details.faucetpay_email || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
           }
 
           return {
@@ -3188,11 +3264,12 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           const rawMethod = String(p.payment_method || p.gateway || (details && (details.gateway || details.transfer_type)) || '').toLowerCase().trim();
           const isBank = rawMethod === 'bank' || rawMethod.includes('bank') || rawMethod.includes('wire');
-          const gwName = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : 'PayPal Transfer');
+          const isFaucetPay = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
+          const gwName = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : (isFaucetPay ? 'FaucetPay (Crypto)' : 'PayPal Transfer'));
 
           let destination = p.destination || '';
           if (!destination && details && typeof details === 'object') {
-            destination = details.destination || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
+            destination = details.destination || details.faucetpay_email || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
           }
 
           combinedLedger.push({
@@ -4240,6 +4317,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- PAYOUT GATEWAYS & DYNAMIC BANK TRANSFER FORM ENGINE ---
     const GATEWAY_CONFIG = {
+      faucetpay: {
+        name: 'FaucetPay (Crypto)',
+        minAmount: 1.00,
+        destLabel: 'Your FaucetPay Email Address',
+        destPlaceholder: 'e.g. yourname@example.com',
+        destDefault: '',
+        hint: 'Funds arrive to your FaucetPay wallet within seconds. Zero processing fee.'
+      },
       paypal: {
         name: 'PayPal Transfer',
         minAmount: 5.00,
@@ -4348,17 +4433,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function selectGateway(gwKey) {
-      if (!GATEWAY_CONFIG[gwKey]) gwKey = 'paypal';
+      if (!GATEWAY_CONFIG[gwKey]) gwKey = 'faucetpay';
       state.selectedGateway = gwKey;
-      
-      ['paypal', 'bank'].forEach(key => {
+
+      // Update all gateway cards
+      ['faucetpay', 'paypal', 'bank'].forEach(key => {
         const card = document.getElementById(`card-gateway-${key}`);
         if (!card) return;
         if (key === gwKey) {
-          card.classList.remove('border-surf-border');
-          card.classList.add('border-surf-teal', 'shadow-glow-teal');
+          card.classList.remove('border-surf-border', 'border-surf-teal');
+          if (key === 'faucetpay') {
+            card.classList.add('border-emerald-500');
+            card.style.boxShadow = '0 0 18px 2px rgba(16,185,129,0.22)';
+          } else {
+            card.classList.add('border-surf-teal', 'shadow-glow-teal');
+            card.style.boxShadow = '';
+          }
         } else {
-          card.classList.remove('border-surf-teal', 'shadow-glow-teal');
+          card.classList.remove('border-surf-teal', 'shadow-glow-teal', 'border-emerald-500');
+          card.style.boxShadow = '';
           card.classList.add('border-surf-border');
         }
       });
@@ -4369,14 +4462,46 @@ document.addEventListener('DOMContentLoaded', () => {
       if (label) label.textContent = config.name;
       if (minBadge) minBadge.textContent = `Min $${config.minAmount.toFixed(2)}`;
 
+      // Update amount input min
+      const amountInput = document.getElementById('cashout-amount');
+      if (amountInput) {
+        amountInput.min = config.minAmount.toFixed(2);
+        amountInput.placeholder = config.minAmount.toFixed(2);
+        if (parseFloat(amountInput.value) < config.minAmount) {
+          amountInput.value = config.minAmount.toFixed(2);
+        }
+      }
+
+      // Show/hide PayPal warning banner
+      const paypalBanner = document.getElementById('paypal-warning-banner');
+      if (paypalBanner) {
+        if (gwKey === 'paypal') {
+          paypalBanner.classList.remove('hidden');
+        } else {
+          paypalBanner.classList.add('hidden');
+        }
+      }
+
+      // Show/hide FaucetPay guide card and fields
+      const faucetpayGuide = document.getElementById('faucetpay-guide-card');
+      const faucetpayFields = document.getElementById('fields-faucetpay');
       const paypalFields = document.getElementById('fields-paypal');
       const bankFields = document.getElementById('fields-bank');
 
-      if (gwKey === 'bank') {
+      if (gwKey === 'faucetpay') {
+        if (faucetpayGuide) faucetpayGuide.classList.remove('hidden');
+        if (faucetpayFields) faucetpayFields.classList.remove('hidden');
+        if (paypalFields) paypalFields.classList.add('hidden');
+        if (bankFields) bankFields.classList.add('hidden');
+      } else if (gwKey === 'bank') {
+        if (faucetpayGuide) faucetpayGuide.classList.add('hidden');
+        if (faucetpayFields) faucetpayFields.classList.add('hidden');
         if (paypalFields) paypalFields.classList.add('hidden');
         if (bankFields) bankFields.classList.remove('hidden');
         initBankCountryFromState();
       } else {
+        if (faucetpayGuide) faucetpayGuide.classList.add('hidden');
+        if (faucetpayFields) faucetpayFields.classList.add('hidden');
         if (paypalFields) paypalFields.classList.remove('hidden');
         if (bankFields) bankFields.classList.add('hidden');
       }
@@ -4405,7 +4530,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!amountInput || !submitBtn) return true;
 
       const amount = parseFloat(amountInput.value);
-      const gw = GATEWAY_CONFIG[state.selectedGateway] || GATEWAY_CONFIG['paypal'];
+      const gw = GATEWAY_CONFIG[state.selectedGateway] || GATEWAY_CONFIG['faucetpay'];
 
       let isValid = true;
       let msg = '';
@@ -4419,6 +4544,18 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (amount < gw.minAmount) {
         isValid = false;
         msg = `Minimum cashout for ${gw.name} is $${gw.minAmount.toFixed(2)} USD.`;
+      } else if (state.selectedGateway === 'faucetpay') {
+        // Validate FaucetPay email
+        const fpInput = document.getElementById('cashout-faucetpay-email');
+        const email = fpInput ? fpInput.value.trim() : '';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email) {
+          isValid = false;
+          msg = 'Please enter your FaucetPay email address.';
+        } else if (!emailRegex.test(email)) {
+          isValid = false;
+          msg = 'Please enter a valid FaucetPay email format.';
+        }
       } else if (state.selectedGateway === 'paypal') {
         // Validate PayPal
         const destInput = document.getElementById('cashout-destination');
@@ -4516,7 +4653,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const amountInput = document.getElementById('cashout-amount');
       const amount = parseFloat(amountInput.value);
-      const gw = GATEWAY_CONFIG[state.selectedGateway] || GATEWAY_CONFIG['paypal'];
+      const gw = GATEWAY_CONFIG[state.selectedGateway] || GATEWAY_CONFIG['faucetpay'];
 
       // Upfront available balance check
       if (typeof state.user.availableBalance === 'number' && state.user.availableBalance < amount) {
@@ -4527,10 +4664,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // 3. Build structured destination and details
       let destination = '';
-      let payoutMethod = (state.selectedGateway === 'bank') ? 'Direct Bank Transfer' : 'PayPal Transfer';
+      let payoutMethod = state.selectedGateway === 'bank' ? 'Direct Bank Transfer' : state.selectedGateway === 'faucetpay' ? 'FaucetPay (Crypto)' : 'PayPal Transfer';
       let structuredDetails = {};
 
-      if (state.selectedGateway === 'bank') {
+      if (state.selectedGateway === 'faucetpay') {
+        const fpInput = document.getElementById('cashout-faucetpay-email');
+        const fpEmail = fpInput ? fpInput.value.trim() : (state.user.email || '');
+        destination = fpEmail;
+        structuredDetails = {
+          transfer_type: 'faucetpay',
+          faucetpay_email: fpEmail,
+          destination: fpEmail,
+          gateway: 'faucetpay',
+          gateway_name: 'FaucetPay (Crypto)'
+        };
+      } else if (state.selectedGateway === 'bank') {
         const holderName = document.getElementById('bank-holder-name')?.value.trim() || '';
         const accNumber = document.getElementById('bank-account-number')?.value.trim() || '';
         const branchName = document.getElementById('bank-branch-name')?.value.trim() || '';
@@ -4566,6 +4714,7 @@ document.addEventListener('DOMContentLoaded', () => {
         destination = `${bankName} (${maskedAcc}) - ${holderName}`;
         structuredDetails.destination = destination;
       } else {
+        // PayPal fallback
         const destInput = document.getElementById('cashout-destination');
         const paypalEmail = destInput ? destInput.value.trim() : (state.user.email || '');
         destination = paypalEmail;
@@ -4773,11 +4922,12 @@ document.addEventListener('DOMContentLoaded', () => {
               }
               const rawMethod = String(p.payment_method || p.gateway || (details && (details.gateway || details.transfer_type)) || '').toLowerCase().trim();
               const isBank = rawMethod === 'bank' || rawMethod.includes('bank') || rawMethod.includes('wire');
-              const method = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : 'PayPal Transfer');
+              const isFaucetPay = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
+              const method = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : (isFaucetPay ? 'FaucetPay (Crypto)' : 'PayPal Transfer'));
 
               let dest = p.destination || '';
               if (!dest && details && typeof details === 'object') {
-                dest = details.destination || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
+                dest = details.destination || details.faucetpay_email || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
               }
 
               return {
