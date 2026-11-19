@@ -224,6 +224,18 @@
             <span class="sidebar-text ml-auto text-[10px] bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.5 rounded border border-amber-500/30">Active</span>
           </button>
 
+          <!-- Mini Games Tab (GameDistribution Arcade) -->
+          <button onclick="switchTab('games')" id="nav-btn-games" class="nav-item w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-400 hover:text-slate-100 hover:bg-surf-surface border border-transparent">
+            <svg class="w-5 h-5 shrink-0 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="6" width="20" height="12" rx="4"></rect>
+              <path d="M6 12h4m-2-2v4"></path>
+              <line x1="15" y1="11" x2="15.01" y2="11"></line>
+              <line x1="18" y1="13" x2="18.01" y2="13"></line>
+            </svg>
+            <span class="sidebar-text truncate">Mini Games</span>
+            <span class="sidebar-text ml-auto text-[10px] bg-gradient-to-r from-purple-500/20 to-pink-500/20 text-purple-300 font-bold px-1.5 py-0.5 rounded border border-purple-500/30 animate-pulse">Play</span>
+          </button>
+
           <!-- Cashout Tab -->
           <button onclick="switchTab('cashout')" id="nav-btn-cashout" class="nav-item w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-400 hover:text-slate-100 hover:bg-surf-surface border border-transparent">
             <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -385,8 +397,10 @@
         </div>
       </header>
 
-      <!-- TAB CONTAINER -->
-      <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6">
+      <!-- DASHBOARD WORKSPACE: 80-82% Main Content + Dedicated 18-20% Global Right-Side Ad Column on lg+ -->
+      <div class="flex-1 flex flex-col lg:flex-row w-full min-w-0">
+        <!-- Main Scrollable Tab View Area (~80-82% on desktop) -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-6 min-w-0">
 
         <!-- ================= TAB A: OVERVIEW TAB ================= -->
         <section id="tab-overview" class="tab-content active space-y-6">
@@ -524,6 +538,42 @@
             </button>
           </div>
 
+<!-- Modular Ad Slot: overview-native-1 (native) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="overview-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #overview-native-1</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-overview-native-1">
+                <!-- Mockup Ad: Exodus Web3 Wallet (Slise / AdEx format) -->
+                <div class="w-full bg-[#080E1C] border border-surf-border/80 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-surf-teal/50 group">
+                  <div class="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full bg-purple-500/10 blur-xl"></div>
+                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600/25 to-blue-600/20 border border-purple-500/40 flex items-center justify-center text-xl shrink-0 text-purple-300 font-black shadow-md group-hover:scale-105 transition-transform">
+                      Ξ
+                    </div>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-white tracking-tight">Exodus Multi-Chain Web3 Wallet</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/35">Featured Partner</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Slise Network</span>
+                      </div>
+                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
+                        Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon with zero custodial risk.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://www.exodus.com/" target="_blank" rel="noopener noreferrer" 
+                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-400 hover:to-indigo-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
+                    <span>Get Free Wallet</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- ================= COMPLETE CLEAN CHART & LOGIC ================= -->
 <div class="bg-surf-surfaceCard border border-surf-border/80 rounded-2xl p-6 space-y-5 shadow-lg relative overflow-hidden">
   
@@ -577,6 +627,40 @@
     <span class="text-[11px] text-slate-500 italic">Updated real-time via Supabase Ledger</span>
   </div>
 </div>
+
+          <!-- Modular Ad Slot: overview-push-1 (push) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-4 transition-all" data-slot-id="overview-push-1" data-format="push">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #overview-push-1</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-overview-push-1">
+                <!-- Mockup Ad: HypeLab Web3 Ads SDK -->
+                <div class="w-full bg-[#080E1C] border border-cyan-500/30 rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative overflow-hidden transition-all hover:border-cyan-400/50">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-lg bg-cyan-500/15 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-sm font-black shrink-0">
+                      ⚡
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold text-white">HypeLab Web3 Monetization SDK</span>
+                        <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">Web3 Infra</span>
+                      </div>
+                      <p class="text-[10px] text-slate-400 mt-0.5">
+                        High-fill, privacy-preserving on-chain advertising engine built for dApps, wallets, and web tools.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://www.hypelab.com/" target="_blank" rel="noopener noreferrer" 
+                     class="px-3 py-1.5 rounded-lg bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 border border-cyan-500/40 font-bold text-[11px] transition-all shrink-0 self-start sm:self-auto">
+                    Developer Docs ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
 
 <script>
 // Global chart state configuration
@@ -1175,6 +1259,94 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+          <!-- 4-Hour Engagement Pulse / Streak Dial Widget -->
+          <div id="surfkit-pulse-container" class="bg-gradient-to-br from-[#0B132B] via-surf-surfaceCard to-[#070D19] border border-surf-border/80 rounded-2xl p-6 relative overflow-hidden shadow-xl transition-all">
+            <!-- Subtle Radial Glow Accents -->
+            <div class="pointer-events-none absolute -top-12 -left-12 w-48 h-48 rounded-full bg-surf-teal/10 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-12 -right-12 w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl"></div>
+
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
+              
+              <!-- Left Info & Cooldown Status -->
+              <div class="flex-1 space-y-3 text-center lg:text-left">
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-surf-teal/15 text-surf-teal border border-surf-teal/30 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-surf-teal animate-pulse"></span>
+                    4-Hour Cadence
+                  </span>
+                  <span id="pulse-status-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    Pulse Ready
+                  </span>
+                </div>
+
+                <div>
+                  <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center justify-center lg:justify-start gap-2">
+                    <span>Surfkit Pulse Dial</span>
+                    <span class="text-surf-teal text-xl">⚡</span>
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-1 max-w-md">
+                    Claim your recurring platform engagement bonus every 4 hours. Keep your streak active to unlock higher reward probabilities.
+                  </p>
+                </div>
+
+                <!-- Cooldown / Ready Tracker Bar -->
+                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-1">
+                  <div class="flex items-center gap-2 bg-[#090E1C] px-3.5 py-2 rounded-xl border border-surf-border/80">
+                    <span class="text-xs text-slate-400 font-mono">Next Pulse:</span>
+                    <span id="pulse-timer-display" class="text-sm font-black text-emerald-400 font-mono tracking-wider">READY NOW</span>
+                  </div>
+
+                  <button id="pulse-claim-btn" onclick="executePulseSpin()" 
+                    class="px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-surf-teal to-emerald-400 hover:from-surf-tealHover hover:to-emerald-300 text-slate-950 transition-all shadow-glow-teal active:scale-95 flex items-center gap-2 cursor-pointer">
+                    <span class="text-sm">🎲</span>
+                    <span id="pulse-btn-text">Spin Pulse Dial</span>
+                  </button>
+                </div>
+
+                <!-- Reward Weights & Policy Note -->
+                <div class="pt-2 text-[11px] text-slate-500 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1">
+                  <span>✦ +5 Creds (45%)</span>
+                  <span>✦ +10 Creds (30%)</span>
+                  <span>✦ +15 Creds (15%)</span>
+                  <span>✦ +25 Creds (8%)</span>
+                  <span class="text-surf-teal font-semibold">✦ 2x Quest Boost (2%)</span>
+                </div>
+              </div>
+
+              <!-- Right: Radial Dial Graphic -->
+              <div class="shrink-0 relative flex items-center justify-center">
+                <!-- Outer Ambient Ring -->
+                <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-[#080E1E] border-2 border-surf-border/70 flex items-center justify-center relative shadow-[0_0_25px_rgba(6,182,212,0.12)]">
+                  
+                  <!-- Dial Rotating Hub -->
+                  <div id="pulse-dial-wheel" class="w-40 h-40 sm:w-48 sm:h-48 rounded-full border border-surf-teal/30 bg-gradient-to-tr from-[#06101E] via-[#09182E] to-[#0A2239] flex items-center justify-center relative transition-transform duration-[2800ms] ease-[cubic-bezier(0.15,0.85,0.35,1.02)]">
+                    
+                    <!-- Circular Tick Markers -->
+                    <div class="absolute inset-2 rounded-full border border-dashed border-surf-teal/20 pointer-events-none"></div>
+                    
+                    <!-- Radial Labels -->
+                    <span class="absolute top-2 text-[10px] font-black text-emerald-400 tracking-wider">+10</span>
+                    <span class="absolute right-3 text-[10px] font-black text-surf-teal tracking-wider">+15</span>
+                    <span class="absolute bottom-2 text-[10px] font-black text-cyan-300 tracking-wider">+5</span>
+                    <span class="absolute left-3 text-[10px] font-black text-amber-400 tracking-wider">+25</span>
+                    <span class="absolute top-8 right-6 text-[9px] font-bold text-emerald-300">+5</span>
+                    <span class="absolute bottom-8 left-6 text-[9px] font-black text-purple-400">2X</span>
+
+                    <!-- Center Cap & Needle Indicator -->
+                    <div class="w-12 h-12 rounded-full bg-[#070D19] border-2 border-surf-teal flex items-center justify-center shadow-lg relative z-10">
+                      <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
+                    </div>
+                  </div>
+
+                  <!-- Fixed Indicator Needle at Top -->
+                  <div class="absolute top-0 left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[14px] border-t-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] z-20 pointer-events-none"></div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+
           <!-- Essential User Guidelines & Compliance Rules (What Users Should Know) -->
           <div class="bg-gradient-to-r from-amber-500/10 via-[#0D1527] to-[#0D1527] border border-amber-500/30 rounded-2xl p-6 relative overflow-hidden">
             <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
@@ -1222,6 +1394,62 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+          <!-- Arcade Arena Quick Access Banner -->
+          <div class="p-4 rounded-2xl bg-gradient-to-r from-purple-950/40 via-surf-surfaceCard to-[#091024] border border-purple-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-xl shrink-0 text-purple-300">
+                🎮
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h4 class="text-sm font-bold text-white">Arcade Arena • Free HTML5 Mini-Games</h4>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Play & Boost</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Play 8+ popular titles directly inside Surfkit to earn activity boosts & streak rewards!</p>
+              </div>
+            </div>
+            <button onclick="switchTab('games')" class="px-4 py-2 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-lg transition-all active:scale-95 shrink-0 flex items-center gap-1.5 self-start sm:self-auto">
+              <span>Open Arcade Arena</span>
+              <span>→</span>
+            </button>
+          </div>
+
+<!-- Modular Ad Slot: earnhub-native-1 (native) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="earnhub-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #earnhub-native-1</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-earnhub-native-1">
+                <!-- Mockup Ad: Bitget Web3 Wallet (AdEx / Monetag format) -->
+                <div class="w-full bg-[#080E1C] border border-surf-border/80 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-surf-teal/50 group">
+                  <div class="pointer-events-none absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-surf-teal/10 blur-xl"></div>
+                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-surf-teal/25 to-emerald-500/20 border border-surf-teal/40 flex items-center justify-center text-xl shrink-0 text-surf-teal font-black shadow-md group-hover:scale-105 transition-transform">
+                      🛡️
+                    </div>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-white tracking-tight">Bitget Web3 Wallet — Multi-Chain DeFi Hub</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">Verified Quest Partner</span>
+                        <span class="text-[10px] text-slate-500 font-mono">AdEx Network</span>
+                      </div>
+                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
+                        Connect to 100+ public chains, swap tokens with lowest slippage, and access verified DeFi opportunities.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://web3.bitget.com/" target="_blank" rel="noopener noreferrer" 
+                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-surf-teal to-emerald-400 hover:from-surf-tealHover hover:to-emerald-300 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
+                    <span>Explore Wallet</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Offerwall Inventory Grid Container -->
           <div class="bg-surf-surfaceCard border border-surf-border/80 rounded-2xl p-6 space-y-5 shadow-lg relative overflow-hidden">
             
@@ -1258,8 +1486,314 @@ document.addEventListener('DOMContentLoaded', () => {
 
           </div>
 
+
         </section>
 
+
+
+        <!-- ================= TAB: MINI GAMES (ARCADE ARENA) ================= -->
+        <section id="tab-games" class="tab-content space-y-6">
+
+          <!-- Top Arcade Header with Live Status & Activity Multiplier -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+            <div>
+              <div class="flex items-center gap-3">
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+                  <span>Arcade Arena</span>
+                  <span class="text-slate-500">•</span>
+                  <span class="text-purple-400">Play &amp; Boost Earnings</span>
+                </h1>
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                  HTML5 Games
+                </span>
+              </div>
+              <p class="text-slate-400 text-sm mt-1">Play immersive free HTML5 games powered by GameDistribution and boost your platform activity!</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <div class="bg-surf-surfaceCard border border-surf-border px-4 py-2 rounded-xl flex items-center gap-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs text-slate-300 font-medium">Session Multiplier: <strong class="text-emerald-400 font-bold">1.5x Boost</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Position 1: Native Ad Card at Top of Arcade Grid -->
+          <div class="surfkit-ad-slot-wrapper w-full transition-all" data-slot-id="games-native-top" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #games-native-top</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-games-native-top">
+                <!-- Mockup Ad: Razer Cortex / Gaming Partner -->
+                <div class="w-full bg-[#080E1C] border border-purple-500/30 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-purple-400/50 group">
+                  <div class="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full bg-purple-500/10 blur-xl"></div>
+                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600/25 to-pink-600/20 border border-purple-500/40 flex items-center justify-center text-xl shrink-0 text-purple-300 font-black shadow-md group-hover:scale-105 transition-transform">
+                      🎮
+                    </div>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-white tracking-tight">Razer Cortex &amp; Web3 Game Pass</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/35">Official Gaming Partner</span>
+                        <span class="text-[10px] text-slate-500 font-mono">GameDistribution Network</span>
+                      </div>
+                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
+                        Unlock boosted PC frame rates, exclusive gaming token drops, and free weekly title passes for active web gamers.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://www.razer.com/cortex" target="_blank" rel="noopener noreferrer" 
+                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
+                    <span>Claim Game Pass</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Filter Bar -->
+          <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-surf-surfaceCard border border-surf-border rounded-2xl p-4">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0" id="game-category-filters">
+              <button onclick="filterArcadeGames('all', this)" class="arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-purple-500 text-white shadow-glow-teal">All Games (8)</button>
+              <button onclick="filterArcadeGames('action', this)" class="arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-surf-surfaceElevated border border-surf-border transition-all">Top Action</button>
+              <button onclick="filterArcadeGames('casual', this)" class="arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-surf-surfaceElevated border border-surf-border transition-all">Casual &amp; Arcade</button>
+              <button onclick="filterArcadeGames('puzzle', this)" class="arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-surf-surfaceElevated border border-surf-border transition-all">Puzzle &amp; Logic</button>
+              <button onclick="filterArcadeGames('racing', this)" class="arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-surf-surfaceElevated border border-surf-border transition-all">Racing &amp; Sports</button>
+            </div>
+
+            <div class="flex items-center gap-3 text-xs text-slate-400">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Instant In-Browser Play</span>
+              </span>
+              <span>•</span>
+              <span class="text-purple-300 font-medium">No Downloads Required</span>
+            </div>
+          </div>
+
+          <!-- Categorized Game Grid -->
+          <div id="arcade-games-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <!-- Game 1: Moto X3M Winter -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="racing action">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://img.gamedistribution.com/5c9b783d8a554a938c558b3c1d458634-512x384.jpeg" alt="Moto X3M 4: Winter" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://images.unsplash.com/photo-1558981806-ec527fa84c39?w=500&auto=format&fit=crop&q=60';">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Racing</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.9</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Moto X3M 4: Winter</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Speed through dangerous snowy ramps, perform crazy flips, and dodge deadly explosive hazards.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+15 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('motox3m', 'Moto X3M 4: Winter', 'https://html5.gamedistribution.com/5c9b783d8a554a938c558b3c1d458634/', 'Racing')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 2: Drift Boss -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="casual racing">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://img.gamedistribution.com/393275ee6f584e27bcfb92eb5cb74621-512x384.jpeg" alt="Drift Boss" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://images.unsplash.com/photo-1542282088-72c9c27ed0cd?w=500&auto=format&fit=crop&q=60';">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Casual</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.8</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Drift Boss</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Test your timing and steering in an endless winding sky highway full of sharp turns and coins.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+10 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('driftboss', 'Drift Boss', 'https://html5.gamedistribution.com/393275ee6f584e27bcfb92eb5cb74621/', 'Casual')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 3: Bubble Shooter Deluxe -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="casual puzzle">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://img.gamedistribution.com/6c0a6b7d2db94d13bf24bfdca2b588bc-512x384.jpeg" alt="Bubble Shooter Deluxe" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" onerror="this.src='https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60';">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30">Puzzle</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.8</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Bubble Shooter Deluxe</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Match 3 or more colored bubbles to clear the screen before the roof collapses downwards.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+12 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('bubbleshooter', 'Bubble Shooter Deluxe', 'https://html5.gamedistribution.com/6c0a6b7d2db94d13bf24bfdca2b588bc/', 'Puzzle')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 4: 2048 Hexa Mania -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="puzzle">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=512&auto=format&fit=crop&q=80" alt="2048 Hexa Mania" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">Logic</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.9</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">2048 Hexa Mania</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Connect matching numerical hexagon cells in multiples of 2, 4, 8 to reach the legendary 2048 crown.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+15 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('2048hexa', '2048 Hexa Mania', 'https://html5.gamedistribution.com/b545f483789047b79427027ae455cb39/', 'Logic')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 5: Cyber City Runner -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="action">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://images.unsplash.com/photo-1578632767115-351597cf2477?w=512&auto=format&fit=crop&q=80" alt="Cyber City Runner" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">Action</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.7</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Cyber City Runner</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Sprint through neon skyscrapers, slide under laser fences, and collect cyber chips on the run.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+15 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('cybercity', 'Cyber City Runner', 'https://html5.gamedistribution.com/b976b05423f0449d85aa0d9e8b7fc939/', 'Action')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 6: Penalty Shooters 2 -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="racing casual">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=512&auto=format&fit=crop&q=80" alt="Penalty Shooters 2" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Sports</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.8</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Penalty Shooters 2</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Select your favorite national league, strike top-corner goals, and defend your net as goalkeeper.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+10 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('penaltyshooters', 'Penalty Shooters 2', 'https://html5.gamedistribution.com/1ee1a221295b432e9112260c6395bcf6/', 'Sports')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 7: Knife Smash Master -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="action casual">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=512&auto=format&fit=crop&q=80" alt="Knife Smash Master" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">Arcade</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.8</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Knife Smash Master</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Throw sharp blades into rotating wooden logs, cut golden apples, and unlock legendary knives.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+10 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('knifesmash', 'Knife Smash Master', 'https://html5.gamedistribution.com/bcf36a54da99499db3fe0a20cb6b5797/', 'Arcade')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game 8: Block Puzzle Classic -->
+            <div class="arcade-game-card bg-surf-surfaceCard border border-surf-border rounded-2xl overflow-hidden hover:border-purple-500/50 transition-all duration-300 group flex flex-col justify-between" data-category="puzzle">
+              <div class="relative aspect-video overflow-hidden bg-black/40">
+                <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?w=512&auto=format&fit=crop&q=80" alt="Block Puzzle Classic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#090E1C] via-transparent to-transparent opacity-80"></div>
+                <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">Puzzle</span>
+                <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/60 text-white backdrop-blur">⭐ 4.9</span>
+              </div>
+              <div class="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 class="text-sm font-bold text-white group-hover:text-purple-300 transition-colors">Block Puzzle Classic</h4>
+                  <p class="text-xs text-slate-400 mt-1 line-clamp-2">Fit wooden jewel blocks into 10x10 grids to destroy full lines and rack up combo high scores.</p>
+                </div>
+                <div class="pt-2 border-t border-surf-border/50 flex items-center justify-between">
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span>⚡</span> <span>+12 SKIT / 3m</span>
+                  </span>
+                  <button onclick="openGameTheater('blockpuzzle', 'Block Puzzle Classic', 'https://html5.gamedistribution.com/5cb1b714574944d1872df033d45ef4c8/', 'Puzzle')" class="px-3 py-1.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 flex items-center gap-1">
+                    <span>Play Now</span>
+                    <span>▶</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Arcade Streak Quest Card -->
+          <div class="p-6 rounded-2xl bg-gradient-to-r from-purple-950/30 via-surf-surfaceCard to-[#091024] border border-purple-500/30 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-2xl shrink-0">
+                ⚡
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white">Daily Arcade Quest: 3-Minute Play Streak</h4>
+                <p class="text-xs text-slate-300 mt-0.5">Play any featured GameDistribution title for 3 minutes to instantly refresh your 4-Hour Engagement Pulse.</p>
+              </div>
+            </div>
+            <button onclick="openGameTheater('motox3m', 'Moto X3M 4: Winter', 'https://html5.gamedistribution.com/5c9b783d8a554a938c558b3c1d458634/', 'Racing')" class="px-5 py-2.5 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-bold text-xs shadow-lg transition-all active:scale-95 shrink-0">
+              Play Random Game 🎲
+            </button>
+          </div>
+
+        </section>
 
 
         <!-- ================= TAB B: CASHOUT / PAYOUT TAB ================= -->
@@ -1646,6 +2180,42 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+<!-- Modular Ad Slot: cashout-native-1 (native) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="cashout-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #cashout-native-1</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-cashout-native-1">
+                <!-- Mockup Ad: CertiK Security Audits (Web3 Security Partner) -->
+                <div class="w-full bg-[#080E1C] border border-amber-500/30 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-amber-400/50 group">
+                  <div class="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full bg-amber-500/10 blur-xl"></div>
+                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/25 to-yellow-600/20 border border-amber-500/40 flex items-center justify-center text-xl shrink-0 text-amber-300 font-black shadow-md group-hover:scale-105 transition-transform">
+                      🔒
+                    </div>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-white tracking-tight">CertiK — Smart Contract Audits & KYC Assurance</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/35">Audited & Verified</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Security Sponsor</span>
+                      </div>
+                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
+                        Industry-leading blockchain security auditor. Over $360B+ in digital assets and 4,000+ protocols safeguarded.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://www.certik.com/" target="_blank" rel="noopener noreferrer" 
+                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
+                    <span>Verify Audits</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Transaction History Table -->
           <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl p-6 space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1673,6 +2243,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </table>
             </div>
           </div>
+
         </section>
 
 
@@ -1737,6 +2308,42 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+<!-- Modular Ad Slot: referral-native-1 (native) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="referral-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #referral-native-1</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-referral-native-1">
+                <!-- Mockup Ad: Lens Protocol (SocialFi Partner) -->
+                <div class="w-full bg-[#080E1C] border border-surf-border/80 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-surf-teal/50 group">
+                  <div class="pointer-events-none absolute -bottom-8 -right-8 w-28 h-28 rounded-full bg-emerald-500/10 blur-xl"></div>
+                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/25 to-teal-600/20 border border-emerald-500/40 flex items-center justify-center text-xl shrink-0 text-emerald-300 font-black shadow-md group-hover:scale-105 transition-transform">
+                      🌿
+                    </div>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-white tracking-tight">Lens Protocol — Decentralized Social Graph</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">SocialFi Network</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Ecosystem Partner</span>
+                      </div>
+                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
+                        Expand your audience on decentralized social media. Own your profile, content, and follower graph across the web.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://www.lens.xyz/" target="_blank" rel="noopener noreferrer" 
+                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
+                    <span>Join Network</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Simple Referral Summary -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl p-5 flex items-center gap-4">
@@ -1789,6 +2396,7 @@ document.addEventListener('DOMContentLoaded', () => {
               </table>
             </div>
           </div>
+
         </section>
 
 
@@ -1828,6 +2436,42 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+<!-- Modular Ad Slot: account-native-1 (native) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="account-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #account-native-1</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-account-native-1">
+                <!-- Mockup Ad: Proton Privacy Suite (Node Security Partner) -->
+                <div class="w-full bg-[#080E1C] border border-blue-500/30 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-blue-400/50 group">
+                  <div class="pointer-events-none absolute -top-8 -left-8 w-28 h-28 rounded-full bg-blue-500/10 blur-xl"></div>
+                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500/25 to-indigo-600/20 border border-blue-500/40 flex items-center justify-center text-xl shrink-0 text-blue-300 font-black shadow-md group-hover:scale-105 transition-transform">
+                      🛡️
+                    </div>
+                    <div>
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-xs font-bold text-white tracking-tight">Proton VPN &amp; Pass — Swiss Privacy Suite</span>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-500/35">Swiss Encryption</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Node Privacy</span>
+                      </div>
+                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
+                        Zero-log, open-source privacy protection engineered for active node operators, credential vaults, and encrypted browser sessions.
+                      </p>
+                    </div>
+                  </div>
+                  <a href="https://proton.me/vpn" target="_blank" rel="noopener noreferrer" 
+                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
+                    <span>Try Proton Free</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Ad Preferences & Frequency Sliders -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <!-- Geo-Tier & Earning Rate Breakdown -->
@@ -1843,8 +2487,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   🌍
                 </div>
                 <div class="flex-1 min-w-0">
-                  <h3 class="text-base font-bold text-white tracking-tight">Geo-Tier &amp; Earning Rate Breakdown</h3>
-                  <p class="text-xs text-slate-400 mt-0.5">Your regional tier determines how much each Surf Cred is worth in USD.</p>
+                  <h3 class="text-base font-bold text-white tracking-tight">Regional Availability &amp; Reward Multiplier</h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Ecosystem offer inventory, partner surveys, and quest availability calibrated by region.</p>
                 </div>
               </div>
 
@@ -1853,7 +2497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-surf-teal/10 border border-surf-teal/20 flex items-center justify-center text-base" id="geo-flag-icon">📍</div>
                   <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Detected Location</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Detected Region</p>
                     <p class="text-sm font-bold text-white mt-0.5" id="geo-location-label">Detecting...</p>
                   </div>
                 </div>
@@ -1862,34 +2506,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 </span>
               </div>
 
-              <!-- Surf Creds Conversion Rate -->
-              <div class="p-3.5 rounded-xl bg-gradient-to-r from-surf-teal/8 via-transparent to-cyan-500/8 border border-surf-teal/20">
+              <!-- Engagement Policy & Survey/Quest Availability Notice -->
+              <div class="p-3.5 rounded-xl bg-gradient-to-r from-surf-teal/8 via-[#0A101D] to-cyan-500/8 border border-surf-teal/20 space-y-2">
                 <div class="flex items-center justify-between">
-                  <div>
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Your Conversion Rate</p>
-                    <p class="text-lg font-extrabold text-surf-teal mt-1" id="geo-rate-display">1,000 Surf Creds = $2.50 USD</p>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-[10px] text-slate-400">Per Ad Impression</p>
-                    <p class="text-sm font-bold text-white mt-1" id="geo-per-ad-display">+10 Creds = $0.0250</p>
-                  </div>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Regional Multiplier</span>
+                  <span class="text-xs font-bold text-surf-teal" id="geo-rate-display">High Availability (2.0x Boost)</span>
                 </div>
+                <p class="text-[11px] text-slate-300 leading-relaxed" id="geo-per-ad-display">
+                  Rewards are generated through verified platform engagement, survey completions, mini-games, and community quests. Specific inventory allocations adjust by geographic market to ensure legitimate advertiser fulfillment.
+                </p>
               </div>
 
-              <!-- All Tiers Rate Table -->
+              <!-- All Regional Availability Tiers -->
               <div class="space-y-2">
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">All Regional Tiers</p>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Regional Engagement Tiers</p>
 
                 <!-- Tier 1 -->
                 <div class="flex items-center justify-between p-2.5 rounded-lg border transition-all" id="tier-row-1">
                   <div class="flex items-center gap-2.5">
                     <span class="text-sm">🇺🇸</span>
                     <div>
-                      <p class="text-xs font-bold text-white">Tier 1 — Premium Markets</p>
-                      <p class="text-[10px] text-slate-500">US, CA, GB, DE, FR, IT, ES, NL, AU, NZ + 10 more</p>
+                      <p class="text-xs font-bold text-white">Tier 1 — High Offer Density</p>
+                      <p class="text-[10px] text-slate-500">North America & Western Europe (Full Survey & Game Pool)</p>
                     </div>
                   </div>
-                  <span class="text-xs font-extrabold text-emerald-400 whitespace-nowrap ml-2">$2.50 / 1k</span>
+                  <span class="text-xs font-extrabold text-emerald-400 whitespace-nowrap ml-2">2.0x Platform Activity</span>
                 </div>
 
                 <!-- Tier 2 -->
@@ -1898,10 +2539,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="text-sm">🌐</span>
                     <div>
                       <p class="text-xs font-bold text-white">Tier 2 — Growth Markets</p>
-                      <p class="text-[10px] text-slate-500">AE, SA, SG, JP, KR, BR, MX, PL, TR + 22 more</p>
+                      <p class="text-[10px] text-slate-500">Asia-Pacific, Latin America & Gulf (Balanced Inventory)</p>
                     </div>
                   </div>
-                  <span class="text-xs font-extrabold text-sky-400 whitespace-nowrap ml-2">$1.00 / 1k</span>
+                  <span class="text-xs font-extrabold text-sky-400 whitespace-nowrap ml-2">1.5x Platform Activity</span>
                 </div>
 
                 <!-- Tier 3 -->
@@ -1910,10 +2551,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <span class="text-sm">🌏</span>
                     <div>
                       <p class="text-xs font-bold text-white">Tier 3 — Emerging Markets</p>
-                      <p class="text-[10px] text-slate-500">LK, IN, PK, BD, ID, PH, VN, EG, NG + 9 more</p>
+                      <p class="text-[10px] text-slate-500">South Asia & Emerging Regions (Expanding Quest Pool)</p>
                     </div>
                   </div>
-                  <span class="text-xs font-extrabold text-amber-400 whitespace-nowrap ml-2">$0.30 / 1k</span>
+                  <span class="text-xs font-extrabold text-amber-400 whitespace-nowrap ml-2">1.2x Platform Activity</span>
                 </div>
 
                 <!-- Tier 4 -->
@@ -1921,22 +2562,22 @@ document.addEventListener('DOMContentLoaded', () => {
                   <div class="flex items-center gap-2.5">
                     <span class="text-sm">🌍</span>
                     <div>
-                      <p class="text-xs font-bold text-white">Tier 4 — Rest of World</p>
-                      <p class="text-[10px] text-slate-500">All other countries not listed above</p>
+                      <p class="text-xs font-bold text-white">Tier 4 — Global Baseline</p>
+                      <p class="text-[10px] text-slate-500">Worldwide baseline access for general quests & daily streak bonuses</p>
                     </div>
                   </div>
-                  <span class="text-xs font-extrabold text-slate-400 whitespace-nowrap ml-2">$0.15 / 1k</span>
+                  <span class="text-xs font-extrabold text-slate-400 whitespace-nowrap ml-2">1.0x Base Activity</span>
                 </div>
               </div>
 
-              <!-- Active Ad Mode Indicator — mirrors extension popup Low / Balanced / High -->
+              <!-- Node Session Activity Mode Indicator -->
               <div id="geo-ad-mode-card" class="flex items-center gap-3 p-3 rounded-xl bg-surf-surface border border-surf-border">
                 <div id="geo-ad-mode-icon" class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-sm shrink-0">⚡</div>
                 <div class="flex-1 min-w-0">
-                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active Ad Mode</p>
-                  <p class="text-xs font-bold text-white mt-0.5" id="geo-ad-mode-label">Balanced — 4 Ads / Hour</p>
+                  <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Browser Node Activity Mode</p>
+                  <p class="text-xs font-bold text-white mt-0.5" id="geo-ad-mode-label">Balanced Mode — Verified Session</p>
                 </div>
-                <span id="geo-mode-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-surf-teal/15 border border-surf-teal/30 text-surf-teal whitespace-nowrap">15 min cooldown</span>
+                <span id="geo-mode-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-surf-teal/15 border border-surf-teal/30 text-surf-teal whitespace-nowrap">Active Node</span>
               </div>
 
             </div>
@@ -1971,6 +2612,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </button>
   </div>
 </div>
+
 
 <!-- Bottom-Right Floating Live Chat Window -->
 <div id="liveChatWidget" class="fixed bottom-6 right-6 z-50 w-80 sm:w-96 bg-surf-surfaceCard border border-surf-border rounded-2xl shadow-2xl flex flex-col overflow-hidden hidden transition-all duration-300 transform scale-95 opacity-0">
@@ -2251,13 +2893,179 @@ document.addEventListener('DOMContentLoaded', () => {
         </section>
 
       </main>
+
+        <!-- GLOBAL RIGHT-SIDE AD COLUMN (On Every Page) -->
+        <aside id="global-right-ad-col" class="hidden lg:flex flex-col gap-4 w-72 xl:w-80 shrink-0 p-4 border-l border-slate-800/50 bg-[#070D19]/40 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
+          <!-- Top Column Header -->
+          <div class="flex items-center justify-between pb-2 border-b border-surf-border/40">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-surf-teal animate-pulse"></span>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">Partner Network</span>
+            </div>
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-surf-surface text-slate-500 font-mono">Sponsored</span>
+          </div>
+
+          <!-- Vertical Ad Slot 1: Bybit Web3 Staking -->
+          <div class="surfkit-ad-slot-wrapper w-full transition-all" data-slot-id="global-right-native-1" data-format="vertical-native">
+            <div class="rounded-2xl border border-surf-border/70 bg-surf-surfaceCard/40 p-4 transition-all hover:border-surf-teal/40">
+              <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Native Partner</span>
+                <span class="text-[9px] text-slate-500 font-mono">#global-1</span>
+              </div>
+              <div class="ad-slot-content" id="ad-slot-global-right-native-1">
+                <!-- Mockup Ad: Bybit Web3 Staking -->
+                <div class="w-full bg-[#080E1C] border border-amber-500/30 rounded-xl p-3.5 space-y-3 relative overflow-hidden group">
+                  <div class="pointer-events-none absolute -top-8 -right-8 w-24 h-24 rounded-full bg-amber-500/10 blur-xl"></div>
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base font-black shrink-0">
+                      ₿
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-white">Bybit Web3 Staking</span>
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">12.5% APR</span>
+                      </div>
+                      <p class="text-[10px] text-slate-400">Non-Custodial Yield</p>
+                    </div>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">
+                    Deposit USDT or BTC to earn passive daily yield with zero lockups and automated compounding.
+                  </p>
+                  <a href="https://www.bybit.com/" target="_blank" rel="noopener noreferrer" class="w-full py-2 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-300 font-bold text-xs flex items-center justify-center gap-1 transition-all">
+                    <span>Stake Earnings</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Vertical Ad Slot 2: Ledger Hardware Security -->
+          <div class="surfkit-ad-slot-wrapper w-full transition-all" data-slot-id="global-right-native-2" data-format="vertical-native">
+            <div class="rounded-2xl border border-surf-border/70 bg-surf-surfaceCard/40 p-4 transition-all hover:border-surf-teal/40">
+              <div class="flex items-center justify-between mb-2.5 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-400 font-mono font-semibold">Sponsored</span>
+                <span class="text-[9px] text-slate-500 font-mono">#global-2</span>
+              </div>
+              <div class="ad-slot-content" id="ad-slot-global-right-native-2">
+                <!-- Mockup Ad: Ledger Hardware Security -->
+                <div class="w-full bg-[#080E1C] border border-surf-border/80 rounded-xl p-3.5 space-y-3 relative overflow-hidden group">
+                  <div class="pointer-events-none absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-surf-teal/10 blur-xl"></div>
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-surf-teal/15 border border-surf-teal/30 flex items-center justify-center text-surf-teal text-base font-black shrink-0">
+                      🛡️
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-xs font-bold text-white">Ledger Nano X</span>
+                        <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-surf-teal/15 text-surf-teal border border-surf-teal/30">Hardware</span>
+                      </div>
+                      <p class="text-[10px] text-slate-400">Cold Storage Vault</p>
+                    </div>
+                  </div>
+                  <p class="text-[11px] text-slate-300 leading-relaxed">
+                    Protect your Surfkit crypto withdrawals with military-grade offline private key storage.
+                  </p>
+                  <a href="https://www.ledger.com/" target="_blank" rel="noopener noreferrer" class="w-full py-2 rounded-lg bg-surf-teal/15 hover:bg-surf-teal/25 border border-surf-teal/35 text-surf-teal font-bold text-xs flex items-center justify-center gap-1 transition-all">
+                    <span>Secure Your Crypto</span>
+                    <span class="text-[10px]">↗</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Mini Quick-Action Widget -->
+          <div class="mt-auto p-3.5 rounded-xl bg-gradient-to-br from-purple-950/20 via-[#0A101D] to-surf-teal/5 border border-purple-500/25 space-y-2">
+            <div class="flex items-center gap-2">
+              <span class="text-base">🎮</span>
+              <span class="text-xs font-bold text-white">Arcade Arena</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 ml-auto">New</span>
+            </div>
+            <p class="text-[11px] text-slate-400">Play free HTML5 mini-games &amp; earn bonus streak rewards!</p>
+            <button onclick="switchTab('games')" class="w-full py-1.5 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1">
+              <span>Enter Arcade</span>
+              <span>→</span>
+            </button>
+          </div>
+        </aside>
+      </div>
     </div>
   </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- MODAL: REDEEM REWARDS / CASHOUT SUCCESS MODAL -->
+  <!-- MODAL: THEATER MODE GAME VIEWER -->
+  <div id="gameTheaterModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 transition-all">
+    <div class="bg-[#090E1C] border border-surf-border/90 rounded-2xl w-full max-w-5xl overflow-hidden shadow-2xl flex flex-col max-h-[96vh] relative animate-in fade-in zoom-in-95 duration-200">
+      
+      <!-- Theater Header -->
+      <div class="h-14 bg-[#0A1020] border-b border-surf-border px-4 sm:px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-sm text-purple-300">
+            🎮
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 id="theaterGameTitle" class="text-sm sm:text-base font-bold text-white truncate max-w-xs sm:max-w-md">Game Title</h3>
+              <span id="theaterGameCategory" class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 uppercase tracking-wider">Action</span>
+            </div>
+            <p class="text-[10px] text-slate-400 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span>Playing in Theater Mode • Earnings Pulse Multiplier Active</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Theater Controls -->
+        <div class="flex items-center gap-2">
+          <button onclick="toggleGameFullscreen()" class="p-2 rounded-xl bg-surf-surface border border-surf-border hover:border-surf-teal text-slate-300 hover:text-white transition-colors" title="Toggle Fullscreen">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+          </button>
+          <button onclick="closeGameTheater()" class="p-2 rounded-xl bg-surf-surface border border-surf-border hover:border-rose-500 text-slate-300 hover:text-rose-400 transition-colors" title="Exit Game">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Theater Main Play Frame -->
+      <div id="theaterFrameContainer" class="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+        <iframe id="theaterGameIframe" src="" class="w-full h-full border-0" allow="autoplay; fullscreen; gamepad; accelerometer; gyroscope"></iframe>
+      </div>
+
+      <!-- Theater Bottom Bar / Ad Placement -->
+      <div class="bg-[#0A1020] border-t border-surf-border p-3 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 shrink-0">
+        <!-- Streak pulse status -->
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xs text-emerald-400">
+            ⚡
+          </div>
+          <div>
+            <p class="text-xs font-bold text-white">Platform Activity Synced</p>
+            <p class="text-[10px] text-slate-400">Playing verified games boosts your daily ad slice engagement.</p>
+          </div>
+        </div>
+
+        <!-- Theater Native Ad Slot (Position 2: beside/below theater game frame) -->
+        <div class="surfkit-ad-slot-wrapper w-full md:w-auto transition-all" data-slot-id="theater-native-ad" data-format="native">
+          <div class="ad-slot-content rounded-xl border border-surf-border/80 bg-[#080E1C] px-3 py-2 flex items-center gap-3" id="ad-slot-theater-native-ad">
+            <div class="flex items-center gap-2">
+              <span class="text-[9px] uppercase font-mono font-bold bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded">Ad</span>
+              <span class="text-xs font-bold text-white">Alienware Arena</span>
+              <span class="text-[10px] text-slate-400 hidden sm:inline">• Free Steam Keys &amp; Rewards</span>
+            </div>
+            <a href="https://www.alienwarearena.com/" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 font-bold text-[11px] rounded-lg transition-colors ml-auto">
+              Visit ↗
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+    <!-- MODAL: REDEEM REWARDS / CASHOUT SUCCESS MODAL -->
   <div id="successModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl max-w-md w-full p-6 text-center space-y-4 shadow-2xl relative transform animate-in fade-in zoom-in-95 duration-200">
       <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center mx-auto text-2xl">
@@ -2970,6 +3778,9 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           state.user.referralCode = userRefCode;
           state.user.streakDays = Number(profile.streak_days || 0);
+          if (profile.last_spin_at) {
+            state.user.lastSpinAt = profile.last_spin_at;
+          }
           state.user.lastActiveDate = profile.last_active_date ? String(profile.last_active_date).split('T')[0] : null;
           state.user.name = profile.display_name || profile.username || state.user.name;
           state.user.username = profile.username || state.user.username;
@@ -3888,6 +4699,75 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+
+    // --- ARCADE ARENA & THEATER MODE CONTROLS ---
+    function openGameTheater(gameId, title, embedUrl, category) {
+      triggerGameInterstitial(gameId, function() {
+        const modal = document.getElementById('gameTheaterModal');
+        const iframe = document.getElementById('theaterGameIframe');
+        const titleEl = document.getElementById('theaterGameTitle');
+        const catEl = document.getElementById('theaterGameCategory');
+
+        if (titleEl) titleEl.textContent = title || 'Arcade Game';
+        if (catEl) catEl.textContent = category || 'Action';
+        if (iframe) iframe.src = embedUrl;
+
+        if (modal) {
+          modal.classList.remove('hidden');
+          document.body.style.overflow = 'hidden';
+        }
+      });
+    }
+
+    function closeGameTheater() {
+      const modal = document.getElementById('gameTheaterModal');
+      const iframe = document.getElementById('theaterGameIframe');
+      if (iframe) iframe.src = '';
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    }
+
+    function toggleGameFullscreen() {
+      const frame = document.getElementById('theaterFrameContainer');
+      if (!frame) return;
+      if (!document.fullscreenElement) {
+        if (frame.requestFullscreen) frame.requestFullscreen();
+        else if (frame.webkitRequestFullscreen) frame.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+      }
+    }
+
+    function filterArcadeGames(category, btn) {
+      document.querySelectorAll('.arcade-filter-btn').forEach(b => {
+        b.className = 'arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-surf-surfaceElevated border border-surf-border transition-all';
+      });
+      if (btn) {
+        btn.className = 'arcade-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all bg-purple-500 text-white shadow-glow-teal';
+      }
+
+      const cards = document.querySelectorAll('.arcade-game-card');
+      cards.forEach(card => {
+        const cats = card.getAttribute('data-category') || '';
+        if (category === 'all' || cats.includes(category)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Interstitial / Rewarded ad trigger hook for GameDistribution / Monetag video ads
+    function triggerGameInterstitial(gameId, callback) {
+      console.log('[Surfkit Arcade] Game interstitial hook fired for game:', gameId);
+      // If third-party ad tag (e.g. gdsdk or Monetag) is loaded, call here.
+      if (typeof callback === 'function') {
+        callback();
+      }
+    }
+
     // --- TAB SWITCHING LOGIC ---
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(tab => {
@@ -3907,6 +4787,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const breadcrumbNames = {
         overview: 'Overview',
         earnhub: 'Earn Hub • Surveys & Offers',
+        games: 'Mini Games • Arcade Arena',
         cashout: 'Cashout / Payouts',
         referral: 'Referral & Crew',
         account: 'Account & Devices'
@@ -5458,22 +6339,22 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!modeLabel || !modeBadge) return;
       const modes = {
         1: {
-          label: 'Low — 2 Ads / Hour',
-          badge: '30 min cooldown',
+          label: 'Eco Mode — Verified Session',
+          badge: 'Low Traffic',
           badgeCls: 'bg-slate-500/15 border-slate-500/30 text-slate-400',
           cardCls: 'flex items-center gap-3 p-3 rounded-xl bg-surf-surface border border-surf-border',
           iconCls: 'w-7 h-7 rounded-lg bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-sm shrink-0'
         },
         2: {
-          label: 'Balanced — 4 Ads / Hour',
-          badge: '15 min cooldown',
+          label: 'Balanced Mode — Verified Session',
+          badge: 'Active Node',
           badgeCls: 'bg-surf-teal/15 border-surf-teal/30 text-surf-teal',
           cardCls: 'flex items-center gap-3 p-3 rounded-xl bg-surf-surface border border-surf-teal/30',
           iconCls: 'w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-sm shrink-0'
         },
         3: {
-          label: 'High — 6 Ads / Hour',
-          badge: '10 min cooldown',
+          label: 'Turbo Mode — High Engagement',
+          badge: 'Boosted',
           badgeCls: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400',
           cardCls: 'flex items-center gap-3 p-3 rounded-xl bg-emerald-950/20 border border-emerald-500/30',
           iconCls: 'w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-sm shrink-0'
@@ -5721,16 +6602,18 @@ document.addEventListener('DOMContentLoaded', () => {
         tierBadge.className = 'text-[10px] font-extrabold px-2.5 py-1 rounded-full border ' + cfg.badge;
       }
 
-      // Conversion rate display
+      // Multiplier display
       const rateEl = document.getElementById('geo-rate-display');
       if (rateEl) {
-        rateEl.textContent = cfg.rateDisplay;
+        const multipliers = { 1: 'High Offer Density (2.0x Boost)', 2: 'Growth Market (1.5x Boost)', 3: 'Emerging Pool (1.2x Boost)', 4: 'Global Baseline (1.0x)' };
+        rateEl.textContent = multipliers[tier] || 'Standard Availability';
       }
 
-      // Per-ad earnings display
+      // Engagement policy display (preserved policy-safe)
       const perAdEl = document.getElementById('geo-per-ad-display');
-      if (perAdEl) {
-        perAdEl.textContent = '+10 Creds = ' + cfg.perAd;
+      if (perAdEl && !perAdEl.dataset.initialized) {
+        perAdEl.dataset.initialized = 'true';
+        perAdEl.textContent = 'Rewards are generated through verified platform engagement, survey completions, mini-games, and community quests. Specific inventory allocations adjust by geographic market to ensure legitimate advertiser fulfillment.';
       }
 
       // Highlight active tier row, dim/reset others
@@ -6116,6 +6999,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderApp() {
+      if (typeof window.initPulseWidget === 'function') {
+        window.initPulseWidget();
+      }
       // Top nav values
       const navBalance = document.getElementById('nav-balance-val');
       if (navBalance) navBalance.textContent = `$${state.user.availableBalance.toFixed(2)}`;
@@ -7407,6 +8293,246 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   console.log('[Surfkit Dashboard] Rewards bridge listener installed.');
+})();
+</script>
+
+
+<!-- ========================================================================== -->
+<!-- SURFKIT PULSE & AD ENGINE ENHANCEMENTS                                    -->
+<!-- ========================================================================== -->
+<script>
+(function() {
+  /* --- 4-Hour Engagement Streak Dial / Pulse Engine --- */
+  const PULSE_CONFIG = {
+    COOLDOWN_MS: 4 * 60 * 60 * 1000, // 14,400,000 ms (4 Hours)
+    LS_KEY: 'surfkit_pulse_last_spin',
+    WEIGHTED_OUTCOMES: [
+      { id: 'c5',  type: 'creds', amount: 5,  label: '+5 Creds',  usd: 0.005, weight: 45, deg: 180 },
+      { id: 'c10', type: 'creds', amount: 10, label: '+10 Creds', usd: 0.010, weight: 30, deg: 0 },
+      { id: 'c15', type: 'creds', amount: 15, label: '+15 Creds', usd: 0.015, weight: 15, deg: 90 },
+      { id: 'c25', type: 'creds', amount: 25, label: '+25 Creds', usd: 0.025, weight: 8,  deg: 270 },
+      { id: 'b2x', type: 'boost', amount: 2,  label: '2x Quest Boost', usd: 0, weight: 2, deg: 240 }
+    ]
+  };
+
+  let pulseIntervalTimer = null;
+  let isPulseSpinning = false;
+  let currentRotationDeg = 0;
+
+  function getLastPulseTimestamp() {
+    const fromProfile = (typeof state !== 'undefined' && state.user && state.user.lastSpinAt) 
+      ? new Date(state.user.lastSpinAt).getTime() 
+      : 0;
+    const fromLocal = parseInt(localStorage.getItem(PULSE_CONFIG.LS_KEY) || '0', 10);
+    return Math.max(fromProfile, fromLocal);
+  }
+
+  function getRemainingPulseCooldown() {
+    const lastTime = getLastPulseTimestamp();
+    if (!lastTime) return 0;
+    const elapsed = Date.now() - lastTime;
+    return Math.max(0, PULSE_CONFIG.COOLDOWN_MS - elapsed);
+  }
+
+  function formatCountdown(ms) {
+    const totalSecs = Math.floor(ms / 1000);
+    const hrs = Math.floor(totalSecs / 3600);
+    const mins = Math.floor((totalSecs % 3600) / 60);
+    const secs = totalSecs % 60;
+    return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+  }
+
+  function updatePulseWidgetUI() {
+    const timerDisplay = document.getElementById('pulse-timer-display');
+    const statusBadge = document.getElementById('pulse-status-badge');
+    const claimBtn = document.getElementById('pulse-claim-btn');
+    const btnText = document.getElementById('pulse-btn-text');
+    if (!timerDisplay || !claimBtn) return;
+
+    const remaining = getRemainingPulseCooldown();
+
+    if (remaining <= 0) {
+      timerDisplay.textContent = 'READY NOW';
+      timerDisplay.className = 'text-sm font-black text-emerald-400 font-mono tracking-wider animate-pulse';
+      if (statusBadge) {
+        statusBadge.textContent = 'Pulse Ready';
+        statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+      }
+      claimBtn.disabled = false;
+      claimBtn.className = 'px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-surf-teal to-emerald-400 hover:from-surf-tealHover hover:to-emerald-300 text-slate-950 transition-all shadow-glow-teal active:scale-95 flex items-center gap-2 cursor-pointer';
+      if (btnText) btnText.textContent = 'Spin Pulse Dial';
+    } else {
+      const formatted = formatCountdown(remaining);
+      timerDisplay.textContent = formatted;
+      timerDisplay.className = 'text-sm font-black text-slate-300 font-mono tracking-wider';
+      if (statusBadge) {
+        statusBadge.textContent = 'Cooldown Active';
+        statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30';
+      }
+      claimBtn.disabled = true;
+      claimBtn.className = 'px-5 py-2.5 rounded-xl font-bold text-xs bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed flex items-center gap-2 opacity-80';
+      if (btnText) btnText.textContent = 'Cooldown (' + formatted + ')';
+    }
+  }
+
+  window.initPulseWidget = function() {
+    updatePulseWidgetUI();
+    if (pulseIntervalTimer) clearInterval(pulseIntervalTimer);
+    pulseIntervalTimer = setInterval(updatePulseWidgetUI, 1000);
+  };
+
+  function selectWeightedPulseOutcome() {
+    const totalWeight = PULSE_CONFIG.WEIGHTED_OUTCOMES.reduce((sum, item) => sum + item.weight, 0);
+    let random = Math.random() * totalWeight;
+    for (const item of PULSE_CONFIG.WEIGHTED_OUTCOMES) {
+      if (random < item.weight) return item;
+      random -= item.weight;
+    }
+    return PULSE_CONFIG.WEIGHTED_OUTCOMES[0];
+  }
+
+  window.executePulseSpin = async function() {
+    if (isPulseSpinning) return;
+    const remaining = getRemainingPulseCooldown();
+    if (remaining > 0) {
+      if (typeof showToast === 'function') {
+        showToast('Pulse is recharging! Available in ' + formatCountdown(remaining) + '.', 'info');
+      }
+      return;
+    }
+
+    isPulseSpinning = true;
+    const claimBtn = document.getElementById('pulse-claim-btn');
+    const btnText = document.getElementById('pulse-btn-text');
+    const dial = document.getElementById('pulse-dial-wheel');
+    if (claimBtn) claimBtn.disabled = true;
+    if (btnText) btnText.textContent = 'Calibrating Pulse...';
+
+    // Weighted Outcome Selection
+    const prize = selectWeightedPulseOutcome();
+
+    // 4 full revolutions + prize angle
+    const fullSpins = 4 + Math.floor(Math.random() * 2);
+    const targetDeg = fullSpins * 360 + prize.deg;
+    currentRotationDeg += targetDeg;
+
+    if (dial) {
+      dial.style.transform = 'rotate(' + currentRotationDeg + 'deg)';
+    }
+
+    setTimeout(async () => {
+      isPulseSpinning = false;
+      const nowIso = new Date().toISOString();
+      const nowMs = Date.now();
+
+      localStorage.setItem(PULSE_CONFIG.LS_KEY, nowMs.toString());
+      if (typeof state !== 'undefined' && state.user) {
+        state.user.lastSpinAt = nowIso;
+      }
+
+      // Award Rewards
+      if (prize.type === 'creds') {
+        const credValUsd = prize.usd;
+        if (typeof state !== 'undefined' && state.user) {
+          state.user.availableBalance = parseFloat(((state.user.availableBalance || 0) + credValUsd).toFixed(3));
+          state.user.lifetimeEarnings = parseFloat(((state.user.lifetimeEarnings || 0) + credValUsd).toFixed(3));
+        }
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          currentUser.availableBalance = state.user.availableBalance;
+        }
+      } else if (prize.type === 'boost') {
+        if (typeof state !== 'undefined' && state.user) {
+          state.user.questBoostActive = true;
+        }
+      }
+
+      // Persist to Supabase if connected
+      if (typeof supabaseClient !== 'undefined' && supabaseClient && typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
+        try {
+          const updatePayload = {
+            last_spin_at: nowIso
+          };
+          if (prize.type === 'creds' && state.user) {
+            updatePayload.available_balance = state.user.availableBalance;
+            updatePayload.lifetime_earnings = state.user.lifetimeEarnings;
+          }
+          await supabaseClient.from('profiles').update(updatePayload).eq('id', currentUser.id);
+        } catch (err) {
+          console.warn('[Surfkit Pulse] Failed to persist pulse to Supabase:', err);
+        }
+      }
+
+      // Re-render UI
+      if (typeof renderApp === 'function') renderApp();
+      updatePulseWidgetUI();
+
+      if (typeof showToast === 'function') {
+        if (prize.type === 'creds') {
+          showToast('⚡ 4-Hour Engagement Bonus Claimed! You received ' + prize.label + ' (+$' + prize.usd.toFixed(3) + ' USD).', 'success');
+        } else {
+          showToast('⚡ 4-Hour Engagement Bonus Claimed! ' + prize.label + ' activated for your next quest!', 'success');
+        }
+      }
+    }, 2850);
+  };
+
+  /* --- Modular Ad Slot Engine --- */
+  window.SurfkitAdEngine = {
+    slots: {
+      'overview-native-1':     { placement: 'overview', format: 'native',          filled: false },
+      'overview-push-1':       { placement: 'overview', format: 'push',            filled: false },
+      'earnhub-native-1':      { placement: 'earnhub',  format: 'native',          filled: false },
+      'cashout-native-1':      { placement: 'cashout',  format: 'native',          filled: false },
+      'referral-native-1':     { placement: 'referral', format: 'native',          filled: false },
+      'account-native-1':      { placement: 'account',  format: 'native',          filled: false },
+      'global-right-native-1': { placement: 'sidebar',  format: 'vertical-native', filled: false },
+      'global-right-native-2': { placement: 'sidebar',  format: 'vertical-native', filled: false },
+      'games-native-top':      { placement: 'games',    format: 'native',          filled: false },
+      'theater-native-ad':     { placement: 'theater',  format: 'native',          filled: false }
+    },
+
+    init: function() {
+      // Mockup ads active by default. Networks can override via fillSlot() or hide via collapseSlot()
+      Object.keys(this.slots).forEach(function(slotId) {
+        const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
+        if (el) {
+          el.style.display = 'block';
+          window.SurfkitAdEngine.slots[slotId].filled = true;
+        }
+      });
+    },
+
+    fillSlot: function(slotId, renderFnOrHtml) {
+      const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
+      const container = document.getElementById('ad-slot-' + slotId);
+      if (!el || !container) return;
+
+      if (typeof renderFnOrHtml === 'string' && renderFnOrHtml.trim()) {
+        container.innerHTML = renderFnOrHtml;
+        el.style.display = 'block';
+        if (this.slots[slotId]) this.slots[slotId].filled = true;
+      } else if (typeof renderFnOrHtml === 'function') {
+        renderFnOrHtml(container, function() {
+          el.style.display = 'block';
+          if (window.SurfkitAdEngine.slots[slotId]) window.SurfkitAdEngine.slots[slotId].filled = true;
+        });
+      }
+    },
+
+    collapseSlot: function(slotId) {
+      const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
+      if (el) el.style.display = 'none';
+      if (this.slots[slotId]) this.slots[slotId].filled = false;
+    }
+  };
+
+  // Auto-init on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function() {
+    window.SurfkitAdEngine.init();
+    if (typeof window.initPulseWidget === 'function') {
+      window.initPulseWidget();
+    }
+  });
 })();
 </script>
 
