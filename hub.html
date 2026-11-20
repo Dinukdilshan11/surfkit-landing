@@ -1883,301 +1883,149 @@ document.addEventListener('DOMContentLoaded', () => {
             </p>
           </div>
 
-          <!-- Payout Request Form & Balance Validation -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 bg-surf-surfaceCard border border-surf-border rounded-2xl p-6 space-y-5">
-              <div class="border-b border-surf-border pb-3 flex items-center justify-between">
-                <div>
-                  <h3 class="text-lg font-bold text-white tracking-tight">Request Payout</h3>
-                  <p class="text-xs text-slate-400">Selected Gateway: <span id="selected-gateway-label" class="text-surf-teal font-semibold">FaucetPay (Crypto)</span></p>
-                </div>
-                <span id="gateway-min-badge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surf-surface border border-surf-border text-slate-300">Min $1.00</span>
+          <!-- Payout Request Form & Balance Validation (Full-Width Expanded Card) -->
+          <div class="w-full bg-surf-surfaceCard border border-surf-border rounded-2xl p-6 sm:p-7 space-y-5">
+            <div class="border-b border-surf-border pb-3 flex items-center justify-between">
+              <div>
+                <h3 class="text-lg font-bold text-white tracking-tight">Request Payout</h3>
+                <p class="text-xs text-slate-400">Selected Gateway: <span id="selected-gateway-label" class="text-emerald-400 font-semibold">FaucetPay (Crypto)</span></p>
               </div>
-
-              <form id="cashout-form" onsubmit="handleCashoutSubmit(event)" class="space-y-4">
-                <!-- Amount input with chips -->
-                <div>
-                  <div class="flex items-center justify-between mb-1.5">
-                    <label class="text-xs font-semibold text-slate-300">Withdrawal Amount ($ USD)</label>
-                    <span class="text-xs text-slate-400">Available: <span id="form-available-max" class="text-surf-teal font-bold">$0.00</span></span>
-                  </div>
-                  
-                  <div class="relative rounded-xl">
-                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">$</div>
-                    <input 
-                      type="number" 
-                      id="cashout-amount" 
-                      step="0.01" 
-                      min="1.00" 
-                      placeholder="1.00" 
-                      value="1.00"
-                      oninput="validateCashoutForm()"
-                      class="w-full bg-[#090E1C] border border-surf-border rounded-xl pl-8 pr-20 py-2.5 text-white font-bold text-sm focus:outline-none focus:border-surf-teal transition-colors"
-                      required
-                    >
-                    <button 
-                      type="button" 
-                      onclick="setCashoutMax()" 
-                      class="absolute inset-y-1.5 right-1.5 px-3 rounded-lg bg-surf-teal/20 text-surf-teal text-xs font-bold hover:bg-surf-teal/30 transition-colors">
-                      MAX
-                    </button>
-                  </div>
-
-                  <!-- Quick Chips -->
-                  <div class="flex items-center gap-2 mt-2">
-                    <button type="button" onclick="setCashoutAmount(5)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-surf-teal/40 transition-colors">$5.00</button>
-                    <button type="button" onclick="setCashoutAmount(10)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-surf-teal/40 transition-colors">$10.00</button>
-                    <button type="button" onclick="setCashoutAmount(25)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-surf-teal/40 transition-colors">$25.00</button>
-                    <button type="button" onclick="setCashoutMax()" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-surf-teal/40 transition-colors">All Balance</button>
-                  </div>
-
-                  <!-- Validation Error Container -->
-                  <p id="cashout-error" class="hidden text-xs text-rose-400 mt-2 flex items-center gap-1 font-medium">
-                    <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
-                    <span id="cashout-error-text">Amount exceeds available balance or minimum limit</span>
-                  </p>
-                </div>
-
-                <!-- Form Section 0: FaucetPay Onboarding Guide (shown when FaucetPay selected) -->
-                <div id="faucetpay-guide-card" class="rounded-xl border border-emerald-500/30 bg-emerald-500/6 p-4 space-y-3" style="background:rgba(16,185,129,0.06);">
-                  <div class="flex items-center gap-2">
-                    <span class="text-emerald-400 text-base">🚀</span>
-                    <p class="text-xs font-bold text-emerald-300">Don't have a FaucetPay account? Create one in 30 seconds for 0% fees:</p>
-                  </div>
-                  <ol class="space-y-1.5 text-xs text-slate-300 pl-1">
-                    <li class="flex items-start gap-2">
-                      <span class="text-emerald-400 font-black shrink-0">1.</span>
-                      <span>Click the button below to register free on FaucetPay.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                      <span class="text-emerald-400 font-black shrink-0">2.</span>
-                      <span>Enter your FaucetPay Email address in the field below.</span>
-                    </li>
-                    <li class="flex items-start gap-2">
-                      <span class="text-emerald-400 font-black shrink-0">3.</span>
-                      <span>Click <span class="font-bold text-white">Withdraw</span> and receive funds instantly!</span>
-                    </li>
-                  </ol>
-                  <a href="https://faucetpay.io/r/10337010" target="_blank" rel="noopener noreferrer"
-                    class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all active:scale-95 shadow-md">
-                    Create Free FaucetPay Account ↗
-                  </a>
-                </div>
-
-                <!-- Form Section: FaucetPay Email Field -->
-                <div id="fields-faucetpay" class="space-y-2">
-                  <label class="block text-xs font-semibold text-slate-300 mb-1.5">Your FaucetPay Email Address</label>
-                  <input 
-                    type="email" 
-                    id="cashout-faucetpay-email" 
-                    placeholder="e.g. yourname@example.com" 
-                    value=""
-                    oninput="validateCashoutForm()"
-                    class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
-                  >
-                  <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
-                    <span class="text-emerald-400">⚡</span>
-                    Funds arrive to your FaucetPay wallet within seconds. Zero processing fee.
-                  </p>
-                </div>
-
-                <!-- Form Section 1: PayPal Transfer Fields -->
-                <div id="fields-paypal" class="space-y-2 hidden">
-                  <label id="destination-label" class="block text-xs font-semibold text-slate-300 mb-1.5">Destination PayPal Email Address</label>
-                  <input 
-                    type="email" 
-                    id="cashout-destination" 
-                    placeholder="e.g. yourname@example.com" 
-                    value=""
-                    oninput="validateCashoutForm()"
-                    class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors"
-                    required
-                  >
-                  <p id="destination-hint" class="text-[11px] text-slate-400 mt-1">Funds will be deposited directly to your verified PayPal email address.</p>
-                </div>
-
-                <!-- Form Section 2: Direct Bank Transfer (Dynamic Local Sri Lanka vs International) -->
-                <div id="fields-bank" class="space-y-4 pt-1 hidden">
-                  <!-- Mode Switcher Pill: Local (Sri Lanka) vs International Wire -->
-                  <div class="flex items-center justify-between p-3 rounded-xl bg-[#090E1C] border border-surf-border">
-                    <div class="flex items-center gap-2.5">
-                      <div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-xs">
-                        <span id="bank-country-flag">🇱🇰</span>
-                      </div>
-                      <div>
-                        <span class="text-xs font-bold text-white block" id="bank-country-mode-title">Sri Lanka (Local Transfer)</span>
-                        <span class="text-[10px] text-slate-400" id="bank-country-mode-sub">Zero wire fees & direct LKR bank deposit</span>
-                      </div>
-                    </div>
-
-                    <!-- Destination Country Selector -->
-                    <div class="flex items-center gap-2">
-                      <label for="bank-country-select" class="text-[11px] text-slate-400 hidden sm:inline">Country:</label>
-                      <select 
-                        id="bank-country-select" 
-                        onchange="handleBankCountryChange()" 
-                        class="bg-surf-surface border border-surf-border rounded-lg px-2.5 py-1 text-xs text-white font-medium focus:outline-none focus:border-surf-teal cursor-pointer">
-                        <option value="LK" selected>Sri Lanka (Local)</option>
-                        <option value="US">United States (USD)</option>
-                        <option value="GB">United Kingdom (GBP)</option>
-                        <option value="EU">European Union (EUR)</option>
-                        <option value="AE">United Arab Emirates (AED)</option>
-                        <option value="SG">Singapore (SGD)</option>
-                        <option value="AU">Australia (AUD)</option>
-                        <option value="IN">India (INR)</option>
-                        <option value="OTHER">Other / International</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <!-- Grid: Account Holder Name & Bank Name -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-                        Account Holder Name <span class="text-rose-400">*</span>
-                      </label>
-                      <input 
-                        type="text" 
-                        id="bank-holder-name" 
-                        placeholder="Full legal name on bank account" 
-                        oninput="validateCashoutForm()"
-                        class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors"
-                      >
-                    </div>
-
-                    <!-- Bank Name: Smart Dropdown + Custom Input -->
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-                        Bank Name <span class="text-rose-400">*</span>
-                      </label>
-                      <div class="space-y-1.5">
-                        <!-- Sri Lanka Dropdown (Visible by default for LK) -->
-                        <select 
-                          id="bank-name-select" 
-                          onchange="handleBankNameSelectChange()" 
-                          class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors cursor-pointer">
-                          <option value="">-- Select Sri Lankan Bank --</option>
-                          <option value="Bank of Ceylon (BOC)">Bank of Ceylon (BOC)</option>
-                          <option value="People's Bank">People's Bank</option>
-                          <option value="Commercial Bank of Ceylon">Commercial Bank of Ceylon</option>
-                          <option value="Hatton National Bank (HNB)">Hatton National Bank (HNB)</option>
-                          <option value="Sampath Bank">Sampath Bank</option>
-                          <option value="National Development Bank (NDB)">National Development Bank (NDB)</option>
-                          <option value="Seylan Bank">Seylan Bank</option>
-                          <option value="DFCC Bank">DFCC Bank</option>
-                          <option value="Nations Trust Bank (NTB)">Nations Trust Bank (NTB)</option>
-                          <option value="Pan Asia Banking Corporation">Pan Asia Bank</option>
-                          <option value="Union Bank of Colombo">Union Bank</option>
-                          <option value="Amana Bank">Amana Bank</option>
-                          <option value="Standard Chartered Sri Lanka">Standard Chartered Bank</option>
-                          <option value="HSBC Sri Lanka">HSBC Sri Lanka</option>
-                          <option value="OTHER_BANK">Other (Type Bank Name)</option>
-                        </select>
-                        <!-- Custom text input for other/international banks -->
-                        <input 
-                          type="text" 
-                          id="bank-name-text" 
-                          placeholder="Enter your bank institution name" 
-                          oninput="validateCashoutForm()"
-                          class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors hidden"
-                        >
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Grid: Account Number & Branch Name -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <div>
-                      <label class="block text-xs font-semibold text-slate-300 mb-1.5">
-                        Account Number <span class="text-rose-400">*</span>
-                      </label>
-                      <input 
-                        type="text" 
-                        id="bank-account-number" 
-                        placeholder="e.g. 8001234567 or IBAN" 
-                        oninput="validateCashoutForm()"
-                        class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-surf-teal transition-colors"
-                      >
-                    </div>
-
-                    <div>
-                      <label id="bank-branch-label" class="block text-xs font-semibold text-slate-300 mb-1.5">
-                        Branch Name / City <span class="text-rose-400">*</span>
-                      </label>
-                      <input 
-                        type="text" 
-                        id="bank-branch-name" 
-                        placeholder="e.g. Colombo Fort / Kandy / Main Branch" 
-                        oninput="validateCashoutForm()"
-                        class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors"
-                      >
-                    </div>
-                  </div>
-
-                  <!-- Dynamic SWIFT / BIC Field (Visible in International Mode) -->
-                  <div id="bank-swift-container" class="transition-all duration-300 hidden">
-                    <div class="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/20 space-y-1.5">
-                      <div class="flex items-center justify-between">
-                        <label class="block text-xs font-bold text-amber-300 flex items-center gap-1.5">
-                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 004 11m0 0a8 8 0 008 8c.84 0 1.65-.078 2.435-.226"/></svg>
-                          <span>SWIFT / BIC Code (International Requirement)</span>
-                          <span class="text-rose-400">*</span>
-                        </label>
-                        <span class="text-[10px] text-amber-400/80 font-mono">8 or 11 characters</span>
-                      </div>
-                      <input 
-                        type="text" 
-                        id="bank-swift-code" 
-                        placeholder="e.g. CHASUS33XXX / HNBCLKLX" 
-                        maxlength="11"
-                        oninput="this.value = this.value.toUpperCase(); validateCashoutForm();"
-                        class="w-full bg-[#090E1C] border border-amber-500/30 rounded-xl px-3.5 py-2 text-white font-mono uppercase text-sm focus:outline-none focus:border-amber-400 transition-colors"
-                      >
-                      <p class="text-[10px] text-slate-400">Required by international intermediary routing banks for cross-border wire settlement.</p>
-                    </div>
-                  </div>
-
-                  <p class="text-[11px] text-slate-400 flex items-center gap-1.5 pt-0.5">
-                    <svg class="w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                    <span>Bank credentials are encrypted & saved securely into Supabase <span class="font-mono text-surf-teal text-[10px]">payout_details</span>.</span>
-                  </p>
-                </div>
-
-                <!-- Submit Button -->
-                <button 
-                  type="submit" 
-                  id="cashout-submit-btn" 
-                  class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-surf-teal hover:bg-surf-tealHover text-slate-950 transition-all shadow-glow-teal flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
-                  <span>Confirm Cashout Request</span>
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </button>
-              </form>
+              <span id="gateway-min-badge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surf-surface border border-surf-border text-slate-300">Min $1.00</span>
             </div>
 
-            <!-- Security & Guarantee Badge -->
-            <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl p-6 flex flex-col justify-between space-y-4">
+            <form id="cashout-form" onsubmit="handleCashoutSubmit(event)" class="space-y-4">
+              <!-- Amount input with chips -->
               <div>
-                <div class="w-10 h-10 rounded-xl bg-surf-teal/15 border border-surf-teal/30 flex items-center justify-center text-surf-teal mb-3">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="text-xs font-semibold text-slate-300">Withdrawal Amount ($ USD)</label>
+                  <span class="text-xs text-slate-400">Available: <span id="form-available-max" class="text-surf-teal font-bold">$0.00</span></span>
                 </div>
-                <h4 class="text-sm font-bold text-white">Secure Payout Processing</h4>
-                <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                  FaucetPay payouts are instant with 0% fees. PayPal requests are reviewed and processed within 24–48 hours.
+                
+                <div class="relative rounded-xl">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 font-bold">$</div>
+                  <input 
+                    type="number" 
+                    id="cashout-amount" 
+                    step="0.01" 
+                    min="1.00" 
+                    placeholder="1.00" 
+                    value="1.00"
+                    oninput="validateCashoutForm()"
+                    class="w-full bg-[#090E1C] border border-surf-border rounded-xl pl-8 pr-20 py-2.5 text-white font-bold text-sm focus:outline-none focus:border-surf-teal transition-colors"
+                  >
+                  <button 
+                    type="button" 
+                    onclick="setCashoutMax()" 
+                    class="absolute inset-y-1.5 right-1.5 px-3 rounded-lg bg-surf-teal/20 text-surf-teal text-xs font-bold hover:bg-surf-teal/30 transition-colors">
+                    MAX
+                  </button>
+                </div>
+
+                <!-- Dynamic Quick Amount Chips (updated by selectGateway) -->
+                <div id="cashout-quick-chips" class="flex flex-wrap items-center gap-2 mt-2">
+                  <button type="button" onclick="setCashoutAmount(1)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-emerald-500/50 transition-colors">$1.00</button>
+                  <button type="button" onclick="setCashoutAmount(5)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-emerald-500/50 transition-colors">$5.00</button>
+                  <button type="button" onclick="setCashoutAmount(10)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-emerald-500/50 transition-colors">$10.00</button>
+                  <button type="button" onclick="setCashoutMax()" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 font-bold transition-colors">All Balance</button>
+                </div>
+
+                <!-- Validation Error Container -->
+                <p id="cashout-error" class="hidden text-xs text-rose-400 mt-2 flex items-center gap-1 font-medium">
+                  <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                  <span id="cashout-error-text">Amount exceeds available balance or minimum limit</span>
                 </p>
               </div>
 
-              <div class="space-y-2 text-xs border-t border-surf-border pt-4">
-                <div class="flex items-center justify-between text-slate-400">
-                  <span>Supported Gateways</span>
-                  <span class="text-white font-medium">FaucetPay & PayPal</span>
+              <!-- Form Section 0: FaucetPay Onboarding Guide (shown when FaucetPay selected) -->
+              <div id="faucetpay-guide-card" class="rounded-xl border border-emerald-500/30 bg-emerald-500/6 p-4 space-y-3" style="background:rgba(16,185,129,0.06);">
+                <div class="flex items-center gap-2">
+                  <span class="text-emerald-400 text-base">🚀</span>
+                  <p class="text-xs font-bold text-emerald-300">Don't have a FaucetPay account? Create one in 30 seconds for 0% fees:</p>
                 </div>
-                <div class="flex items-center justify-between text-slate-400">
-                  <span>Account Status</span>
-                  <span class="text-emerald-400 font-semibold">Verified</span>
-                </div>
+                <ol class="space-y-1.5 text-xs text-slate-300 pl-1">
+                  <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-black shrink-0">1.</span>
+                    <span>Click the button below to register free on FaucetPay.</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-black shrink-0">2.</span>
+                    <span>Enter your FaucetPay Email address in the field below.</span>
+                  </li>
+                  <li class="flex items-start gap-2">
+                    <span class="text-emerald-400 font-black shrink-0">3.</span>
+                    <span>Click <span class="font-bold text-white">Withdraw</span> and receive funds instantly!</span>
+                  </li>
+                </ol>
+                <a href="https://faucetpay.io/r/10337010" target="_blank" rel="noopener noreferrer"
+                  class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl font-bold text-sm bg-emerald-500 hover:bg-emerald-400 text-slate-950 transition-all active:scale-95 shadow-md">
+                  Create Free FaucetPay Account ↗
+                </a>
               </div>
 
-            </div>
+              <!-- Form Section: FaucetPay Email Field -->
+              <div id="fields-faucetpay" class="space-y-2">
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Your FaucetPay Email Address</label>
+                <input 
+                  type="email" 
+                  id="cashout-faucetpay-email" 
+                  placeholder="e.g. yourname@example.com" 
+                  value=""
+                  oninput="validateCashoutForm()"
+                  class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-emerald-500 transition-colors"
+                >
+                <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
+                  <span class="text-emerald-400">⚡</span>
+                  Funds arrive to your FaucetPay wallet within seconds. Zero processing fee.
+                </p>
+              </div>
+
+              <!-- Form Section 1: PayPal Transfer Fields -->
+              <div id="fields-paypal" class="space-y-2 hidden">
+                <label id="destination-label" class="block text-xs font-semibold text-slate-300 mb-1.5">Destination PayPal Email Address</label>
+                <input 
+                  type="email" 
+                  id="cashout-destination" 
+                  placeholder="e.g. yourname@example.com" 
+                  value=""
+                  oninput="validateCashoutForm()"
+                  class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3.5 py-2.5 text-white text-sm focus:outline-none focus:border-surf-teal transition-colors"
+                >
+                <p id="destination-hint" class="text-[11px] text-slate-400 mt-1">Funds will be deposited directly to your verified PayPal email address.</p>
+              </div>
+
+              <!-- Submit Button -->
+              <button 
+                type="submit" 
+                id="cashout-submit-btn" 
+                class="w-full py-3 px-4 rounded-xl font-bold text-sm bg-surf-teal hover:bg-surf-tealHover text-slate-950 transition-all shadow-glow-teal flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span>Confirm Cashout Request</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+              </button>
+
+              <!-- Integrated Security & Processing Guarantee Footer -->
+              <div class="mt-4 pt-4 border-t border-surf-border/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-400 bg-[#070D19]/60 rounded-xl p-3.5 border border-surf-border/40">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-sm font-bold shrink-0">
+                    🛡️
+                  </div>
+                  <div>
+                    <span class="font-bold text-slate-200">Secure Payout Guarantee:</span>
+                    <span class="text-slate-400 ml-1">All requests are cryptographically verified and anti-fraud audited.</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-3 text-[11px] font-medium shrink-0 self-end sm:self-auto">
+                  <span class="flex items-center gap-1 text-emerald-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    FaucetPay: 0% Fee · Instant (Min $1.00)
+                  </span>
+                  <span class="text-slate-600">|</span>
+                  <span class="flex items-center gap-1 text-blue-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>
+                    PayPal: 24–48h Review (Min $5.00)
+                  </span>
+                </div>
+              </div>
+            </form>
           </div>
 
 <!-- Modular Ad Slot: cashout-native-1 (native) -->
@@ -3919,7 +3767,7 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.name = profile.display_name || profile.username || state.user.name;
           state.user.username = profile.username || state.user.username;
           state.user.email = currentUser.email || state.user.email;
-          if (profile.selected_gateway && (profile.selected_gateway === 'faucetpay' || profile.selected_gateway === 'paypal' || profile.selected_gateway === 'bank')) {
+          if (profile.selected_gateway && (profile.selected_gateway === 'faucetpay' || profile.selected_gateway === 'paypal' )) {
             state.selectedGateway = profile.selected_gateway;
           }
           if (profile.ad_intensity) state.user.adIntensity = normalizeAdIntensity(profile.ad_intensity);
@@ -4930,6 +4778,9 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchAvailableSurveys();
         updateOfferwallTrackers();
       }
+      if (tabName === 'cashout') {
+        selectGateway(state.selectedGateway || 'faucetpay');
+      }
       const breadcrumb = document.getElementById('header-breadcrumb');
       if (breadcrumb) breadcrumb.textContent = breadcrumbNames[tabName] || 'Overview';
 
@@ -5341,14 +5192,13 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Payout history exported as CSV', 'success');
     }
 
-    // --- PAYOUT GATEWAYS & DYNAMIC BANK TRANSFER FORM ENGINE ---
+    // --- PAYOUT GATEWAYS & CASHOUT FORM ENGINE (FaucetPay & PayPal) ---
     const GATEWAY_CONFIG = {
       faucetpay: {
         name: 'FaucetPay (Crypto)',
         minAmount: 1.00,
         destLabel: 'Your FaucetPay Email Address',
         destPlaceholder: 'e.g. yourname@example.com',
-        destDefault: '',
         hint: 'Funds arrive to your FaucetPay wallet within seconds. Zero processing fee.'
       },
       paypal: {
@@ -5356,145 +5206,83 @@ document.addEventListener('DOMContentLoaded', () => {
         minAmount: 5.00,
         destLabel: 'Destination PayPal Email Address',
         destPlaceholder: 'e.g. yourname@example.com',
-        destDefault: '',
         hint: 'Funds will be deposited directly to your verified PayPal email address.'
-      },
-      bank: {
-        name: 'Direct Bank Transfer',
-        minAmount: 5.00,
-        destLabel: 'Direct Bank Transfer Details',
-        destPlaceholder: 'Bank Account Number / IBAN',
-        destDefault: '',
-        hint: 'Direct wire or local ACH settlement straight to your designated bank account.'
       }
     };
 
-    // Dynamic Country Bank Mode State
-    let currentBankCountry = 'LK';
-
-    function initBankCountryFromState() {
-      const code = (state.user && state.user.countryCode ? state.user.countryCode : 'LK').toUpperCase();
-      const select = document.getElementById('bank-country-select');
-      if (select) {
-        let matched = false;
-        for (let i = 0; i < select.options.length; i++) {
-          if (select.options[i].value === code) {
-            select.selectedIndex = i;
-            currentBankCountry = code;
-            matched = true;
-            break;
-          }
-        }
-        if (!matched) {
-          select.value = (code === 'LK') ? 'LK' : 'OTHER';
-          currentBankCountry = select.value;
-        }
-      }
-      applyBankCountryUI();
-    }
-
-    function handleBankCountryChange() {
-      const select = document.getElementById('bank-country-select');
-      if (select) {
-        currentBankCountry = select.value;
-        applyBankCountryUI();
-        validateCashoutForm();
-      }
-    }
-
-    function handleBankNameSelectChange() {
-      const select = document.getElementById('bank-name-select');
-      const textInput = document.getElementById('bank-name-text');
-      if (!select || !textInput) return;
-
-      if (select.value === 'OTHER_BANK') {
-        textInput.classList.remove('hidden');
-        textInput.focus();
-      } else {
-        textInput.classList.add('hidden');
-      }
-      validateCashoutForm();
-    }
-
-    function applyBankCountryUI() {
-      const isSriLanka = (currentBankCountry === 'LK');
-      const flagEl = document.getElementById('bank-country-flag');
-      const titleEl = document.getElementById('bank-country-mode-title');
-      const subEl = document.getElementById('bank-country-mode-sub');
-      const swiftContainer = document.getElementById('bank-swift-container');
-      const bankSelect = document.getElementById('bank-name-select');
-      const bankTextInput = document.getElementById('bank-name-text');
-      const branchLabel = document.getElementById('bank-branch-label');
-
-      if (flagEl) {
-        const flags = { LK: '🇱🇰', US: '🇺🇸', GB: '🇬🇧', EU: '🇪🇺', AE: '🇦🇪', SG: '🇸🇬', AU: '🇦🇺', IN: '🇮🇳', OTHER: '🌐' };
-        flagEl.textContent = flags[currentBankCountry] || '🌐';
-      }
-
-      if (isSriLanka) {
-        if (titleEl) titleEl.textContent = 'Sri Lanka (Local Transfer)';
-        if (subEl) subEl.textContent = 'Zero wire fees & direct LKR bank deposit';
-        if (swiftContainer) swiftContainer.classList.add('hidden');
-        if (branchLabel) branchLabel.innerHTML = 'Branch Name <span class="text-rose-400">*</span>';
-        if (bankSelect) {
-          bankSelect.classList.remove('hidden');
-          if (bankSelect.value === 'OTHER_BANK') {
-            if (bankTextInput) bankTextInput.classList.remove('hidden');
-          } else {
-            if (bankTextInput) bankTextInput.classList.add('hidden');
-          }
-        }
-      } else {
-        // International Mode: Automatically show SWIFT / BIC Code
-        if (titleEl) titleEl.textContent = 'International Wire Transfer';
-        if (subEl) subEl.textContent = 'Cross-border wire settlement via SWIFT / BIC routing';
-        if (swiftContainer) swiftContainer.classList.remove('hidden');
-        if (branchLabel) branchLabel.innerHTML = 'Branch / City <span class="text-rose-400">*</span>';
-        if (bankSelect) bankSelect.classList.add('hidden');
-        if (bankTextInput) {
-          bankTextInput.classList.remove('hidden');
-          bankTextInput.placeholder = 'Enter full bank name (e.g. JPMorgan Chase, HSBC, Barclays)';
-        }
-      }
-    }
-
     function selectGateway(gwKey) {
-      if (!GATEWAY_CONFIG[gwKey]) gwKey = 'faucetpay';
+      if (gwKey !== 'faucetpay' && gwKey !== 'paypal') {
+        gwKey = 'faucetpay';
+      }
       state.selectedGateway = gwKey;
 
-      // Update all gateway cards
-      ['faucetpay', 'paypal', 'bank'].forEach(key => {
-        const card = document.getElementById(`card-gateway-${key}`);
-        if (!card) return;
-        if (key === gwKey) {
-          card.classList.remove('border-surf-border', 'border-surf-teal');
-          if (key === 'faucetpay') {
-            card.classList.add('border-emerald-500');
-            card.style.boxShadow = '0 0 18px 2px rgba(16,185,129,0.22)';
-          } else {
-            card.classList.add('border-surf-teal', 'shadow-glow-teal');
-            card.style.boxShadow = '';
-          }
-        } else {
-          card.classList.remove('border-surf-teal', 'shadow-glow-teal', 'border-emerald-500');
-          card.style.boxShadow = '';
-          card.classList.add('border-surf-border');
+      // Update gateway cards visual styling
+      const fpCard = document.getElementById('card-gateway-faucetpay');
+      const ppCard = document.getElementById('card-gateway-paypal');
+
+      if (gwKey === 'faucetpay') {
+        if (fpCard) {
+          fpCard.classList.remove('border-surf-border', 'border-surf-teal');
+          fpCard.classList.add('border-emerald-500');
+          fpCard.style.boxShadow = '0 0 18px 2px rgba(16,185,129,0.22)';
         }
-      });
+        if (ppCard) {
+          ppCard.classList.remove('border-surf-teal', 'shadow-glow-teal', 'border-emerald-500');
+          ppCard.classList.add('border-surf-border');
+          ppCard.style.boxShadow = '';
+        }
+      } else {
+        if (ppCard) {
+          ppCard.classList.remove('border-surf-border', 'border-emerald-500');
+          ppCard.classList.add('border-surf-teal', 'shadow-glow-teal');
+          ppCard.style.boxShadow = '';
+        }
+        if (fpCard) {
+          fpCard.classList.remove('border-emerald-500');
+          fpCard.classList.add('border-surf-border');
+          fpCard.style.boxShadow = '';
+        }
+      }
 
       const config = GATEWAY_CONFIG[gwKey];
       const label = document.getElementById('selected-gateway-label');
       const minBadge = document.getElementById('gateway-min-badge');
-      if (label) label.textContent = config.name;
-      if (minBadge) minBadge.textContent = `Min $${config.minAmount.toFixed(2)}`;
+      if (label) {
+        label.textContent = config.name;
+        label.className = gwKey === 'faucetpay' ? 'text-emerald-400 font-semibold' : 'text-blue-400 font-semibold';
+      }
+      if (minBadge) {
+        minBadge.textContent = `Min $${config.minAmount.toFixed(2)}`;
+      }
 
-      // Update amount input min
+      // Update amount input constraints & default/enforced value
       const amountInput = document.getElementById('cashout-amount');
       if (amountInput) {
         amountInput.min = config.minAmount.toFixed(2);
         amountInput.placeholder = config.minAmount.toFixed(2);
-        if (parseFloat(amountInput.value) < config.minAmount) {
+        const curVal = parseFloat(amountInput.value);
+        if (isNaN(curVal) || curVal < config.minAmount) {
           amountInput.value = config.minAmount.toFixed(2);
+        }
+      }
+
+      // Dynamic Quick Chips per Gateway
+      const chipsContainer = document.getElementById('cashout-quick-chips');
+      if (chipsContainer) {
+        if (gwKey === 'faucetpay') {
+          chipsContainer.innerHTML = `
+            <button type="button" onclick="setCashoutAmount(1)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-emerald-500/50 transition-colors">$1.00</button>
+            <button type="button" onclick="setCashoutAmount(5)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-emerald-500/50 transition-colors">$5.00</button>
+            <button type="button" onclick="setCashoutAmount(10)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-emerald-500/50 transition-colors">$10.00</button>
+            <button type="button" onclick="setCashoutMax()" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 font-bold transition-colors">All Balance</button>
+          `;
+        } else {
+          chipsContainer.innerHTML = `
+            <button type="button" onclick="setCashoutAmount(5)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-blue-500/50 transition-colors">$5.00</button>
+            <button type="button" onclick="setCashoutAmount(10)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-blue-500/50 transition-colors">$10.00</button>
+            <button type="button" onclick="setCashoutAmount(25)" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-slate-300 hover:text-white hover:border-blue-500/50 transition-colors">$25.00</button>
+            <button type="button" onclick="setCashoutMax()" class="px-2.5 py-1 rounded-lg bg-surf-surface border border-surf-border text-xs text-blue-400 hover:text-blue-300 hover:border-blue-500/50 font-bold transition-colors">All Balance</button>
+          `;
         }
       }
 
@@ -5508,28 +5296,27 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // Show/hide FaucetPay guide card and fields
+      // Show/hide FaucetPay guide card and input fields
       const faucetpayGuide = document.getElementById('faucetpay-guide-card');
       const faucetpayFields = document.getElementById('fields-faucetpay');
       const paypalFields = document.getElementById('fields-paypal');
-      const bankFields = document.getElementById('fields-bank');
 
       if (gwKey === 'faucetpay') {
         if (faucetpayGuide) faucetpayGuide.classList.remove('hidden');
         if (faucetpayFields) faucetpayFields.classList.remove('hidden');
         if (paypalFields) paypalFields.classList.add('hidden');
-        if (bankFields) bankFields.classList.add('hidden');
-      } else if (gwKey === 'bank') {
-        if (faucetpayGuide) faucetpayGuide.classList.add('hidden');
-        if (faucetpayFields) faucetpayFields.classList.add('hidden');
-        if (paypalFields) paypalFields.classList.add('hidden');
-        if (bankFields) bankFields.classList.remove('hidden');
-        initBankCountryFromState();
       } else {
         if (faucetpayGuide) faucetpayGuide.classList.add('hidden');
         if (faucetpayFields) faucetpayFields.classList.add('hidden');
         if (paypalFields) paypalFields.classList.remove('hidden');
-        if (bankFields) bankFields.classList.add('hidden');
+      }
+
+      // Pre-fill email from state if field is empty
+      if (state.user && state.user.email) {
+        const fpInput = document.getElementById('cashout-faucetpay-email');
+        const ppInput = document.getElementById('cashout-destination');
+        if (fpInput && !fpInput.value) fpInput.value = state.user.email;
+        if (ppInput && !ppInput.value) ppInput.value = state.user.email;
       }
 
       validateCashoutForm();
@@ -5538,13 +5325,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function setCashoutAmount(val) {
       const input = document.getElementById('cashout-amount');
       if (input) {
-        input.value = val.toFixed(2);
+        input.value = Number(val).toFixed(2);
         validateCashoutForm();
       }
     }
 
     function setCashoutMax() {
-      setCashoutAmount(state.user.availableBalance);
+      const avail = Number(state.user?.availableBalance || 0);
+      setCashoutAmount(avail);
     }
 
     function validateCashoutForm() {
@@ -5555,83 +5343,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!amountInput || !submitBtn) return true;
 
+      const currentGw = (state.selectedGateway === 'paypal') ? 'paypal' : 'faucetpay';
+      const gw = GATEWAY_CONFIG[currentGw];
       const amount = parseFloat(amountInput.value);
-      const gw = GATEWAY_CONFIG[state.selectedGateway] || GATEWAY_CONFIG['faucetpay'];
+      const availBal = Number(state.user?.availableBalance || 0);
 
       let isValid = true;
       let msg = '';
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
       if (isNaN(amount) || amount <= 0) {
         isValid = false;
         msg = 'Please specify a valid withdrawal amount.';
-      } else if (amount > state.user.availableBalance) {
+      } else if (amount > availBal) {
         isValid = false;
-        msg = `Amount exceeds available balance ($${state.user.availableBalance.toFixed(2)} USD).`;
+        msg = `Amount exceeds available balance ($${availBal.toFixed(2)} USD).`;
       } else if (amount < gw.minAmount) {
         isValid = false;
         msg = `Minimum cashout for ${gw.name} is $${gw.minAmount.toFixed(2)} USD.`;
-      } else if (state.selectedGateway === 'faucetpay') {
-        // Validate FaucetPay email
+      } else if (currentGw === 'faucetpay') {
         const fpInput = document.getElementById('cashout-faucetpay-email');
         const email = fpInput ? fpInput.value.trim() : '';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email) {
           isValid = false;
           msg = 'Please enter your FaucetPay email address.';
         } else if (!emailRegex.test(email)) {
           isValid = false;
-          msg = 'Please enter a valid FaucetPay email format.';
+          msg = 'Please enter a valid FaucetPay email format (e.g. user@example.com).';
         }
-      } else if (state.selectedGateway === 'paypal') {
-        // Validate PayPal
+      } else if (currentGw === 'paypal') {
         const destInput = document.getElementById('cashout-destination');
         const email = destInput ? destInput.value.trim() : '';
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email) {
           isValid = false;
-          msg = 'Please provide destination PayPal email address.';
+          msg = 'Please enter your destination PayPal email address.';
         } else if (!emailRegex.test(email)) {
           isValid = false;
-          msg = 'Please enter a valid PayPal email format.';
-        }
-      } else if (state.selectedGateway === 'bank') {
-        // Validate Direct Bank Transfer
-        const holderName = document.getElementById('bank-holder-name')?.value.trim();
-        const accNumber = document.getElementById('bank-account-number')?.value.trim();
-        const branchName = document.getElementById('bank-branch-name')?.value.trim();
-        const isSriLanka = (currentBankCountry === 'LK');
-
-        let bankName = '';
-        if (isSriLanka) {
-          const bankSelect = document.getElementById('bank-name-select');
-          if (bankSelect && bankSelect.value === 'OTHER_BANK') {
-            bankName = document.getElementById('bank-name-text')?.value.trim();
-          } else {
-            bankName = bankSelect ? bankSelect.value : '';
-          }
-        } else {
-          bankName = document.getElementById('bank-name-text')?.value.trim();
-        }
-
-        if (!holderName || holderName.length < 2) {
-          isValid = false;
-          msg = 'Please enter the Account Holder Name.';
-        } else if (!bankName) {
-          isValid = false;
-          msg = isSriLanka ? 'Please select your Sri Lankan bank.' : 'Please enter your bank institution name.';
-        } else if (!accNumber || accNumber.length < 4) {
-          isValid = false;
-          msg = 'Please enter a valid Account Number / IBAN.';
-        } else if (!branchName) {
-          isValid = false;
-          msg = 'Please enter your Branch Name or City.';
-        } else if (!isSriLanka) {
-          // International validation: SWIFT / BIC Code required
-          const swiftCode = document.getElementById('bank-swift-code')?.value.trim();
-          if (!swiftCode || swiftCode.length < 8) {
-            isValid = false;
-            msg = 'International transfer requires a valid 8-11 character SWIFT / BIC Code.';
-          }
+          msg = 'Please enter a valid PayPal email format (e.g. user@example.com).';
         }
       }
 
@@ -5650,8 +5398,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function handleCashoutSubmit(e) {
       e.preventDefault();
 
-      // 1. Immediate button disable & idempotency safeguard
-      const submitBtn = e.target.querySelector('button[type="submit"]') || document.getElementById('cashout-submit-btn');
+      const submitBtn = document.getElementById('cashout-submit-btn') || e.target.querySelector('button[type="submit"]');
       if (window.__isPayoutSubmitting) {
         return;
       }
@@ -5671,7 +5418,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      // 2. Validate form
       if (!validateCashoutForm()) {
         resetSubmitBtn();
         return;
@@ -5679,83 +5425,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const amountInput = document.getElementById('cashout-amount');
       const amount = parseFloat(amountInput.value);
-      const gw = GATEWAY_CONFIG[state.selectedGateway] || GATEWAY_CONFIG['faucetpay'];
+      const currentGw = (state.selectedGateway === 'paypal') ? 'paypal' : 'faucetpay';
+      const gw = GATEWAY_CONFIG[currentGw];
 
-      // Upfront available balance check
-      if (typeof state.user.availableBalance === 'number' && state.user.availableBalance < amount) {
-        showToast(`Insufficient available balance ($${state.user.availableBalance.toFixed(2)} available, $${amount.toFixed(2)} requested)`, 'error');
+      const availBal = Number(state.user?.availableBalance || 0);
+      if (availBal < amount) {
+        showToast(`Insufficient balance ($${availBal.toFixed(2)} available, $${amount.toFixed(2)} requested)`, 'error');
         resetSubmitBtn();
         return;
       }
 
-      // 3. Build structured destination and details
       let destination = '';
-      let payoutMethod = state.selectedGateway === 'bank' ? 'Direct Bank Transfer' : state.selectedGateway === 'faucetpay' ? 'FaucetPay (Crypto)' : 'PayPal Transfer';
-      let structuredDetails = {};
-
-      if (state.selectedGateway === 'faucetpay') {
+      if (currentGw === 'faucetpay') {
         const fpInput = document.getElementById('cashout-faucetpay-email');
-        const fpEmail = fpInput ? fpInput.value.trim() : (state.user.email || '');
-        destination = fpEmail;
-        structuredDetails = {
-          transfer_type: 'faucetpay',
-          faucetpay_email: fpEmail,
-          destination: fpEmail,
-          gateway: 'faucetpay',
-          gateway_name: 'FaucetPay (Crypto)'
-        };
-      } else if (state.selectedGateway === 'bank') {
-        const holderName = document.getElementById('bank-holder-name')?.value.trim() || '';
-        const accNumber = document.getElementById('bank-account-number')?.value.trim() || '';
-        const branchName = document.getElementById('bank-branch-name')?.value.trim() || '';
-        const isSriLanka = (currentBankCountry === 'LK');
-
-        let bankName = '';
-        if (isSriLanka) {
-          const bankSelect = document.getElementById('bank-name-select');
-          if (bankSelect && bankSelect.value === 'OTHER_BANK') {
-            bankName = document.getElementById('bank-name-text')?.value.trim() || '';
-          } else {
-            bankName = bankSelect ? bankSelect.value : '';
-          }
-        } else {
-          bankName = document.getElementById('bank-name-text')?.value.trim() || '';
-        }
-
-        const swiftCode = isSriLanka ? '' : (document.getElementById('bank-swift-code')?.value.trim() || '');
-
-        structuredDetails = {
-          transfer_type: isSriLanka ? 'local_sri_lanka' : 'international_wire',
-          country: isSriLanka ? 'Sri Lanka (LK)' : currentBankCountry,
-          account_holder_name: holderName,
-          bank_name: bankName,
-          account_number: accNumber,
-          branch_name: branchName,
-          swift_bic_code: swiftCode || null,
-          gateway: 'bank',
-          gateway_name: 'Direct Bank Transfer'
-        };
-
-        const maskedAcc = accNumber.length > 4 ? ('••••' + accNumber.slice(-4)) : accNumber;
-        destination = `${bankName} (${maskedAcc}) - ${holderName}`;
-        structuredDetails.destination = destination;
+        destination = fpInput ? fpInput.value.trim() : (state.user?.email || '');
       } else {
-        // PayPal fallback
         const destInput = document.getElementById('cashout-destination');
-        const paypalEmail = destInput ? destInput.value.trim() : (state.user.email || '');
-        destination = paypalEmail;
-        structuredDetails = {
-          transfer_type: 'paypal',
-          paypal_email: paypalEmail,
-          destination: paypalEmail,
-          gateway: 'paypal',
-          gateway_name: 'PayPal Transfer'
-        };
+        destination = destInput ? destInput.value.trim() : (state.user?.email || '');
       }
 
-      // Ensure Supabase user UUID
-      let userUuid = (currentUser && currentUser.id && currentUser.id.includes('-')) 
-        ? currentUser.id 
+      const structuredDetails = {
+        transfer_type: currentGw,
+        gateway: currentGw,
+        gateway_name: gw.name,
+        destination: destination,
+        destination_email: destination,
+        ...(currentGw === 'faucetpay' ? { faucetpay_email: destination } : { paypal_email: destination })
+      };
+
+      // Resolve Supabase user UUID
+      let userUuid = (currentUser && currentUser.id && currentUser.id.includes('-'))
+        ? currentUser.id
         : (state.user?.id && state.user.id.includes('-') ? state.user.id : null);
 
       if (!supabaseClient) {
@@ -5765,19 +5465,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        // Aggressive User UUID resolution so userUuid is NEVER null
         if (!userUuid) {
           try {
             const targetEmail = state.user?.email || currentUser?.email || '';
-            const { data: profByEmail } = await supabaseClient.from('profiles').select('id, available_balance, locked_balance').ilike('email', targetEmail).maybeSingle();
-            if (profByEmail && profByEmail.id) userUuid = profByEmail.id;
+            if (targetEmail) {
+              const { data: profByEmail } = await supabaseClient.from('profiles').select('id, available_balance, locked_balance').ilike('email', targetEmail).maybeSingle();
+              if (profByEmail && profByEmail.id) userUuid = profByEmail.id;
+            }
           } catch (e) {}
 
           if (!userUuid) {
             try {
               const targetUsername = state.user?.username || '';
-              const { data: profByUser } = await supabaseClient.from('profiles').select('id, available_balance, locked_balance').eq('username', targetUsername).maybeSingle();
-              if (profByUser && profByUser.id) userUuid = profByUser.id;
+              if (targetUsername) {
+                const { data: profByUser } = await supabaseClient.from('profiles').select('id, available_balance, locked_balance').eq('username', targetUsername).maybeSingle();
+                if (profByUser && profByUser.id) userUuid = profByUser.id;
+              }
             } catch (e) {}
           }
 
@@ -5789,7 +5492,6 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           if (!userUuid) {
-            // No valid session - require sign-in
             resetSubmitBtn();
             showToast('Please sign in to submit a cashout request.', 'error');
             openAuthModal();
@@ -5802,49 +5504,46 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const txid = 'PAY-' + Math.floor(100000 + Math.random() * 900000);
 
-        // 4. INVOKE BACKEND SUPABASE RPC FUNCTION: create_payout_request
         const rpcPayload = {
           p_amount_usd: parseFloat(amount),
-          p_payment_method: payoutMethod,
+          p_payment_method: gw.name,
           p_destination: destination,
           p_payout_details: structuredDetails,
           p_user_id: userUuid,
-          p_gateway: state.selectedGateway
+          p_gateway: currentGw
         };
 
-        console.log('[Payout Submit] Payload:', rpcPayload);
+        console.log('[Payout Submit] Gateway:', currentGw, 'Payload:', rpcPayload);
 
         let payoutSucceeded = false;
         let payoutResultData = null;
         let lastErrorMsg = null;
 
-        // ATTEMPT 1: create_payout_request RPC
+        // ATTEMPT 1: RPC create_payout_request
         try {
           const res1 = await supabaseClient.rpc('create_payout_request', rpcPayload);
           if (!res1.error && res1.data && res1.data.success !== false) {
             payoutSucceeded = true;
             payoutResultData = res1.data;
-            console.log('[Payout RPC create_payout_request Succeeded]:', payoutResultData);
+            console.log('[Payout RPC create_payout_request Success]:', payoutResultData);
           } else {
-            console.warn('[Payout RPC create_payout_request Failed]:', res1.error, res1.data);
             lastErrorMsg = (res1.data && res1.data.error) || res1.error?.message;
+            console.warn('[Payout RPC create_payout_request Notice]:', res1.error, res1.data);
           }
         } catch (rpcEx1) {
-          console.warn('[Payout RPC create_payout_request Exception]:', rpcEx1);
           lastErrorMsg = rpcEx1.message;
+          console.warn('[Payout RPC create_payout_request Exception]:', rpcEx1);
         }
 
-        // ATTEMPT 2: request_payout RPC alias fallback
+        // ATTEMPT 2: RPC request_payout
         if (!payoutSucceeded) {
           try {
-            console.log('[Payout] Attempting fallback RPC request_payout...');
             const res2 = await supabaseClient.rpc('request_payout', rpcPayload);
             if (!res2.error && res2.data && res2.data.success !== false) {
               payoutSucceeded = true;
               payoutResultData = res2.data;
-              console.log('[Payout Fallback RPC request_payout Succeeded]:', payoutResultData);
+              console.log('[Payout Fallback RPC request_payout Success]:', payoutResultData);
             } else {
-              console.warn('[Payout Fallback RPC request_payout Failed]:', res2.error, res2.data);
               if (!lastErrorMsg) lastErrorMsg = (res2.data && res2.data.error) || res2.error?.message;
             }
           } catch (rpcEx2) {
@@ -5853,19 +5552,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // ATTEMPT 3: Direct Resilient Insert into public.payout_requests table
-        // (Guarantees the payout request ALWAYS goes to Supabase even if custom SQL RPC functions are missing or failing!)
         if (!payoutSucceeded) {
-          console.log('[Payout] Executing direct resilient table insert into public.payout_requests...');
           try {
             const insertPayload = {
               txid: txid,
               user_id: userUuid,
               amount: amount,
               amount_usd: amount,
-              gateway: state.selectedGateway,
+              gateway: currentGw,
               gateway_name: gw.name,
               destination: destination,
-              payment_method: payoutMethod,
+              destination_email: destination,
+              payment_method: gw.name,
               payout_details: structuredDetails,
               status: 'pending'
             };
@@ -5885,9 +5583,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 user_id: userUuid,
                 status: 'pending'
               };
-              console.log('[Payout] Direct table insert into payout_requests SUCCEEDED:', insData);
+              console.log('[Payout] Direct insert into payout_requests succeeded:', insData);
+            } else {
+              console.warn('[Payout] Direct insert full payload returned:', insErr);
+              // Fallback to minimal column payload if extra column does not exist
+              const minimalPayload = {
+                txid: txid,
+                user_id: userUuid,
+                amount: amount,
+                destination: destination,
+                payment_method: gw.name,
+                status: 'pending'
+              };
 
-              // Update profile balances directly in Supabase
+              const { data: minData, error: minErr } = await supabaseClient
+                .from('payout_requests')
+                .insert(minimalPayload)
+                .select()
+                .maybeSingle();
+
+              if (!minErr && minData) {
+                payoutSucceeded = true;
+                payoutResultData = {
+                  success: true,
+                  payout_id: minData.id,
+                  txid: minData.txid || txid,
+                  user_id: userUuid,
+                  status: 'pending'
+                };
+                console.log('[Payout] Minimal insert into payout_requests succeeded:', minData);
+              } else {
+                // ATTEMPT 4: Try legacy 'payouts' table fallback
+                const { data: legData, error: legErr } = await supabaseClient
+                  .from('payouts')
+                  .insert(minimalPayload)
+                  .select()
+                  .maybeSingle();
+
+                if (!legErr && legData) {
+                  payoutSucceeded = true;
+                  payoutResultData = {
+                    success: true,
+                    payout_id: legData.id,
+                    txid: legData.txid || txid,
+                    user_id: userUuid,
+                    status: 'pending'
+                  };
+                  console.log('[Payout] Fallback insert into payouts succeeded:', legData);
+                } else {
+                  lastErrorMsg = insErr?.message || minErr?.message || legErr?.message || 'Database error saving payout request';
+                }
+              }
+            }
+
+            // If direct insert succeeded, synchronize profiles balance
+            if (payoutSucceeded) {
               try {
                 const { data: pCur } = await supabaseClient
                   .from('profiles')
@@ -5913,26 +5663,21 @@ document.addEventListener('DOMContentLoaded', () => {
               } catch (updErr) {
                 console.warn('[Payout] Profile balance update warning:', updErr);
               }
-            } else {
-              console.error('[Payout] Direct insert into canonical payout_requests table failed:', insErr);
-              lastErrorMsg = insErr?.message || 'Database error creating payout request';
             }
           } catch (dirErr) {
             console.error('[Payout] Direct table insert exception:', dirErr);
           }
         }
 
-        // 5. HANDLE FAILURE: If all paths failed, notify user
         if (!payoutSucceeded || !payoutResultData) {
           const errMsg = lastErrorMsg || 'Payout request failed to save to database. Please check your Supabase connection.';
-          console.error('[Payout Error]: All payout submission attempts failed.');
+          console.error('[Payout Error]:', errMsg);
           resetSubmitBtn();
           showToast(errMsg, 'error');
           return;
         }
 
-        // 6. SUCCESS PATH:
-        // Instantly refresh the withdrawal history by fetching rows directly from payout_requests table
+        // Fetch fresh rows from payout_requests
         try {
           const { data: payRows, error: histErr } = await supabaseClient
             .from('payout_requests')
@@ -5947,13 +5692,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { details = JSON.parse(details); } catch (e) {}
               }
               const rawMethod = String(p.payment_method || p.gateway || (details && (details.gateway || details.transfer_type)) || '').toLowerCase().trim();
-              const isBank = rawMethod === 'bank' || rawMethod.includes('bank') || rawMethod.includes('wire');
-              const isFaucetPay = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
-              const method = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : (isFaucetPay ? 'FaucetPay (Crypto)' : 'PayPal Transfer'));
+              const isFP = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
+              const method = p.gateway_name || (details && details.gateway_name) || (isFP ? 'FaucetPay (Crypto)' : 'PayPal Transfer');
 
-              let dest = p.destination || '';
+              let dest = p.destination || p.destination_email || '';
               if (!dest && details && typeof details === 'object') {
-                dest = details.destination || details.faucetpay_email || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
+                dest = details.destination || details.destination_email || details.faucetpay_email || details.paypal_email || '';
               }
 
               return {
@@ -5970,17 +5714,21 @@ document.addEventListener('DOMContentLoaded', () => {
           console.warn('Error fetching fresh payout_requests:', fetchErr);
         }
 
-        // 7. Update user profile balances from authoritative database response
+        // Update profile balances
         if (payoutResultData.available_balance !== undefined && payoutResultData.available_balance !== null) {
           state.user.availableBalance = Number(payoutResultData.available_balance);
         } else if (payoutResultData.new_balance !== undefined && payoutResultData.new_balance !== null) {
           state.user.availableBalance = Number(payoutResultData.new_balance);
+        } else {
+          state.user.availableBalance = Math.max(0, state.user.availableBalance - amount);
         }
         if (payoutResultData.locked_balance !== undefined && payoutResultData.locked_balance !== null) {
           state.user.lockedBalance = Number(payoutResultData.locked_balance);
+        } else {
+          state.user.lockedBalance = Number(state.user.lockedBalance || 0) + amount;
         }
 
-        // Direct profile query to ensure 100% database synchronization
+        // Also sync profile from DB
         try {
           const { data: profRow } = await supabaseClient
             .from('profiles')
@@ -5994,8 +5742,9 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         } catch (pSyncErr) {}
 
-        // Add confirmed activity ledger entry
         const confirmedTxid = payoutResultData.txid || ('PAY-' + Date.now().toString().slice(-6));
+
+        // Add confirmed activity ledger entry
         state.activityLedger.unshift({
           id: 'act-' + Date.now(),
           type: 'Payout Request',
@@ -6019,6 +5768,10 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPayoutHistoryTable();
         resetSubmitBtn();
 
+        // Reset amount to default for active gateway
+        amountInput.value = gw.minAmount.toFixed(2);
+        validateCashoutForm();
+
         // Show success modal with REAL confirmed database TXID
         document.getElementById('modal-success-amount').textContent = `$${amount.toFixed(2)} USD`;
         document.getElementById('modal-success-destination').textContent = destination;
@@ -6037,6 +5790,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeSuccessModal() {
       document.getElementById('successModal').classList.add('hidden');
+      selectGateway(state.selectedGateway || 'faucetpay');
       switchTab('overview');
     }
 
