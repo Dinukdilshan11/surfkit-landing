@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Surfkit",
+  "version": "1.0.0",
+  "description": "Turn your daily browsing into real rewards with micro-tasks, surveys, and mini-games.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Surfkit"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "permissions": [
+    "storage",
+    "alarms"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}
