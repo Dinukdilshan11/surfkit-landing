@@ -195,8 +195,8 @@
         <div class="mx-3 mt-4 p-3 rounded-xl bg-surf-surface/70 border border-surf-border/70 sidebar-text flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div class="relative flex h-2.5 w-2.5">
-              <span id="ext-status-dot-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
-              <span id="ext-status-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-slate-500"></span>
+              <span id="ext-status-dot-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span id="ext-status-dot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
             </div>
             <div>
               <p id="ext-status-text" class="text-xs font-semibold text-white">Extension Connected</p>
@@ -336,14 +336,11 @@
         <!-- Right: Actions, Badges & Profile -->
         <div class="flex items-center gap-2 sm:gap-4">
 
-          <!-- Live Auto-Surf Simulation Toggle Switch (Legacy - disabled via ENABLE_LEGACY_AUTO_SURF) -->
-          <div id="auto-surf-toggle-container" class="hidden items-center gap-2 px-3 py-1.5 rounded-xl bg-surf-surface border border-surf-border" style="display: none !important;">
-            <label class="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" id="auto-surf-toggle" onchange="toggleAutoSurf(this.checked)" class="sr-only peer">
-              <div class="w-7 h-4 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-surf-teal"></div>
-              <span class="ml-2 text-[11px] font-semibold text-slate-300 select-none">Auto-Surf</span>
-            </label>
-            <span id="auto-surf-indicator" class="hidden w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Auto-harvesting ad slices"></span>
+          <!-- Dashboard Sync Status Indicator (Replaces legacy Auto-Surf toggle) -->
+          <div id="auto-surf-toggle-container" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surf-surface border border-surf-border">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="text-[11px] font-medium text-slate-300 select-none">Sync Active</span>
+            <input type="checkbox" id="auto-surf-toggle" class="hidden" style="display: none !important;">
           </div>
 
           <!-- +Earn button removed -->
@@ -918,7 +915,7 @@ function renderTrendChart(labels, earnings, impressions) {
                             if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards')) {
                                 return `  ${label}: $${Number(context.parsed.y).toFixed(3)}`;
                             }
-                            return `  ${label}: ${Number(context.parsed.y).toLocaleString()} ads`;
+                            return `  ${label}: ${Number(context.parsed.y).toLocaleString()}`;
                         }
                     }
                 }
@@ -4297,7 +4294,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Right Axis: Impressions
         ctx.fillStyle = '#00E5FF';
         ctx.textAlign = 'left';
-        ctx.fillText(impVal.toLocaleString() + ' ads', width - padding.right + 8, y);
+        ctx.fillText(impVal.toLocaleString(), width - padding.right + 8, y);
         ctx.textAlign = 'right';
       }
 
@@ -4496,7 +4493,7 @@ document.addEventListener('DOMContentLoaded', () => {
                       if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards')) {
                         return `  ${label}: $${Number(context.parsed.y).toFixed(3)}`;
                       }
-                      return `  ${label}: ${Number(context.parsed.y).toLocaleString()} ads`;
+                      return `  ${label}: ${Number(context.parsed.y).toLocaleString()}`;
                     }
                   }
                 }
@@ -4535,7 +4532,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   ticks: {
                     color: '#00E5FF',
                     font: { size: 10 },
-                    callback: function(value) { return Number(value).toLocaleString() + ' ads'; }
+                    precision: 0,
+                    callback: function(value) { return Number.isInteger(value) ? Number(value).toLocaleString() : ''; }
                   }
                 }
               }
@@ -6135,9 +6133,9 @@ document.addEventListener('DOMContentLoaded', () => {
       // Legacy slider label (kept in case HTML still references it)
       const label = document.getElementById('slider-intensity-label');
       if (label) {
-        if (intensity === 1) label.textContent = 'Low (~2 ads / hr)';
-        if (intensity === 2) label.textContent = 'Balanced (~4 ads / hr • Optimal)';
-        if (intensity === 3) label.textContent = 'High (~6 ads / hr • Max)';
+        if (intensity === 1) label.textContent = 'Low (Eco Mode)';
+        if (intensity === 2) label.textContent = 'Balanced (Optimal)';
+        if (intensity === 3) label.textContent = 'High (Boosted)';
       }
       renderGeoTierCardMode(intensity);
     }
@@ -7348,21 +7346,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (!statusTextEl) return;
 
-      if (connected && masterEnabled) {
-        statusTextEl.textContent = 'Extension Connected';
-        statusSubEl  && (statusSubEl.textContent  = 'Dashboard Sync Active');
-        statusDotEl  && statusDotEl.classList.replace('bg-slate-500', 'bg-emerald-500');
-        statusDotPingEl && statusDotPingEl.classList.replace('bg-slate-400', 'bg-emerald-400');
-      } else if (connected && !masterEnabled) {
-        statusTextEl.textContent = 'Extension Connected';
-        statusSubEl  && (statusSubEl.textContent  = 'Dashboard Sync Active');
-        statusDotEl  && statusDotEl.classList.replace('bg-slate-500', 'bg-emerald-500');
-        statusDotPingEl && statusDotPingEl.classList.replace('bg-slate-400', 'bg-emerald-400');
-      } else {
-        statusTextEl.textContent = 'Extension Connected';
-        statusSubEl  && (statusSubEl.textContent  = 'Dashboard Sync Active');
-        statusDotEl  && (statusDotEl.className = statusDotEl.className.replace('bg-emerald-500', 'bg-slate-500').replace('bg-amber-500', 'bg-slate-500'));
-        statusDotPingEl && (statusDotPingEl.className = statusDotPingEl.className.replace('bg-emerald-400', 'bg-slate-400').replace('bg-amber-400', 'bg-slate-400'));
+      statusTextEl.textContent = 'Extension Connected';
+      statusSubEl && (statusSubEl.textContent = 'Dashboard Sync Active');
+      if (statusDotEl) {
+        statusDotEl.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500';
+      }
+      if (statusDotPingEl) {
+        statusDotPingEl.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
       }
     }
 
