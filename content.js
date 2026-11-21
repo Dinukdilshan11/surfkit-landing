@@ -11,6 +11,10 @@
 (() => {
   'use strict';
 
+  // Feature flag: ad-network compliance & dashboard-only rewards model
+  const ENABLE_EXTERNAL_AD_INJECTION = false;
+
+
   // Prevent duplicate execution on the same document or frame
   if (window.__SURFKIT_INITIALIZED__) return;
   window.__SURFKIT_INITIALIZED__ = true;
@@ -121,7 +125,7 @@
               localCooldownUntil = Math.max(localCooldownUntil, stored.ad_cooldown_until);
             }
             config.hasAuthUser = Boolean(stored.authUser && stored.authUser.id);
-            config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+            config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
           }
         });
       }
@@ -139,7 +143,7 @@
           config.intervalMs = HOURLY_CONFIG[response.intensity].intervalMs;
           config.hourlyLimit = HOURLY_CONFIG[response.intensity].maxPerHour;
         }
-        config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+        config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
 
         if (config.isOperational) {
           if (response.canShowNow && Date.now() >= localCooldownUntil) {
@@ -180,7 +184,7 @@
       });
 
       if (statusRes && statusRes.success) {
-        config.isOperational = Boolean(statusRes.isOperational);
+        config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && statusRes.isOperational);
         config.masterEnabled = statusRes.masterEnabled;
         config.isDomainPaused = statusRes.isDomainPaused;
 
@@ -532,7 +536,7 @@
             config.hourlyLimit = HOURLY_CONFIG[payload.intensity].maxPerHour;
           }
 
-          config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+          config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
 
           // If turned off or signed out, immediately hide card and cancel timers
           if (!config.isOperational) {
@@ -547,7 +551,7 @@
         case 'DOMAIN_STATUS_CHANGED': {
           if (payload && payload.domain === currentDomain) {
             config.isDomainPaused = payload.isPaused;
-            config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+            config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
 
             if (!config.isOperational) {
               clearTimersAndAd();
@@ -581,7 +585,7 @@
 
       if (changes.masterEnabled && typeof changes.masterEnabled.newValue === 'boolean') {
         config.masterEnabled = changes.masterEnabled.newValue;
-        config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+        config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
         if (!config.isOperational) {
           clearTimersAndAd();
         } else if (!scheduleTimer && !activeAdElement) {
@@ -592,7 +596,7 @@
 
       if (changes.pausedDomains && Array.isArray(changes.pausedDomains.newValue)) {
         config.isDomainPaused = changes.pausedDomains.newValue.includes(currentDomain);
-        config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+        config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
         if (!config.isOperational) {
           clearTimersAndAd();
         } else if (!scheduleTimer && !activeAdElement) {
@@ -603,7 +607,7 @@
 
       if (changes.authUser) {
         config.hasAuthUser = Boolean(changes.authUser.newValue && changes.authUser.newValue.id);
-        config.isOperational = Boolean(config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
+        config.isOperational = Boolean(ENABLE_EXTERNAL_AD_INJECTION && config.hasAuthUser && config.masterEnabled && !config.isDomainPaused);
         if (!config.isOperational) {
           clearTimersAndAd();
         } else if (!scheduleTimer && !activeAdElement) {

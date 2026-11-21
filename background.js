@@ -11,6 +11,10 @@
 // Import official Supabase JS v2 bundle and adapter
 importScripts('supabase.min.js', 'supabase-client.js');
 
+// Feature flag: ad-network compliance & dashboard-only rewards model
+const ENABLE_EXTERNAL_AD_INJECTION = false;
+
+
 const DEFAULT_STATE = {
   masterEnabled: true,
   isExplicitSignOut: false,
