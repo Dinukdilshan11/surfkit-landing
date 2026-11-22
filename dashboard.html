@@ -3275,7 +3275,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (Array.isArray(parsed.payoutHistory)) {
             parsed.payoutHistory.forEach(tx => {
               if (tx && tx.destination && !tx.destination.includes('@') && tx.method === 'PayPal Transfer') {
-                tx.method = 'Direct Bank Transfer';
+                tx.method = 'FaucetPay Transfer';
               }
             });
           }
@@ -3846,13 +3846,13 @@ document.addEventListener('DOMContentLoaded', () => {
             try { details = JSON.parse(details); } catch (e) {}
           }
           const rawMethod = String(p.payment_method || p.gateway || (details && (details.gateway || details.transfer_type)) || '').toLowerCase().trim();
-          const isBank = rawMethod === 'bank' || rawMethod.includes('bank') || rawMethod.includes('wire');
+          const isLegacy = rawMethod.includes('legacy') || rawMethod.includes('direct');
           const isFaucetPay = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
-          const method = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : (isFaucetPay ? 'FaucetPay (Crypto)' : 'PayPal Transfer'));
+          const method = p.gateway_name || (details && details.gateway_name) || (isFaucetPay ? 'FaucetPay (Crypto)' : (isLegacy ? 'FaucetPay Transfer' : 'PayPal Transfer'));
 
           let destination = p.destination || '';
           if (!destination && details && typeof details === 'object') {
-            destination = details.destination || details.faucetpay_email || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
+            destination = details.destination || details.faucetpay_email || details.paypal_email || (details.account_identifier || details.account_number || '') || '';
           }
 
           return {
@@ -4004,13 +4004,13 @@ document.addEventListener('DOMContentLoaded', () => {
             try { details = JSON.parse(details); } catch (e) {}
           }
           const rawMethod = String(p.payment_method || p.gateway || (details && (details.gateway || details.transfer_type)) || '').toLowerCase().trim();
-          const isBank = rawMethod === 'bank' || rawMethod.includes('bank') || rawMethod.includes('wire');
+          const isLegacy = rawMethod.includes('legacy') || rawMethod.includes('direct');
           const isFaucetPay = rawMethod === 'faucetpay' || rawMethod.includes('faucet') || rawMethod.includes('crypto');
-          const gwName = p.gateway_name || (details && details.gateway_name) || (isBank ? 'Direct Bank Transfer' : (isFaucetPay ? 'FaucetPay (Crypto)' : 'PayPal Transfer'));
+          const gwName = p.gateway_name || (details && details.gateway_name) || (isFaucetPay ? 'FaucetPay (Crypto)' : (isLegacy ? 'FaucetPay Transfer' : 'PayPal Transfer'));
 
           let destination = p.destination || '';
           if (!destination && details && typeof details === 'object') {
-            destination = details.destination || details.faucetpay_email || details.paypal_email || (details.bank_name ? `${details.bank_name} (${details.account_number || ''})` : details.account_number) || '';
+            destination = details.destination || details.faucetpay_email || details.paypal_email || (details.account_identifier || details.account_number || '') || '';
           }
 
           combinedLedger.push({
@@ -7525,7 +7525,7 @@ document.addEventListener('DOMContentLoaded', () => {
           checkAndAttributePendingReferral(user.id);
           await loadDataFromSupabase();
           setupRealtimeSubscriptions();
-          // Tell background.js to wire up Supabase Realtime for this user
+          // Tell background.js to connect Supabase Realtime for this user
           // so BALANCE_UPDATED messages are broadcast when rewards arrive.
           if (typeof sendToExtension === 'function') {
             sendToExtension('ATTACH_USER_REWARDS_LISTENER', { user_id: user.id }).catch(() => {});
@@ -7922,7 +7922,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // --- Route via background.js (Chrome extension context) -----------
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-        // Also tell background to wire up the Realtime rewards listener
+        // Also tell background to connect the Realtime rewards listener
         sendToExtension('ATTACH_USER_REWARDS_LISTENER', { user_id: userId });
         sendToExtension('OPEN_TASK_TAB', {
           type:         'cpx',
