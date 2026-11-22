@@ -205,6 +205,10 @@
 
         <!-- Right Extension CTA -->
         <div class="hidden sm:flex items-center gap-3">
+          <a id="nav-auth-btn" href="/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <span id="nav-auth-text">Dashboard</span>
+          </a>
           <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
              class="btn-glow inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
             <svg class="w-4 h-4 fill-slate-950" viewBox="0 0 24 24">
@@ -316,7 +320,7 @@
                 User sessions are managed securely through pseudonymous account identifiers and randomized cryptographic session tokens.
               </p>
               <div class="mt-4 p-3 rounded-xl bg-[#060A14] border border-white/5 text-[11px] text-slate-400 font-mono">
-                <span class="text-cyan-400 font-bold">&bull; Zero Advertiser Tracking:</span> Personal communication channels, email addresses, and real identities are never passed to third-party ad networks or data aggregators.
+                <span class="text-cyan-400 font-bold">&bull; Zero Third-Party Tracking:</span> Personal communication channels, email addresses, and real identities are never passed to third-party networks or data aggregators.
               </div>
             </div>
             <div class="mt-5 pt-4 border-t border-white/5 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
@@ -338,10 +342,10 @@
                 <span class="text-[10px] font-mono text-teal-400 px-2 py-0.5 rounded bg-teal-500/10 border border-teal-500/20">Edge Handlers</span>
               </div>
               <p class="text-xs text-slate-300 leading-relaxed">
-                When you surf sponsor ads or complete a partner survey, our secure postback gateway processes incoming reward confirmations with end-to-end cryptographic verification.
+                When you complete a partner survey, play an arcade mini-game, or trigger a 4-hour spin, our secure postback gateway processes incoming reward confirmations with end-to-end cryptographic verification.
               </p>
               <div class="mt-4 p-3 rounded-xl bg-[#060A14] border border-white/5 text-[11px] text-slate-400 font-mono">
-                <span class="text-teal-400 font-bold">&bull; Minimal State Storage:</span> The system records only the transactional event state (e.g., +1 ad view, +$0.60 reward) without logging or retaining personal browsing metadata.
+                <span class="text-teal-400 font-bold">&bull; Minimal State Storage:</span> The system records only the transactional event state (e.g., +250 SKIT survey reward, +50 SKIT spin bonus) without logging or retaining personal browsing metadata.
               </div>
             </div>
             <div class="mt-5 pt-4 border-t border-white/5 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
@@ -366,7 +370,7 @@
                 Surfkit only resolves an <strong class="text-white">approximate country-level location</strong> derived securely at network edge nodes from your IP address (e.g. United States, Germany, Sri Lanka).
               </p>
               <div class="mt-4 p-3 rounded-xl bg-[#060A14] border border-white/5 text-[11px] text-slate-400 font-mono">
-                <span class="text-indigo-400 font-bold">&bull; Inventory Matching Only:</span> Country codes are used strictly to display available local surveys and ad inventory. Exact GPS or residential coordinates are never requested, stored, or shared.
+                <span class="text-indigo-400 font-bold">&bull; Inventory Matching Only:</span> Country codes are used strictly to display available local surveys and partner task inventory. Exact GPS or residential coordinates are never requested, stored, or shared.
               </div>
             </div>
             <div class="mt-5 pt-4 border-t border-white/5 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
@@ -375,7 +379,7 @@
             </div>
           </div>
 
-          <!-- Pillar 5: Advertisers & Partner Tunnels -->
+          <!-- Pillar 5: Research & Partner Tunnels -->
           <div class="glass-card rounded-2xl p-7 border border-white/10 flex flex-col justify-between transition-all duration-300">
             <div>
               <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/25 text-purple-400 flex items-center justify-center mb-5">
@@ -384,7 +388,7 @@
                 </svg>
               </div>
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-bold text-white">Advertisers &amp; Partner Tunnels</h3>
+                <h3 class="text-lg font-bold text-white">Research &amp; Partner Tunnels</h3>
                 <span class="text-[10px] font-mono text-purple-400 px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20">Sandboxed Iframes</span>
               </div>
               <p class="text-xs text-slate-300 leading-relaxed">
@@ -400,7 +404,7 @@
             </div>
           </div>
 
-          <!-- Pillar 6: Ad Blockers -->
+          <!-- Pillar 6: Content Blockers -->
           <div class="glass-card rounded-2xl p-7 border border-white/10 flex flex-col justify-between transition-all duration-300">
             <div>
               <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 flex items-center justify-center mb-5">
@@ -409,19 +413,19 @@
                 </svg>
               </div>
               <div class="flex items-center justify-between mb-2">
-                <h3 class="text-lg font-bold text-white">Ad Blockers</h3>
+                <h3 class="text-lg font-bold text-white">Content Blockers</h3>
                 <span class="text-[10px] font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">Full Compatibility</span>
               </div>
               <p class="text-xs text-slate-300 leading-relaxed">
-                Surfkit is engineered to work <strong class="text-white">seamlessly alongside standard browser ad blockers</strong> (such as uBlock Origin, Adblock Plus, and Brave Shields).
+                Surfkit is engineered to work <strong class="text-white">seamlessly alongside standard browser content blockers</strong> (such as uBlock Origin, Adblock Plus, and Brave Shields).
               </p>
               <div class="mt-4 p-3 rounded-xl bg-[#060A14] border border-white/5 text-[11px] text-slate-400 font-mono">
-                <span class="text-emerald-400 font-bold">&bull; Uncompromised Comfort:</span> You can block intrusive tracking banners across the web while continuing to earn passive USD rewards through Surfkit's dedicated platform engagement activities.
+                <span class="text-emerald-400 font-bold">&bull; Uncompromised Comfort:</span> You can block intrusive tracking scripts across the web while continuing to earn SKIT rewards through Surfkit's dedicated platform engagement activities.
               </div>
             </div>
             <div class="mt-5 pt-4 border-t border-white/5 flex items-center gap-1.5 text-[11px] font-mono text-slate-400">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              <span>No ad blocker disabling required</span>
+              <span>No content blocker conflicts</span>
             </div>
           </div>
 
@@ -459,7 +463,7 @@
               </div>
               <div class="p-3.5 rounded-xl bg-[#060A14] border border-white/5">
                 <div class="text-indigo-400 font-bold mb-1">Zero Commercial Sale</div>
-                <div class="text-slate-400 text-[11px] font-sans">Your data is never sold, leased, or traded to data brokers, ad exchanges, or external marketing entities.</div>
+                <div class="text-slate-400 text-[11px] font-sans">Your data is never sold, leased, or traded to data brokers, unauthorized aggregators, or external marketing entities.</div>
               </div>
             </div>
           </div>
@@ -512,7 +516,7 @@
           <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-wider">Economics &bull; Verified Fair Share</span>
           <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">SKIT Reward &amp; Activity Engine</h2>
           <p class="text-xs sm:text-sm text-slate-400 mt-2">
-            Every cent received from advertiser impressions and offerwalls is distributed using a transparent, automated mathematical formula.
+            Every reward generated through partner task completions and offerwalls is distributed using a transparent, automated mathematical formula.
           </p>
         </div>
 
@@ -628,10 +632,10 @@
                 </div>
                 <h4 class="text-base sm:text-lg font-bold text-white group-hover:text-teal-300 transition-colors flex items-center gap-2 mb-2.5">
                   <span class="w-7 h-7 rounded-lg bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 text-xs font-mono font-bold">1</span>
-                  <span>Instant Estimated Yield</span>
+                  <span>Instant Estimated Activity Credit</span>
                 </h4>
                 <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Every time you see an ad, Surfkit instantly calculates an estimated reward based on current global ad rates (Geo-Tier &amp; Ad Type) and adds it to your live balance. Because ad networks pay differently for each campaign, this real-time figure is a close estimate.
+                  When you complete partner surveys, play Arcade Arena mini-games, or spin the 4-Hour Pulse dial, Surfkit tracks your activity and updates your estimated SKIT balance in real-time based on verified partner credentials and task tier.
                 </p>
               </div>
               <div class="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-teal-400">
@@ -639,7 +643,7 @@
                   <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                   Instant Live Balance
                 </span>
-                <span class="text-slate-500 text-[10px]">Geo-Tier &bull; Ad Type</span>
+                <span class="text-slate-500 text-[10px]">Activity &bull; Task Tier</span>
               </div>
             </div>
 
@@ -652,22 +656,22 @@
                   </span>
                   <span class="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                    Monthly Net-30
+                    Automated Validation
                   </span>
                 </div>
                 <h4 class="text-base sm:text-lg font-bold text-white group-hover:text-emerald-300 transition-colors flex items-center gap-2 mb-2.5">
                   <span class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xs font-mono font-bold">2</span>
-                  <span>Final Payout Reconciliation</span>
+                  <span>Verified Cashout Reconciliation</span>
                 </h4>
                 <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Verified task completions and partner rewards are credited to your SKIT balance upon confirmation. Once verified, rewards ar</p>
+                  Partner networks validate and release task postbacks upon automated completion. Once verified, rewards are permanently credited to your withdrawable SKIT balance with zero lockups.</p>
               </div>
               <div class="mt-5 pt-3 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-emerald-400">
                 <span class="flex items-center gap-1.5 text-emerald-400">
                   <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                   Verified SKIT Rewards
                 </span>
-                <span class="text-slate-500 text-[10px]">Net-30 Verified</span>
+                <span class="text-slate-500 text-[10px]">Verified Postback</span>
               </div>
             </div>
           </div>
@@ -780,10 +784,10 @@
               <span class="text-slate-400 font-sans font-bold">FaucetPay Gateway</span>
               <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
             </div>
-            <div class="text-white font-bold text-sm">FaucetPay Instant + PayPal</div>
+            <div class="text-white font-bold text-sm">FaucetPay Instant Micro-Payouts</div>
             <div class="text-emerald-400 text-[11px] mt-2 flex items-center justify-between">
               <span>Status: Active</span>
-              <span>Min: $5.00 USD</span>
+              <span>Min: $1.00 USD (1,000 SKIT)</span>
             </div>
           </div>
 

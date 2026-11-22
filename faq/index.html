@@ -185,6 +185,10 @@
 
         <!-- Right: Back button + Add to Chrome CTA -->
         <div class="flex items-center gap-3">
+          <a id="nav-auth-btn" href="/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+            <span id="nav-auth-text">Dashboard</span>
+          </a>
           <a href="/home" class="inline-flex items-center gap-2 text-sm font-semibold text-slate-300 hover:text-white px-4 py-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition-colors">
             <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -262,20 +266,20 @@
             </svg>
           </button>
           <div class="faq-content hidden px-6 pb-6">
-            <p class="text-sm text-slate-300 leading-relaxed">Surfkit is an independent, two-founder Chrome extension (Manifest V3) that lets you earn real rewards simply by browsing the web. When you browse with Surfkit active, you passively accumulate impression-based earnings — capped at a strict 2–6 ads per hour — from partner ad networks. You also unlock optional CPX Research surveys and mini-games for bonus income. All activity rewards are credited directly in <strong class="text-emerald-400">SKIT to your withdrawable balance</strong> with zero hidden fees.</p>
+            <p class="text-sm text-slate-300 leading-relaxed">Surfkit is an independent, two-founder Chrome extension (Manifest V3) that lets you earn real rewards simply by browsing the web. Surfkit enables users to earn real SKIT rewards through active platform engagement: complete CPX Research surveys, play Arcade Arena mini-games, spin the 4-Hour Pulse dial, and build daily streaks. All activity rewards are credited directly in <strong class="text-emerald-400">SKIT to your withdrawable balance</strong> with zero hidden fees.</p>
           </div>
         </div>
 
         <!-- 2 -->
         <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
           <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
-            <span class="font-semibold text-white text-sm sm:text-base">How does the ad frequency cap work?</span>
+            <span class="font-semibold text-white text-sm sm:text-base">How do platform fair-play limits work?</span>
             <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
           <div class="faq-content hidden px-6 pb-6">
-            <p class="text-sm text-slate-300 leading-relaxed">Surfkit enforces a hard cap of <strong class="text-emerald-400">2–6 ad impressions per hour</strong> per user. This limit is tracked server-side in our Supabase backend and enforced both in the extension and at the postback layer — meaning even if a client were modified, excess impressions are rejected before wallet credit is applied. The cap exists to protect user experience and ensure partner CPMs remain sustainable.</p>
+            <p class="text-sm text-slate-300 leading-relaxed">Surfkit enforces server-side fair-play limits to protect platform integrity and ensure partner survey and task rewards remain sustainable. These limits prevent botting and ensure verified task credits are distributed accurately to real human members with zero artificial throttling.</p>
           </div>
         </div>
 
@@ -334,13 +338,13 @@
         <!-- 7 -->
         <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
           <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
-            <span class="font-semibold text-white text-sm sm:text-base">How are daily impressions tracked?</span>
+            <span class="font-semibold text-white text-sm sm:text-base">How is daily activity tracked?</span>
             <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
           <div class="faq-content hidden px-6 pb-6">
-            <p class="text-sm text-slate-300 leading-relaxed">When a qualifying ad impression is confirmed by the partner postback, our backend increments your <code class="text-cyan-400 font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded">daily_impressions</code> counter in Supabase. This counter is scoped to the UTC calendar day and resets automatically at <strong class="text-emerald-400">00:00 UTC</strong> during the nightly maintenance window. Your dashboard displays both today's impressions and your 30-day rolling total so you can track trends.</p>
+            <p class="text-sm text-slate-300 leading-relaxed">When a qualifying survey, mini-game score, or 4-hour spin is confirmed by the partner postback, our backend increments your activity counter in real-time. This counter is scoped to the UTC calendar day and resets automatically at <strong class="text-emerald-400">00:00 UTC</strong> during nightly maintenance. Your dashboard displays both today's activity and your 30-day rolling trend.</p>
           </div>
         </div>
 
@@ -360,13 +364,13 @@
         <!-- Estimated Balance & Reconciliation FAQ Item -->
         <div class="faq-item glass-card rounded-2xl border border-white/8 overflow-hidden transition-colors" data-category="earning">
           <button class="faq-trigger w-full flex items-center justify-between gap-4 px-6 py-5 text-left">
-            <span class="font-semibold text-white text-sm sm:text-base">Why is my balance marked as Estimated, and can it change slightly?</span>
+            <span class="font-semibold text-white text-sm sm:text-base">Why are some rewards marked as estimated before confirmation?</span>
             <svg class="faq-icon w-5 h-5 text-emerald-400 flex-shrink-0 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
             </svg>
           </button>
           <div class="faq-content hidden px-6 pb-6">
-            <p class="text-sm text-slate-300 leading-relaxed">Your live dashboard shows Estimated Earnings based on average global ad rates (eCPM) for your region and ad type. Because ad networks finalize and pay out actual campaign revenue on a monthly cycle (Net-30), your balance is automatically synced with the exact final amount once received—adjusting slightly up or down if needed to ensure 100% accuracy and your accurate SKIT reward credit.</p>
+            <p class="text-sm text-slate-300 leading-relaxed">Your live dashboard displays real-time reward estimates as you engage with partner surveys and mini-games. Because survey syndicators and offerwall providers validate completion quality and demographic matching upon receipt, your balance is automatically finalized with the exact confirmed SKIT amount upon partner postback verification.</p>
           </div>
         </div>
 

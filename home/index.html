@@ -11,7 +11,7 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Surfkit — Turn Your Daily Browsing into Real Rewards</title>
-  <meta name="description" content="Earn <strong>SKIT</strong> rewards through daily platform engagement — Surveys, Arcade Mini-Games, 4-Hour Spins, Daily Streaks, and Referral Crew — with zero data selling and zero ads watching required. Join the Surfkit Early Access Public Beta.">
+  <meta name="description" content="Earn <strong>SKIT</strong> rewards through daily platform engagement — Surveys, Arcade Mini-Games, 4-Hour Spins, Daily Streaks, and Referral Crew — with zero data selling and zero intrusive popups. Join the Surfkit Early Access Public Beta.">
 
   <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -476,7 +476,7 @@
 
         <!-- Right CTA & Chrome Badge -->
         <div class="hidden sm:flex items-center gap-3">
-          <a id="nav-auth-btn" href="/login" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+          <a id="nav-auth-btn" href="/dashboard" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
             <i id="nav-auth-icon" class="ri-login-box-line text-base"></i>
             <span id="nav-auth-text">Sign In</span>
           </a>
@@ -704,7 +704,7 @@
                     <circle cx="12" cy="12" r="10" stroke-width="2"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-3-9h6m-6 6h6" />
                   </svg>
-                  <div class="text-2xl font-extrabold text-white tracking-tight" id="mockup-ads-count">67,819</div>
+                  <div class="text-2xl font-extrabold text-white tracking-tight" id="mockup-skit-count">67,819</div>
                   <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-1">SKIT TOKENS</div>
                 </div>
 
@@ -718,10 +718,10 @@
                 </div>
               </div>
 
-              <!-- 5. Ad Frequency / Intensity Segmented Control (Legacy - hidden via ENABLE_EXTERNAL_AD_INJECTION) -->
+              <!-- 5. Activity Level Segmented Control (Legacy - hidden via ENABLE_EXTERNAL_AD_INJECTION) -->
               <div id="ext-intensity-control-container" class="p-4 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3.5" style="display: none !important;">
                 <div class="flex items-center justify-between text-xs font-semibold mb-3">
-                  <span class="text-slate-300">Ad Frequency / Intensity</span>
+                  <span class="text-slate-300">Activity Level</span>
                   <span class="text-emerald-400 font-mono" id="intensity-label">High</span>
                 </div>
                 <div class="grid grid-cols-3 gap-2">
@@ -1316,7 +1316,7 @@
               Complete real Surveys &amp; Offers via CPX Research and BitLabs, play Arcade Arena HTML5 mini-games, and spin the 4-Hour Pulse dial for recurring bonus credits. zero intrusive overlays.
             </p>
 
-            <!-- Visual Mockup: Browser Ad Replacement -->
+            <!-- Visual Mockup: Verified Task Completion -->
             <div class="my-5 bg-[#070D19] border border-white/10 rounded-xl p-3 text-[11px] font-mono">
               <div class="flex items-center gap-1.5 pb-2 mb-2 border-b border-white/5 text-slate-500">
                 <span class="w-2 h-2 rounded-full bg-rose-500/60"></span>
@@ -1325,7 +1325,7 @@
                 <span class="text-[10px] ml-1 text-slate-400">webpage.com</span>
               </div>
               <div class="h-6 bg-slate-800/40 rounded mb-2"></div>
-              <!-- Replaced Clean Ad Banner (Qualitative, No Hardcoded Numbers) -->
+              <!-- Verified Task Completion Card -->
               <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-500/30 flex items-center justify-between shadow-[0_0_10px_rgba(16,185,129,0.15)]">
                 <div class="flex items-center gap-2">
                   <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1936,11 +1936,11 @@
         <!-- FAQ 3 -->
         <div class="glass-card rounded-xl border border-white/10 overflow-hidden">
           <button type="button" class="faq-btn w-full px-6 py-4 text-left flex items-center justify-between text-white font-semibold hover:text-emerald-400 transition-colors">
-            <span>Does it slow down browsing or conflict with ad blockers?</span>
+            <span>Does it slow down browsing or conflict with content blockers?</span>
             <svg class="faq-icon w-5 h-5 text-slate-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <div class="faq-content hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
-            No. Surfkit uses an ultra-lightweight asynchronous runtime (&lt; 14MB RAM, negligible CPU overhead). Furthermore, Surfkit is engineered to run seamlessly alongside standard ad blockers (such as uBlock Origin or Brave Shields)—you never need to disable your privacy protections.
+            No. Surfkit uses an ultra-lightweight asynchronous runtime (&lt; 14MB RAM, negligible CPU overhead). Furthermore, Surfkit is engineered to run seamlessly alongside standard content blockers (such as uBlock Origin or Brave Shields)—you never need to disable your privacy protections.
           </div>
         </div>
 
@@ -2142,8 +2142,8 @@
       <!-- Interactive Walkthrough Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono mb-6">
         <div class="p-4 rounded-xl bg-[#090E1C] border border-emerald-500/30">
-          <div class="text-emerald-400 font-bold mb-1">1. Background Surfing</div>
-          <div class="text-slate-400 font-sans text-[11px]">Quietly matches sponsor ad slots as you browse normally. Zero clicks required.</div>
+          <div class="text-emerald-400 font-bold mb-1">1. Platform Activity</div>
+          <div class="text-slate-400 font-sans text-[11px]">Play Arcade mini-games, answer surveys, and spin the 4-Hour Pulse dial.</div>
         </div>
         <div class="p-4 rounded-xl bg-[#090E1C] border border-teal-500/30">
           <div class="text-teal-400 font-bold mb-1">2. Secure Postback</div>
@@ -2156,7 +2156,7 @@
       </div>
 
       <div class="p-4 rounded-xl bg-[#060A14] border border-white/5 flex items-center justify-between">
-        <span class="text-xs text-slate-400">Ready to start earning real USD rewards?</span>
+        <span class="text-xs text-slate-400">Ready to start earning real SKIT rewards?</span>
         <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-lg bg-emerald-500 text-slate-950 font-bold text-xs hover:bg-emerald-400 transition-colors">
           Add to Chrome — Free &rarr;
         </a>
@@ -2268,13 +2268,13 @@
       }
 
       // 2. Real Extension Popup Interactivity
-      // A. Live Balance & Ads Increment Ticker
+      // A. Live Balance & SKIT Increment Ticker
       const balanceEl = document.getElementById('mockup-balance');
       const tokensEl = document.getElementById('mockup-tokens');
-      const adsCountEl = document.getElementById('mockup-ads-count');
+      const adsCountEl = document.getElementById('mockup-skit-count');
       const pinBadge = document.getElementById('pin-badge');
 
-      // Feature flag: ad-network compliance & dashboard-only rewards
+      // Feature flag: compliance & dashboard-only rewards
       const ENABLE_EXTERNAL_AD_INJECTION = false;
 
       let currentUsd = 67.819;
@@ -2305,7 +2305,7 @@
         });
       }
 
-      // C. Ad Frequency / Intensity Segmented Control Buttons
+      // C. Activity Level Segmented Control Buttons
       const intensityBtns = document.querySelectorAll('.intensity-btn');
       const intensityLabel = document.getElementById('intensity-label');
 
