@@ -219,7 +219,7 @@
       <div class="flex items-center gap-2">
         <i class="ri-shield-check-fill text-emerald-400"></i>
         <span>Sandbox Isolation Active</span>
-        <span class="text-slate-600 hidden sm:inline">&bull; 70% Reward Allocation Guaranteed</span>
+        <span class="text-slate-600 hidden sm:inline">&bull; SKIT Rewards Verified</span>
       </div>
       <div class="flex items-center gap-3">
         <span id="postback-indicator" class="text-emerald-400 font-medium">Automatic Postback Sync Ready</span>
@@ -311,7 +311,7 @@
         if (event.data && (event.data.type === 'CPX_COMPLETED' || event.data.type === 'TASK_COMPLETED')) {
           const indicator = document.getElementById('postback-indicator');
           if (indicator) {
-            indicator.textContent = '\u2713 Task Completed! 70% Allocated to Balance';
+            indicator.textContent = '\u2713 Task Completed! SKIT Rewards Credited';
             indicator.className = 'text-emerald-300 font-bold animate-pulse';
           }
         }

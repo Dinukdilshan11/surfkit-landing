@@ -7538,7 +7538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ================================================================
     // EARN HUB — PRODUCTION OFFERWALL ENGINE v2.0
     // Dual-provider support: CPX Research + BitLabs
-    // 70% revenue-split multiplier on all payouts (30% platform fee)
+    // SKIT reward multiplier applied to all verified task payouts
     // Supabase activity_ledger integration for live tracker stats
     // ================================================================
 
@@ -7561,10 +7561,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // == Postback / Webhook endpoint (Supabase Edge Function) ====
       postbackUrl: 'https://kpvrewhmnrifsnkgswdt.supabase.co/functions/v1/offerwall-postback',
 
-      // == New unified reward webhook (70/30 split, idempotent) ======
+      // == New unified reward webhook (idempotent) ===================
       rewardWebhookUrl: 'https://kpvrewhmnrifsnkgswdt.supabase.co/functions/v1/handle-reward-webhook',
 
-      // == Revenue split ===========================================
+      // == Reward calculation ======================================
       userMultiplier: 0.70
     };
 
@@ -7671,12 +7671,12 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log(`[CPX Research] Using ${rawOffers.length} dynamic CPX study opportunities`);
         }
 
-        // ── Apply 70% user reward multiplier (grossPayout * 0.70) ──
+        // ── Apply SKIT user reward multiplier ──────────────────────
         allCachedSurveys = rawOffers.map((item, index) => {
           const rawPayout = parseFloat(
             item.payout ?? item.payout_usd ?? item.cpi ?? item.reward ?? item.amount ?? 1.50
           );
-          // Calculate 70% of gross payout as user reward
+          // Calculate SKIT reward for user based on verified task completion
           const userReward = parseFloat((rawPayout * OFFERWALL_CONFIG.userMultiplier).toFixed(2));
           const estMins = Math.max(1, Math.round(Number(item.loi ?? item.duration ?? 10)));
           const rating = parseFloat(Number(item.statistics_rating_avg ?? item.rating ?? item.score ?? 4.9).toFixed(1));
