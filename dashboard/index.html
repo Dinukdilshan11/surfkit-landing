@@ -533,10 +533,7 @@
                 <div class="text-2xl sm:text-3xl font-extrabold text-surf-cyan tracking-tight flex items-baseline gap-1.5 mt-1">
                   <span id="metric-referral-bonus">0 SKIT</span>
                 </div>
-                <div class="text-xs text-slate-400 font-medium mt-0.5">
-                  <span id="metric-referral-usd">≈ $0.00 USD</span>
-                </div>
-                <p id="metric-crew-pool-desc" class="text-xs text-slate-400 mt-0.5">0 active members in network earning you 10% passive commission</p>
+                <p id="metric-crew-pool-desc" class="text-xs text-slate-400 mt-1">0 active members in network earning you 10% passive commission</p>
               </div>
             </div>
             <button onclick="switchTab('referral')" class="px-4 py-2 rounded-xl bg-surf-surface border border-surf-border hover:border-surf-cyan/50 text-xs font-bold text-surf-cyan hover:text-white transition-all self-start sm:self-center">
@@ -623,7 +620,7 @@
     <div class="flex items-center gap-5">
       <div class="flex items-center gap-2">
         <span class="w-3 h-3 rounded-full bg-[#10B981] shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
-        <span class="text-white font-medium">Activity Rewards ($ USD)</span>
+        <span class="text-white font-medium">Activity Rewards (SKIT)</span>
       </div>
       <div class="flex items-center gap-2">
         <span class="w-3 h-3 rounded-full bg-[#06B6D4] shadow-[0_0_8px_rgba(6,182,212,0.5)]"></span>
@@ -786,12 +783,12 @@ async function loadChartDataFromSupabase() {
         const dateKey = d.toISOString().substring(0, 10);
         labels7d.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
         const past = dailyStatsMap[dateKey] || { earnings: 0, impressions: 0 };
-        earnings7d.push(Number(Number(past.earnings || 0).toFixed(4)));
+        earnings7d.push(Math.round(Number(past.earnings || 0) * 1000));
         impressions7d.push(Number(past.impressions || 0));
     }
     // Final data point (Today) pushed directly from fetched profiles row
     labels7d.push('Today');
-    earnings7d.push(Number(liveEarn.toFixed(4)));
+    earnings7d.push(Math.round(liveEarn * 1000));
     impressions7d.push(Number(liveImp));
 
     // ── 3b. Chart Assembly & Zero-Filling: 30-Day Window ───────────────────────
@@ -805,12 +802,12 @@ async function loadChartDataFromSupabase() {
         const dateKey = d.toISOString().substring(0, 10);
         labels30d.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         const past = dailyStatsMap[dateKey] || { earnings: 0, impressions: 0 };
-        earnings30d.push(Number(Number(past.earnings || 0).toFixed(4)));
+        earnings30d.push(Math.round(Number(past.earnings || 0) * 1000));
         impressions30d.push(Number(past.impressions || 0));
     }
     // Final data point (Today) pushed directly from fetched profiles row
     labels30d.push('Today');
-    earnings30d.push(Number(liveEarn.toFixed(4)));
+    earnings30d.push(Math.round(liveEarn * 1000));
     impressions30d.push(Number(liveImp));
 
     if (typeof state !== 'undefined') {
@@ -838,7 +835,7 @@ async function loadChartDataFromSupabase() {
             chart.data.datasets[1].data = [...activeData.impressions];
         }
         if (chart.options && chart.options.scales) {
-            if (chart.options.scales.y) chart.options.scales.y.suggestedMax = Math.max(...activeData.earnings, 0.1) * 1.25;
+            if (chart.options.scales.y) chart.options.scales.y.suggestedMax = Math.max(...activeData.earnings, 100) * 1.25;
             if (chart.options.scales.y1) chart.options.scales.y1.suggestedMax = Math.max(...activeData.impressions, 5) * 1.25;
         }
         chart.update();
@@ -861,7 +858,7 @@ function renderTrendChart(labels, earnings, impressions) {
     earningsGradient.addColorStop(0, 'rgba(0, 210, 180, 0.45)');
     earningsGradient.addColorStop(1, 'rgba(0, 210, 180, 0.0)');
 
-    const maxEarn = Math.max(...(earnings || [0]), 0.1) * 1.25;
+    const maxEarn = Math.max(...(earnings || [0]), 100) * 1.25;
     const maxImp = Math.max(...(impressions || [0]), 5) * 1.25;
     const is30d = (labels && labels.length > 15);
 
@@ -871,7 +868,7 @@ function renderTrendChart(labels, earnings, impressions) {
             labels: labels,
             datasets: [
                 {
-                    label: 'Activity Rewards ($ USD)',
+                    label: 'Activity Rewards (SKIT)',
                     data: earnings,
                     borderColor: '#00D2B4',
                     backgroundColor: (window.currentChartType === 'line') ? earningsGradient : 'rgba(0, 210, 180, 0.85)',
@@ -921,8 +918,8 @@ function renderTrendChart(labels, earnings, impressions) {
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
-                            if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards')) {
-                                return `  ${label}: $${Number(context.parsed.y).toFixed(3)}`;
+                            if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards') || label.includes('SKIT')) {
+                                return `  ${label}: ${Number(context.parsed.y).toLocaleString()} SKIT`;
                             }
                             return `  ${label}: ${Number(context.parsed.y).toLocaleString()}`;
                         }
@@ -950,7 +947,7 @@ function renderTrendChart(labels, earnings, impressions) {
                     ticks: {
                         color: '#00D2B4',
                         font: { size: 10 },
-                        callback: val => '$' + Number(val).toFixed(2)
+                        callback: val => Number(val).toLocaleString() + ' SKIT'
                     }
                 },
                 y1: {
@@ -1066,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
       <div>
         <h3 class="text-lg font-bold text-white tracking-tight">Daily Elite Leaderboard</h3>
-        <p class="text-xs text-slate-400 mt-0.5">Top 10 highest-earning browser nodes dominating today's ad yield</p>
+        <p class="text-xs text-slate-400 mt-0.5">Top 10 highest-earning browser nodes dominating today's platform yield</p>
       </div>
     </div>
     <div class="flex items-center gap-2">
@@ -1160,7 +1157,7 @@ async function loadLeaderboardData() {
                         </div>
                     </div>
                     <div class="text-right">
-                        <span class="text-xs font-extrabold text-emerald-400">+$${earnings.toFixed(3)}</span>
+                        <span class="text-xs font-extrabold text-emerald-400">+${Math.round(earnings * 1000).toLocaleString()} SKIT</span>
                         <p class="text-[9px] text-slate-500">Today's Yield</p>
                     </div>
                 </div>
@@ -1206,7 +1203,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   Live Offers
                 </span>
               </div>
-              <p class="text-slate-400 text-sm mt-1">Complete real-time surveys, brand trials, and mini-games to credit your available USD balance instantly.</p>
+              <p class="text-slate-400 text-sm mt-1">Complete real-time surveys, brand trials, and mini-games to credit your available SKIT balance instantly.</p>
             </div>
             
             <div class="flex items-center gap-2">
@@ -1243,8 +1240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               <div class="text-2xl sm:text-3xl font-extrabold text-white mt-2 tracking-tight flex items-baseline gap-1">
-                <span id="tracker-pending-rewards">$0.00</span>
-                <span class="text-sm text-slate-400 font-bold">USD</span>
+                <span id="tracker-pending-rewards">0 SKIT</span>
               </div>
               <p class="text-[11px] text-amber-400/90 mt-2 flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping"></span>
@@ -1261,8 +1257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-2 tracking-tight flex items-baseline gap-1">
-                <span id="tracker-total-survey-earnings">$0.00</span>
-                <span class="text-sm text-slate-300 font-bold">USD</span>
+                <span id="tracker-total-survey-earnings">0 SKIT</span>
               </div>
               <p class="text-[11px] text-slate-400 mt-2">Credited directly to available balance</p>
             </div>
@@ -2129,7 +2124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div class="space-y-1">
                 <span class="text-xs font-bold text-surf-teal uppercase tracking-wider">YOUR UNIQUE INVITE LINK</span>
-                <h3 class="text-lg font-bold text-white">Share Surfkit & Earn Passive Crypto / USD</h3>
+                <h3 class="text-lg font-bold text-white">Share Surfkit & Earn Passive SKIT Commissions</h3>
                 <p class="text-xs text-slate-400">Anyone who installs the browser extension through your link is forever bound to your crew.</p>
               </div>
 
@@ -2227,7 +2222,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div>
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">TOTAL REFERRAL EARNINGS</span>
                 <div class="text-2xl font-extrabold text-surf-cyan mt-1">
-                  <span id="crew-payout-total-card">$0.00 USD</span>
+                  <span id="crew-payout-total-card">0 SKIT</span>
                 </div>
                 <p class="text-xs text-slate-400 mt-1">Lifetime commissions credited directly to your balance</p>
               </div>
@@ -4151,12 +4146,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const dateKey = d.toISOString().substring(0, 10);
           labels7d.push(d.toLocaleDateString('en-US', { weekday: 'short' }));
           const day = dailyStatsMap[dateKey] || { earnings: 0, impressions: 0 };
-          earnings7d.push(Number(Number(day.earnings || 0).toFixed(4)));
+          earnings7d.push(Math.round(Number(day.earnings || 0) * 1000));
           impressions7d.push(Number(day.impressions || 0));
         }
         // Final data point (Today) pushed directly from fetched profiles row
         labels7d.push('Today');
-        earnings7d.push(Number(liveEarn.toFixed(4)));
+        earnings7d.push(Math.round(Number(liveEarn || 0) * 1000));
         impressions7d.push(Number(liveImp));
 
         // ── Chart Assembly & Zero-Filling: 30-Day Window ─────────────────────────────
@@ -4170,12 +4165,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const dateKey = d.toISOString().substring(0, 10);
           labels30d.push(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
           const day = dailyStatsMap[dateKey] || { earnings: 0, impressions: 0 };
-          earnings30d.push(Number(Number(day.earnings || 0).toFixed(4)));
+          earnings30d.push(Math.round(Number(day.earnings || 0) * 1000));
           impressions30d.push(Number(day.impressions || 0));
         }
         // Final data point (Today) pushed directly from fetched profiles row
         labels30d.push('Today');
-        earnings30d.push(Number(liveEarn.toFixed(4)));
+        earnings30d.push(Math.round(Number(liveEarn || 0) * 1000));
         impressions30d.push(Number(liveImp));
 
         // Store in state — strictly real per-day data with continuous zero-filling
@@ -4200,7 +4195,7 @@ document.addEventListener('DOMContentLoaded', () => {
           trendChartInstance.data.labels = dataToUse.labels;
           trendChartInstance.data.datasets[0].data = [...dataToUse.earnings];
           trendChartInstance.data.datasets[1].data = [...dataToUse.impressions];
-          trendChartInstance.options.scales.y.suggestedMax = Math.max(...dataToUse.earnings, 0.1) * 1.25;
+          trendChartInstance.options.scales.y.suggestedMax = Math.max(...dataToUse.earnings, 100) * 1.25;
           trendChartInstance.options.scales.y1.suggestedMax = Math.max(...dataToUse.impressions, 5) * 1.25;
           trendChartInstance.update(); // force re-render with fresh profile data
         } else {
@@ -4479,7 +4474,7 @@ document.addEventListener('DOMContentLoaded', () => {
               labels: dataToUse.labels,
               datasets: [
                 {
-                  label: 'Activity Rewards ($ USD)',
+                  label: 'Activity Rewards (SKIT)',
                   data: dataToUse.earnings,
                   borderColor: '#00D2B4',
                   backgroundColor: currentChartType === 'bar' ? 'rgba(0, 210, 180, 0.85)' : earningsGradient,
@@ -4532,8 +4527,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   callbacks: {
                     label: function(context) {
                       let label = context.dataset.label || '';
-                      if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards')) {
-                        return `  ${label}: $${Number(context.parsed.y).toFixed(3)}`;
+                      if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards') || label.includes('SKIT')) {
+                        return `  ${label}: ${Number(context.parsed.y).toLocaleString()} SKIT`;
                       }
                       return `  ${label}: ${Number(context.parsed.y).toLocaleString()}`;
                     }
@@ -4561,7 +4556,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   ticks: {
                     color: '#00D2B4',
                     font: { size: 10 },
-                    callback: function(value) { return '$' + Number(value).toFixed(2); }
+                    callback: function(value) { return Number(value).toLocaleString() + ' SKIT'; }
                   }
                 },
                 y1: {
@@ -5833,12 +5828,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const referralBonusMetricEl = document.getElementById('metric-referral-bonus');
       const referralInputEl = document.getElementById('referral-input');
 
+      const totalReferralSkit = Math.round(Number(totalReferralBonus || 0) * 1000);
       if (invitesCountEl) invitesCountEl.textContent = `${crewCount} Users`;
       if (summaryTotalRefEl) summaryTotalRefEl.textContent = crewCount;
       if (crewHeaderEl) crewHeaderEl.textContent = crewCount;
-      if (crewPayoutCardEl) crewPayoutCardEl.textContent = `$${totalReferralBonus.toFixed(2)} USD`;
+      if (crewPayoutCardEl) crewPayoutCardEl.textContent = `${totalReferralSkit.toLocaleString()} SKIT`;
       if (crewPoolDescEl) crewPoolDescEl.textContent = `${crewCount} registered crew member(s)`;
-      if (referralBonusMetricEl) referralBonusMetricEl.textContent = `$${totalReferralBonus.toFixed(2)}`;
+      if (referralBonusMetricEl) referralBonusMetricEl.textContent = `${totalReferralSkit.toLocaleString()} SKIT`;
 
       const refCode = state.user?.referralCode || (currentUser && currentUser.id ? 'sk_' + currentUser.id.replace(/-/g, '').substring(0, 8) : 'sk_8f3a9d21');
       if (referralInputEl) referralInputEl.value = `https://surfkit.cloud/?ref=${refCode}`;
@@ -6013,7 +6009,7 @@ document.addEventListener('DOMContentLoaded', () => {
               ${m.status}
             </span>
           </td>
-          <td class="py-3 px-4 text-surf-cyan font-bold">+$${Number(m.earned || 0).toFixed(2)} USD</td>
+          <td class="py-3 px-4 text-surf-cyan font-bold">+${Math.round(Number(m.earned || 0) * 1000).toLocaleString()} SKIT</td>
         </tr>
       `;
       }).join('');
@@ -7025,7 +7021,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (metricImpressions) metricImpressions.textContent = state.user.lifetimeImpressions.toLocaleString();
       if (metricStreak) metricStreak.textContent = state.user.streakDays;
       if (metricBonus) metricBonus.textContent = formatSkitPrimary(state.user.referralBonus);
-      if (metricBonusUsd) metricBonusUsd.textContent = formatUsdSecondary(state.user.referralBonus);
+      if (metricBonusUsd) metricBonusUsd.textContent = '';
       if (streakEl) streakEl.textContent = state.user.streakDays;
 
       // Cashout form bounds & balance display (authoritative from DB)
@@ -7818,7 +7814,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="mt-4 pt-3.5 border-t border-surf-border/60 flex items-center justify-between gap-3">
             <div>
               <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Your Reward</span>
-              <span class="text-base font-extrabold text-emerald-400 tracking-tight">+$${s.userReward.toFixed(2)} USD</span>
+              <span class="text-base font-extrabold text-emerald-400 tracking-tight">+${Math.round(Number(s.userReward || 0) * 1000).toLocaleString()} SKIT</span>
             </div>
 
             <button
@@ -7857,7 +7853,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const offerwallUrl = `https://offers.cpx-research.com/index.php?app_id=37856&ext_user_id=${userId}&secure_hash=${secureHash}`;
 
       if (modalTitle)  modalTitle.textContent  = title ? `CPX Research • ${title}` : 'CPX Research Interactive Offerwall';
-      if (modalReward) modalReward.textContent  = rewardAmount ? `+$${Number(rewardAmount).toFixed(2)} USD` : '+$0.90 USD';
+      if (modalReward) modalReward.textContent  = rewardAmount ? `+${Math.round(Number(rewardAmount) * 1000).toLocaleString()} SKIT` : '+900 SKIT';
       if (modalUid)    modalUid.textContent     = `UID: ${userId.substring(0, 8)}...`;
 
       // Store current offer for tracking
@@ -8065,8 +8061,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Update DOM
       if (completedEl) { completedEl.textContent = completedCount; completedEl.classList.remove('opacity-50'); }
-      if (totalEl)     { totalEl.textContent     = `$${totalEarned.toFixed(2)}`; totalEl.classList.remove('opacity-50'); }
-      if (pendingEl)   { pendingEl.textContent   = `$${pendingAmount.toFixed(2)}`; pendingEl.classList.remove('opacity-50'); }
+      if (totalEl)     { totalEl.textContent     = `${Math.round(totalEarned * 1000).toLocaleString()} SKIT`; totalEl.classList.remove('opacity-50'); }
+      if (pendingEl)   { pendingEl.textContent   = `${Math.round(pendingAmount * 1000).toLocaleString()} SKIT`; pendingEl.classList.remove('opacity-50'); }
     }
 
     function getOfferwallUserId() {
@@ -8185,7 +8181,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
               <span>Direct Session</span>
               <span>•</span>
-              <span class="text-emerald-400 font-mono font-bold" id="offerwall-modal-reward">+$0.00 USD</span>
+              <span class="text-emerald-400 font-mono font-bold" id="offerwall-modal-reward">+0 SKIT</span>
               <span>•</span>
               <span class="text-slate-500 font-mono text-[10px]" id="offerwall-modal-uid">UID: ...</span>
             </p>
@@ -8473,7 +8469,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (typeof showToast === 'function') {
         if (prize.type === 'creds') {
-          showToast('⚡ 4-Hour Engagement Bonus Claimed! You received ' + prize.label + ' (+$' + prize.usd.toFixed(3) + ' USD).', 'success');
+          showToast('⚡ 4-Hour Engagement Bonus Claimed! You received ' + prize.label + ' (+' + Math.round(prize.usd * 1000).toLocaleString() + ' SKIT).', 'success');
         } else {
           showToast('⚡ 4-Hour Engagement Bonus Claimed! ' + prize.label + ' activated for your next quest!', 'success');
         }
