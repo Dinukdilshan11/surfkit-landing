@@ -1263,88 +1263,118 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
-          <!-- 4-Hour Engagement Pulse / Streak Dial Widget -->
-          <div id="surfkit-pulse-container" class="bg-gradient-to-br from-[#0B132B] via-surf-surfaceCard to-[#070D19] border border-surf-border/80 rounded-2xl p-6 relative overflow-hidden shadow-xl transition-all">
-            <!-- Subtle Radial Glow Accents -->
-            <div class="pointer-events-none absolute -top-12 -left-12 w-48 h-48 rounded-full bg-surf-teal/10 blur-3xl"></div>
-            <div class="pointer-events-none absolute -bottom-12 -right-12 w-48 h-48 rounded-full bg-emerald-500/10 blur-3xl"></div>
+          <!-- 4-Hour Quantum Pulse Dial / SKIT Spin Wheel -->
+          <div id="pulse-dial-card" class="bg-gradient-to-br from-[#07101F] via-[#0b1527] to-[#070D19] border border-cyan-500/20 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
+            <!-- Ambient glows -->
+            <div class="pointer-events-none absolute -top-16 -left-16 w-64 h-64 rounded-full bg-cyan-500/8 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-16 -right-16 w-64 h-64 rounded-full bg-emerald-500/8 blur-3xl"></div>
 
-            <div class="flex flex-col lg:flex-row items-center justify-between gap-6 relative z-10">
-              
-              <!-- Left Info & Cooldown Status -->
-              <div class="flex-1 space-y-3 text-center lg:text-left">
-                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
-                  <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-surf-teal/15 text-surf-teal border border-surf-teal/30 flex items-center gap-1.5">
-                    <span class="w-1.5 h-1.5 rounded-full bg-surf-teal animate-pulse"></span>
+            <!-- Result banner (hidden until spin lands) -->
+            <div id="pulse-dial-result-banner" class="hidden absolute inset-x-4 top-4 z-30 rounded-xl bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 border border-cyan-400/40 px-5 py-3 flex items-center justify-between gap-3 backdrop-blur-sm shadow-lg">
+              <div>
+                <p id="pulse-result-title" class="text-sm font-black text-white"></p>
+                <p id="pulse-result-msg" class="text-xs text-slate-300 mt-0.5"></p>
+              </div>
+              <button onclick="document.getElementById('pulse-dial-result-banner').classList.add('hidden')" class="text-slate-400 hover:text-white text-lg leading-none">&times;</button>
+            </div>
+
+            <div class="flex flex-col lg:flex-row items-center gap-8 relative z-10">
+
+              <!-- Left: Info & Controls -->
+              <div class="flex-1 space-y-4 text-center lg:text-left">
+                <!-- Header badges -->
+                <div class="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                  <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
                     4-Hour Cadence
                   </span>
-                  <span id="pulse-status-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                    Pulse Ready
+                  <span id="pulse-dial-status-pill" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                    <span id="pulse-dial-status-pill-text">Ready to Spin</span>
                   </span>
                 </div>
 
+                <!-- Title -->
                 <div>
                   <h3 class="text-xl sm:text-2xl font-black text-white tracking-tight flex items-center justify-center lg:justify-start gap-2">
-                    <span>Surfkit Pulse Dial</span>
-                    <span class="text-surf-teal text-xl">⚡</span>
+                    <span>Quantum Pulse Dial</span>
+                    <span class="text-cyan-400">⚡</span>
                   </h3>
-                  <p class="text-xs text-slate-400 mt-1 max-w-md">
-                    Claim your recurring platform engagement bonus every 4 hours. Keep your streak active to unlock higher reward probabilities.
+                  <p class="text-xs text-slate-400 mt-1 max-w-sm">
+                    Spin every 4 hours to earn <span class="text-cyan-400 font-semibold">SKIT</span> rewards credited instantly to your balance.
                   </p>
                 </div>
 
-                <!-- Cooldown / Ready Tracker Bar -->
-                <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3 pt-1">
-                  <div class="flex items-center gap-2 bg-[#090E1C] px-3.5 py-2 rounded-xl border border-surf-border/80">
-                    <span class="text-xs text-slate-400 font-mono">Next Pulse:</span>
-                    <span id="pulse-timer-display" class="text-sm font-black text-emerald-400 font-mono tracking-wider">READY NOW</span>
+                <!-- Countdown row -->
+                <div class="flex items-center justify-center lg:justify-start gap-3">
+                  <div class="flex items-center gap-2 bg-[#060D1A] px-4 py-2.5 rounded-xl border border-slate-700/60">
+                    <span class="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Next Spin</span>
+                    <span id="pulse-cd-h" class="text-sm font-black text-cyan-400 font-mono">00</span>
+                    <span class="text-slate-500 font-mono">:</span>
+                    <span id="pulse-cd-m" class="text-sm font-black text-cyan-400 font-mono">00</span>
+                    <span class="text-slate-500 font-mono">:</span>
+                    <span id="pulse-cd-s" class="text-sm font-black text-cyan-400 font-mono">00</span>
                   </div>
-
-                  <button id="pulse-claim-btn" onclick="executePulseSpin()" 
-                    class="px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-surf-teal to-emerald-400 hover:from-surf-tealHover hover:to-emerald-300 text-slate-950 transition-all shadow-glow-teal active:scale-95 flex items-center gap-2 cursor-pointer">
-                    <span class="text-sm">🎲</span>
-                    <span id="pulse-btn-text">Spin Pulse Dial</span>
-                  </button>
                 </div>
 
-                <!-- Reward Weights & Policy Note -->
-                <div class="pt-2 text-[11px] text-slate-500 flex flex-wrap items-center justify-center lg:justify-start gap-x-4 gap-y-1">
-                  <span>✦ +5 Creds (45%)</span>
-                  <span>✦ +10 Creds (30%)</span>
-                  <span>✦ +15 Creds (15%)</span>
-                  <span>✦ +25 Creds (8%)</span>
-                  <span class="text-surf-teal font-semibold">✦ 2x Quest Boost (2%)</span>
+                <!-- Recharge progress bar -->
+                <div class="space-y-1">
+                  <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="pulse-recharge-progress" class="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-1000" style="width:100%"></div>
+                  </div>
+                  <p class="text-[10px] text-slate-600 font-mono">Recharge Progress</p>
+                </div>
+
+                <!-- Spin button -->
+                <button id="pulse-spin-btn" onclick="triggerPulseDialSpin()"
+                  class="w-full lg:w-auto px-8 py-3 rounded-xl font-black text-sm bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  <span id="pulse-spin-btn-text">Spin Now</span>
+                </button>
+
+                <!-- Reward tier chips -->
+                <div class="flex flex-wrap justify-center lg:justify-start gap-2 pt-1">
+                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/25">1 SKIT · $0.001</span>
+                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">2 SKIT · $0.002</span>
+                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/25">3 SKIT · $0.003</span>
+                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/25">5 SKIT · $0.005</span>
                 </div>
               </div>
 
-              <!-- Right: Radial Dial Graphic -->
-              <div class="shrink-0 relative flex items-center justify-center">
-                <!-- Outer Ambient Ring -->
-                <div class="w-48 h-48 sm:w-56 sm:h-56 rounded-full bg-[#080E1E] border-2 border-surf-border/70 flex items-center justify-center relative shadow-[0_0_25px_rgba(6,182,212,0.12)]">
-                  
-                  <!-- Dial Rotating Hub -->
-                  <div id="pulse-dial-wheel" class="w-40 h-40 sm:w-48 sm:h-48 rounded-full border border-surf-teal/30 bg-gradient-to-tr from-[#06101E] via-[#09182E] to-[#0A2239] flex items-center justify-center relative transition-transform duration-[2800ms] ease-[cubic-bezier(0.15,0.85,0.35,1.02)]">
-                    
-                    <!-- Circular Tick Markers -->
-                    <div class="absolute inset-2 rounded-full border border-dashed border-surf-teal/20 pointer-events-none"></div>
-                    
-                    <!-- Radial Labels -->
-                    <span class="absolute top-2 text-[10px] font-black text-emerald-400 tracking-wider">+10</span>
-                    <span class="absolute right-3 text-[10px] font-black text-surf-teal tracking-wider">+15</span>
-                    <span class="absolute bottom-2 text-[10px] font-black text-cyan-300 tracking-wider">+5</span>
-                    <span class="absolute left-3 text-[10px] font-black text-amber-400 tracking-wider">+25</span>
-                    <span class="absolute top-8 right-6 text-[9px] font-bold text-emerald-300">+5</span>
-                    <span class="absolute bottom-8 left-6 text-[9px] font-black text-purple-400">2X</span>
-
-                    <!-- Center Cap & Needle Indicator -->
-                    <div class="w-12 h-12 rounded-full bg-[#070D19] border-2 border-surf-teal flex items-center justify-center shadow-lg relative z-10">
-                      <div class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></div>
-                    </div>
+              <!-- Right: SVG Spin Wheel -->
+              <div class="shrink-0 relative flex flex-col items-center gap-3">
+                <!-- Fixed pointer needle at top -->
+                <div class="relative w-[280px] h-[280px] flex items-center justify-center">
+                  <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1 z-20 pointer-events-none">
+                    <svg width="18" height="22" viewBox="0 0 18 22"><polygon points="9,2 1,20 17,20" fill="#22d3ee" filter="drop-shadow(0 0 6px rgba(34,211,238,0.9))"/></svg>
                   </div>
-
-                  <!-- Fixed Indicator Needle at Top -->
-                  <div class="absolute top-0 left-1/2 -translate-x-1/2 -mt-1 w-0 h-0 border-l-[7px] border-l-transparent border-r-[7px] border-r-transparent border-t-[14px] border-t-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.8)] z-20 pointer-events-none"></div>
+                  <!-- Outer ring glow -->
+                  <div class="absolute inset-0 rounded-full border-2 border-cyan-500/20 shadow-[0_0_30px_rgba(34,211,238,0.12)]"></div>
+                  <!-- SVG Wheel -->
+                  <svg id="pulse-wheel-svg" viewBox="0 0 300 300" width="260" height="260"
+                    class="transition-transform will-change-transform"
+                    style="transform-origin:center center;"
+                    aria-label="Spin Wheel">
+                    <!-- Sector 0° – 1 SKIT (cyan/teal, top) -->
+                    <path d="M150,150 L150,10 A140,140 0 0,1 290,150 Z" fill="#0e3a4a" stroke="#164e63" stroke-width="1.5"/>
+                    <text x="210" y="85" fill="#22d3ee" font-size="13" font-weight="900" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle">1 SKIT</text>
+                    <!-- Sector 90° – 5 SKIT (amber/gold, right) -->
+                    <path d="M150,150 L290,150 A140,140 0 0,1 150,290 Z" fill="#2d1e08" stroke="#451a03" stroke-width="1.5"/>
+                    <text x="215" y="215" fill="#fbbf24" font-size="13" font-weight="900" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle">5 SKIT</text>
+                    <!-- Sector 180° – 3 SKIT (indigo, bottom) -->
+                    <path d="M150,150 L150,290 A140,140 0 0,1 10,150 Z" fill="#1a1240" stroke="#2e1065" stroke-width="1.5"/>
+                    <text x="90" y="215" fill="#818cf8" font-size="13" font-weight="900" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle">3 SKIT</text>
+                    <!-- Sector 270° – 2 SKIT (emerald, left) -->
+                    <path d="M150,150 L10,150 A140,140 0 0,1 150,10 Z" fill="#062d1e" stroke="#064e3b" stroke-width="1.5"/>
+                    <text x="85" y="85" fill="#34d399" font-size="13" font-weight="900" font-family="system-ui,sans-serif" text-anchor="middle" dominant-baseline="middle">2 SKIT</text>
+                    <!-- Divider lines -->
+                    <line x1="150" y1="10" x2="150" y2="290" stroke="#0f172a" stroke-width="2.5"/>
+                    <line x1="10" y1="150" x2="290" y2="150" stroke="#0f172a" stroke-width="2.5"/>
+                    <!-- Center cap -->
+                    <circle cx="150" cy="150" r="30" fill="#07101f" stroke="#22d3ee" stroke-width="2"/>
+                    <circle cx="150" cy="150" r="8" fill="#22d3ee" opacity="0.9"/>
+                  </svg>
                 </div>
+                <p class="text-[11px] text-slate-500 font-mono">1 SKIT = $0.001 USD</p>
               </div>
 
             </div>
@@ -8299,182 +8329,273 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <!-- ========================================================================== -->
-<!-- SURFKIT PULSE & AD ENGINE ENHANCEMENTS                                    -->
+<!-- SURFKIT QUANTUM PULSE DIAL – SKIT SPIN WHEEL ENGINE                        -->
 <!-- ========================================================================== -->
 <script>
 (function() {
-  /* --- 4-Hour Engagement Streak Dial / Pulse Engine --- */
-  const PULSE_CONFIG = {
-    COOLDOWN_MS: 4 * 60 * 60 * 1000, // 14,400,000 ms (4 Hours)
-    LS_KEY: 'surfkit_pulse_last_spin',
-    WEIGHTED_OUTCOMES: [
-      { id: 'c5',  type: 'creds', amount: 5,  label: '+5 Creds',  usd: 0.005, weight: 45, deg: 180 },
-      { id: 'c10', type: 'creds', amount: 10, label: '+10 Creds', usd: 0.010, weight: 30, deg: 0 },
-      { id: 'c15', type: 'creds', amount: 15, label: '+15 Creds', usd: 0.015, weight: 15, deg: 90 },
-      { id: 'c25', type: 'creds', amount: 25, label: '+25 Creds', usd: 0.025, weight: 8,  deg: 270 },
-      { id: 'b2x', type: 'boost', amount: 2,  label: '2x Quest Boost', usd: 0, weight: 2, deg: 240 }
-    ]
+  /* ------------------------------------------------------------------ *
+   *  QUANTUM PULSE DIAL – 4-Hour SKIT Spin Engine                       *
+   *  Rewards: 1 SKIT / 2 SKIT / 3 SKIT / 5 SKIT (1 SKIT = $0.001 USD) *
+   * ------------------------------------------------------------------ */
+  const PULSE_DIAL_COOLDOWN_MS = 14400 * 1000;   // 4 hours
+  const SKIT_TO_USD = 0.001;
+  const LS_KEY_SPIN = 'surfkit_pulse_dial_last_spin';
+
+  // ── Weight Profiles ──────────────────────────────────────────────────
+  // Weights always sum to 100. Order: [1 SKIT, 2 SKIT, 3 SKIT, 5 SKIT]
+  const SPIN_WEIGHT_PROFILES = {
+    standard: {
+      label: 'Standard',
+      weights: { 1: 65, 2: 22, 3: 10, 5: 3 },
+      ev: 1.54  // EV = 1*0.65 + 2*0.22 + 3*0.10 + 5*0.03 = 1.54 SKIT
+    },
+    conservative: {
+      label: 'Conservative',
+      weights: { 1: 75, 2: 18, 3: 5, 5: 2 },
+      ev: 1.34  // EV = 1*0.75 + 2*0.18 + 3*0.05 + 5*0.02 = 1.34 SKIT
+    },
+    highYield: {
+      label: 'High Yield',
+      weights: { 1: 55, 2: 25, 3: 14, 5: 6 },
+      ev: 1.76  // EV = 1*0.55 + 2*0.25 + 3*0.14 + 5*0.06 = 1.77 SKIT
+    }
   };
 
-  let pulseIntervalTimer = null;
-  let isPulseSpinning = false;
-  let currentRotationDeg = 0;
-
-  function getLastPulseTimestamp() {
-    const fromProfile = (typeof state !== 'undefined' && state.user && state.user.lastSpinAt) 
-      ? new Date(state.user.lastSpinAt).getTime() 
-      : 0;
-    const fromLocal = parseInt(localStorage.getItem(PULSE_CONFIG.LS_KEY) || '0', 10);
-    return Math.max(fromProfile, fromLocal);
+  // ── Context-aware profile selector ───────────────────────────────────
+  function getSpinWeightsForContext({ geoTier = 2, fillRate = 0.7, ecpm = 1.5, adRevenueFactor = 1.0 } = {}) {
+    const score = (adRevenueFactor || 1) * (fillRate || 0.7) * Math.min(ecpm / 2, 1);
+    if (geoTier >= 3 || score < 0.4) return SPIN_WEIGHT_PROFILES.conservative.weights;
+    if (geoTier === 1 && score >= 0.8) return SPIN_WEIGHT_PROFILES.highYield.weights;
+    return SPIN_WEIGHT_PROFILES.standard.weights;
   }
 
-  function getRemainingPulseCooldown() {
-    const lastTime = getLastPulseTimestamp();
-    if (!lastTime) return 0;
-    const elapsed = Date.now() - lastTime;
-    return Math.max(0, PULSE_CONFIG.COOLDOWN_MS - elapsed);
+  // ── Weighted Random Reward Selection ─────────────────────────────────
+  function selectPulseReward(weightsObj) {
+    const candidates = [1, 2, 3, 5];
+    const totalW = candidates.reduce((s, k) => s + (weightsObj[k] || 0), 0);
+    let rand = Math.random() * totalW;
+    for (const k of candidates) {
+      rand -= (weightsObj[k] || 0);
+      if (rand <= 0) return k;
+    }
+    return 1; // safe fallback
   }
 
-  function formatCountdown(ms) {
-    const totalSecs = Math.floor(ms / 1000);
-    const hrs = Math.floor(totalSecs / 3600);
-    const mins = Math.floor((totalSecs % 3600) / 60);
-    const secs = totalSecs % 60;
-    return String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+  // ── State ─────────────────────────────────────────────────────────────
+  let isPulseDialSpinning = false;
+  let pulseDialTotalRotation = 0;
+  let pulseCooldownInterval = null;
+
+  // ── Persistence helpers ───────────────────────────────────────────────
+  function getPulseDialLastSpin() {
+    const fromProfile = (typeof state !== 'undefined' && state.user && (state.user.pulseDialLastSpin || state.user.lastSpinAt))
+      ? new Date(state.user.pulseDialLastSpin || state.user.lastSpinAt).getTime() : 0;
+    const fromLocal = parseInt(localStorage.getItem(LS_KEY_SPIN) || '0', 10);
+    return Math.max(fromProfile || 0, fromLocal || 0);
   }
 
-  function updatePulseWidgetUI() {
-    const timerDisplay = document.getElementById('pulse-timer-display');
-    const statusBadge = document.getElementById('pulse-status-badge');
-    const claimBtn = document.getElementById('pulse-claim-btn');
-    const btnText = document.getElementById('pulse-btn-text');
-    if (!timerDisplay || !claimBtn) return;
+  function setPulseDialLastSpin(ts) {
+    localStorage.setItem(LS_KEY_SPIN, String(ts));
+    if (typeof state !== 'undefined' && state.user) {
+      state.user.pulseDialLastSpin = new Date(ts).toISOString();
+    }
+  }
 
-    const remaining = getRemainingPulseCooldown();
+  function isPulseDialOnCooldown() {
+    const last = getPulseDialLastSpin();
+    if (!last) return false;
+    return (Date.now() - last) < PULSE_DIAL_COOLDOWN_MS;
+  }
+
+  // ── UI updater ────────────────────────────────────────────────────────
+  function updatePulseDialUI() {
+    const pill     = document.getElementById('pulse-dial-status-pill');
+    const pillText = document.getElementById('pulse-dial-status-pill-text');
+    const btn      = document.getElementById('pulse-spin-btn');
+    const btnText  = document.getElementById('pulse-spin-btn-text');
+    const hEl      = document.getElementById('pulse-cd-h');
+    const mEl      = document.getElementById('pulse-cd-m');
+    const sEl      = document.getElementById('pulse-cd-s');
+    const progEl   = document.getElementById('pulse-recharge-progress');
+
+    const last      = getPulseDialLastSpin();
+    const elapsed   = last ? Math.max(0, Date.now() - last) : PULSE_DIAL_COOLDOWN_MS;
+    const remaining = Math.max(0, PULSE_DIAL_COOLDOWN_MS - elapsed);
+    const pct       = Math.min(100, (elapsed / PULSE_DIAL_COOLDOWN_MS) * 100);
+
+    if (progEl) progEl.style.width = pct + '%';
 
     if (remaining <= 0) {
-      timerDisplay.textContent = 'READY NOW';
-      timerDisplay.className = 'text-sm font-black text-emerald-400 font-mono tracking-wider animate-pulse';
-      if (statusBadge) {
-        statusBadge.textContent = 'Pulse Ready';
-        statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+      // READY
+      if (pillText) pillText.textContent = 'Ready to Spin';
+      if (pill) pill.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+      if (hEl) hEl.textContent = '00';
+      if (mEl) mEl.textContent = '00';
+      if (sEl) sEl.textContent = '00';
+      if (hEl) hEl.className = 'text-sm font-black text-emerald-400 font-mono animate-pulse';
+      if (btn && !isPulseDialSpinning) {
+        btn.disabled = false;
+        btn.className = 'w-full lg:w-auto px-8 py-3 rounded-xl font-black text-sm bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer';
+        if (btnText) btnText.textContent = 'Spin Now';
       }
-      claimBtn.disabled = false;
-      claimBtn.className = 'px-5 py-2.5 rounded-xl font-bold text-xs bg-gradient-to-r from-surf-teal to-emerald-400 hover:from-surf-tealHover hover:to-emerald-300 text-slate-950 transition-all shadow-glow-teal active:scale-95 flex items-center gap-2 cursor-pointer';
-      if (btnText) btnText.textContent = 'Spin Pulse Dial';
+      // Update overview banner
+      const ovBadge = document.getElementById('overview-pulse-badge');
+      const ovSub   = document.getElementById('overview-pulse-sub');
+      if (ovBadge) { ovBadge.textContent = 'READY'; ovBadge.className = 'text-xs font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'; }
+      if (ovSub) ovSub.textContent = 'Tap to spin now!';
     } else {
-      const formatted = formatCountdown(remaining);
-      timerDisplay.textContent = formatted;
-      timerDisplay.className = 'text-sm font-black text-slate-300 font-mono tracking-wider';
-      if (statusBadge) {
-        statusBadge.textContent = 'Cooldown Active';
-        statusBadge.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30';
+      // COOLDOWN
+      const totalSecs = Math.floor(remaining / 1000);
+      const h = Math.floor(totalSecs / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+      if (hEl) { hEl.textContent = String(h).padStart(2,'0'); hEl.className = 'text-sm font-black text-cyan-400 font-mono'; }
+      if (mEl) mEl.textContent = String(m).padStart(2,'0');
+      if (sEl) sEl.textContent = String(s).padStart(2,'0');
+      if (pillText) pillText.textContent = 'Cooldown Active';
+      if (pill) pill.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30';
+      if (btn) {
+        btn.disabled = true;
+        btn.className = 'w-full lg:w-auto px-8 py-3 rounded-xl font-black text-sm bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed flex items-center justify-center gap-2 opacity-70';
+        if (btnText) btnText.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
       }
-      claimBtn.disabled = true;
-      claimBtn.className = 'px-5 py-2.5 rounded-xl font-bold text-xs bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed flex items-center gap-2 opacity-80';
-      if (btnText) btnText.textContent = 'Cooldown (' + formatted + ')';
+      // Overview banner
+      const ovBadge = document.getElementById('overview-pulse-badge');
+      const ovSub   = document.getElementById('overview-pulse-sub');
+      if (ovBadge) { ovBadge.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'); ovBadge.className = 'text-xs font-black px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-400 border border-slate-700/60'; }
+      if (ovSub) ovSub.textContent = 'Next spin available soon';
     }
   }
 
-  window.initPulseWidget = function() {
-    updatePulseWidgetUI();
-    if (pulseIntervalTimer) clearInterval(pulseIntervalTimer);
-    pulseIntervalTimer = setInterval(updatePulseWidgetUI, 1000);
-  };
-
-  function selectWeightedPulseOutcome() {
-    const totalWeight = PULSE_CONFIG.WEIGHTED_OUTCOMES.reduce((sum, item) => sum + item.weight, 0);
-    let random = Math.random() * totalWeight;
-    for (const item of PULSE_CONFIG.WEIGHTED_OUTCOMES) {
-      if (random < item.weight) return item;
-      random -= item.weight;
-    }
-    return PULSE_CONFIG.WEIGHTED_OUTCOMES[0];
+  // ── Cooldown timer init ───────────────────────────────────────────────
+  function initPulseDialCooldownTimer() {
+    updatePulseDialUI();
+    if (pulseCooldownInterval) clearInterval(pulseCooldownInterval);
+    pulseCooldownInterval = setInterval(updatePulseDialUI, 1000);
   }
 
-  window.executePulseSpin = async function() {
-    if (isPulseSpinning) return;
-    const remaining = getRemainingPulseCooldown();
-    if (remaining > 0) {
+  // ── Spin trigger ──────────────────────────────────────────────────────
+  window.triggerPulseDialSpin = async function() {
+    if (isPulseDialSpinning) return;
+    if (isPulseDialOnCooldown()) {
       if (typeof showToast === 'function') {
-        showToast('Pulse is recharging! Available in ' + formatCountdown(remaining) + '.', 'info');
+        const rem = Math.max(0, PULSE_DIAL_COOLDOWN_MS - (Date.now() - getPulseDialLastSpin()));
+        const totalSecs = Math.floor(rem / 1000);
+        const h = Math.floor(totalSecs / 3600), m = Math.floor((totalSecs % 3600) / 60), s = totalSecs % 60;
+        showToast('Pulse recharging! Available in ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'), 'info');
       }
       return;
     }
 
-    isPulseSpinning = true;
-    const claimBtn = document.getElementById('pulse-claim-btn');
-    const btnText = document.getElementById('pulse-btn-text');
-    const dial = document.getElementById('pulse-dial-wheel');
-    if (claimBtn) claimBtn.disabled = true;
-    if (btnText) btnText.textContent = 'Calibrating Pulse...';
+    isPulseDialSpinning = true;
+    const btn = document.getElementById('pulse-spin-btn');
+    const btnText = document.getElementById('pulse-spin-btn-text');
+    const svg = document.getElementById('pulse-wheel-svg');
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.textContent = 'Spinning...';
 
-    // Weighted Outcome Selection
-    const prize = selectWeightedPulseOutcome();
+    // Determine weights from geo context
+    const geoTier = (typeof state !== 'undefined' && state.user && state.user.geoTier) ? parseInt(state.user.geoTier) || 2 : 2;
+    const weights = getSpinWeightsForContext({ geoTier });
+    const chosenSkit = selectPulseReward(weights);
 
-    // 4 full revolutions + prize angle
-    const fullSpins = 4 + Math.floor(Math.random() * 2);
-    const targetDeg = fullSpins * 360 + prize.deg;
-    currentRotationDeg += targetDeg;
+    // Target angle: sectors at 0°=1SKIT(top), 90°=5SKIT, 180°=3SKIT, 270°=2SKIT
+    // Spin so chosen sector aligns to 12-o'clock pointer
+    // Pointer is at top. We need the chosen sector's center to point up.
+    // Sector centers: 1SKIT=315°, 2SKIT=225°, 3SKIT=135°, 5SKIT=45° (from 0° reference in SVG)
+    // We rotate the wheel CW so chosen sector arrives under pointer.
+    const sectorAngles = { 1: 315, 2: 225, 3: 135, 5: 45 };
+    const targetAngle  = sectorAngles[chosenSkit] || 315;
+    const fullSpins    = 5 + Math.floor(Math.random() * 3);
+    const jitter       = (Math.random() - 0.5) * 20;
+    const targetRot    = fullSpins * 360 + targetAngle + jitter;
+    pulseDialTotalRotation += targetRot;
 
-    if (dial) {
-      dial.style.transform = 'rotate(' + currentRotationDeg + 'deg)';
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration      = reducedMotion ? 400 : 4200 + Math.random() * 800;
+
+    if (svg) {
+      svg.style.transition = `transform ${duration}ms cubic-bezier(0.17,0.67,0.12,0.99)`;
+      svg.style.transform  = `rotate(${pulseDialTotalRotation}deg)`;
     }
 
     setTimeout(async () => {
-      isPulseSpinning = false;
-      const nowIso = new Date().toISOString();
-      const nowMs = Date.now();
+      isPulseDialSpinning = false;
+      const nowMs  = Date.now();
+      const nowIso = new Date(nowMs).toISOString();
+      setPulseDialLastSpin(nowMs);
 
-      localStorage.setItem(PULSE_CONFIG.LS_KEY, nowMs.toString());
+      // Credit SKIT balance locally
+      const skitEarned = chosenSkit;
+      const usdEarned  = parseFloat((skitEarned * SKIT_TO_USD).toFixed(6));
       if (typeof state !== 'undefined' && state.user) {
-        state.user.lastSpinAt = nowIso;
+        state.user.availableBalance  = parseFloat(((state.user.availableBalance  || 0) + usdEarned).toFixed(6));
+        state.user.lifetimeEarnings  = parseFloat(((state.user.lifetimeEarnings  || 0) + usdEarned).toFixed(6));
+      }
+      if (typeof currentUser !== 'undefined' && currentUser && typeof state !== 'undefined' && state.user) {
+        currentUser.availableBalance = state.user.availableBalance;
       }
 
-      // Award Rewards
-      if (prize.type === 'creds') {
-        const credValUsd = prize.usd;
-        if (typeof state !== 'undefined' && state.user) {
-          state.user.availableBalance = parseFloat(((state.user.availableBalance || 0) + credValUsd).toFixed(3));
-          state.user.lifetimeEarnings = parseFloat(((state.user.lifetimeEarnings || 0) + credValUsd).toFixed(3));
-        }
-        if (typeof currentUser !== 'undefined' && currentUser) {
-          currentUser.availableBalance = state.user.availableBalance;
-        }
-      } else if (prize.type === 'boost') {
-        if (typeof state !== 'undefined' && state.user) {
-          state.user.questBoostActive = true;
-        }
+      // Log to activity ledger
+      if (typeof state !== 'undefined' && Array.isArray(state.activityLedger)) {
+        state.activityLedger.unshift({
+          id: 'pulse_' + nowMs,
+          type: 'Pulse Reward',
+          amount: usdEarned,
+          skitAmount: skitEarned,
+          description: `+${skitEarned} SKIT from Quantum Pulse Dial`,
+          timestamp: nowIso
+        });
       }
 
-      // Persist to Supabase if connected
-      if (typeof supabaseClient !== 'undefined' && supabaseClient && typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
+      // Persist to Supabase via authoritative RPC
+      if (typeof supabaseClient !== 'undefined' && supabaseClient &&
+          typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
         try {
-          const updatePayload = {
-            last_spin_at: nowIso
-          };
-          if (prize.type === 'creds' && state.user) {
-            updatePayload.available_balance = state.user.availableBalance;
-            updatePayload.lifetime_earnings = state.user.lifetimeEarnings;
-          }
-          await supabaseClient.from('profiles').update(updatePayload).eq('id', currentUser.id);
+          const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
+          await supabaseClient.rpc('claim_pulse_spin_reward', {
+            p_user_id: currentUser.id,
+            p_skit_reward: skitEarned,
+            p_client_context: ctx
+          });
         } catch (err) {
-          console.warn('[Surfkit Pulse] Failed to persist pulse to Supabase:', err);
+          console.warn('[Pulse Dial] Supabase RPC failed (balance already updated locally):', err);
+          // Fallback: direct profile update
+          try {
+            await supabaseClient.from('profiles').update({
+              last_spin_at: nowIso,
+              available_balance: (typeof state !== 'undefined' && state.user) ? state.user.availableBalance : undefined
+            }).eq('id', currentUser.id);
+          } catch (e2) {
+            console.warn('[Pulse Dial] Fallback update also failed:', e2);
+          }
         }
       }
 
-      // Re-render UI
-      if (typeof renderApp === 'function') renderApp();
-      updatePulseWidgetUI();
+      // Show result banner
+      const banner    = document.getElementById('pulse-dial-result-banner');
+      const resTitle  = document.getElementById('pulse-result-title');
+      const resMsg    = document.getElementById('pulse-result-msg');
+      if (banner && resTitle && resMsg) {
+        resTitle.textContent = `+${skitEarned} SKIT Earned!`;
+        resMsg.textContent   = `≈ $${usdEarned.toFixed(4)} USD credited to your balance.`;
+        banner.classList.remove('hidden');
+        setTimeout(() => banner.classList.add('hidden'), 6000);
+      }
 
       if (typeof showToast === 'function') {
-        if (prize.type === 'creds') {
-          showToast('⚡ 4-Hour Engagement Bonus Claimed! You received ' + prize.label + ' (+' + Math.round(prize.usd * 1000).toLocaleString() + ' SKIT).', 'success');
-        } else {
-          showToast('⚡ 4-Hour Engagement Bonus Claimed! ' + prize.label + ' activated for your next quest!', 'success');
-        }
+        showToast(`⚡ +${skitEarned} SKIT earned from Quantum Pulse Dial! (+$${usdEarned.toFixed(4)} USD)`, 'success');
       }
-    }, 2850);
+
+      if (typeof renderApp === 'function') renderApp();
+      updatePulseDialUI();
+    }, duration);
+  };
+
+  // ── Backwards-compatible alias (renderApp calls window.initPulseWidget) ──
+  window.initPulseWidget = function() {
+    initPulseDialCooldownTimer();
+    updatePulseDialUI();
   };
 
   /* --- Modular Ad Slot Engine --- */
@@ -8500,7 +8621,6 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     init: function() {
-      // Mockup ads active by default. Networks can override via fillSlot() or hide via collapseSlot()
       Object.keys(this.slots).forEach(function(slotId) {
         const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
         if (el) {
@@ -8514,7 +8634,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
       const container = document.getElementById('ad-slot-' + slotId);
       if (!el || !container) return;
-
       if (typeof renderFnOrHtml === 'string' && renderFnOrHtml.trim()) {
         container.innerHTML = renderFnOrHtml;
         el.style.display = 'block';
