@@ -1,193 +1,460 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-[#070D19]">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Surfkit Extension</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="tailwind.cdn.js"></script>
+  <title>Surfkit Extension Popup</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       width: 360px;
       margin: 0;
-      padding: 16px;
-      background-color: #070D19;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      color: #fff;
+      padding: 14px;
+      background: #070d19;
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      overflow-x: hidden;
       user-select: none;
+    }
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 12px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #00d293 0%, #06b6d4 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #070d19;
+      font-weight: 900;
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(0, 210, 147, 0.35);
+    }
+    .brand-name {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .brand-pill {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 210, 147, 0.15);
+      color: #00d293;
+      border: 1px solid rgba(0, 210, 147, 0.3);
+      letter-spacing: 0.5px;
+    }
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #00d293;
+      background: rgba(0, 210, 147, 0.1);
+      padding: 3px 8px;
+      border-radius: 9999px;
+      border: 1px solid rgba(0, 210, 147, 0.25);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00d293;
+      box-shadow: 0 0 6px #00d293;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.9); }
+    }
+
+    /* Primary Balance Card */
+    .balance-card {
+      background: linear-gradient(145deg, #0d172a 0%, #080f1d 100%);
+      border: 1px solid rgba(0, 210, 147, 0.25);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .balance-card::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 70px;
+      height: 70px;
+      background: radial-gradient(circle, rgba(0, 210, 147, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .balance-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .balance-main {
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: -0.5px;
+      margin-top: 3px;
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+    }
+    .balance-main .token-unit {
+      font-size: 14px;
+      color: #00d293;
+      font-weight: 800;
+    }
+    .balance-secondary {
+      font-size: 12px;
+      color: #94a3b8;
+      font-weight: 600;
+      margin-top: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .balance-rate-tag {
+      font-size: 9px;
+      font-family: monospace;
+      color: #64748b;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 1px 4px;
+      border-radius: 3px;
+    }
+
+    /* Grid of Two Mini Cards (Streak & Spin) */
+    .mini-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .mini-card {
+      background: #0c1424;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px;
+    }
+    .mini-card-label {
+      font-size: 10px;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+    .mini-card-val {
+      font-size: 14px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-top: 3px;
+    }
+    .mini-card-sub {
+      font-size: 10px;
+      color: #00d293;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    /* Cashout Readiness Card */
+    .cashout-card {
+      background: #0c1424;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .cashout-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .cashout-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+    }
+    .cashout-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 4px 0;
+    }
+    .cashout-row:not(:last-child) {
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+    }
+    .cashout-gw {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+    .cashout-threshold {
+      font-size: 10px;
+      font-family: monospace;
+      color: #94a3b8;
+    }
+    .cashout-status-pill {
+      font-size: 9px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 9999px;
+    }
+    .status-ready {
+      background: rgba(0, 210, 147, 0.15);
+      color: #00d293;
+      border: 1px solid rgba(0, 210, 147, 0.3);
+    }
+
+    /* Action Buttons */
+    .btn-dashboard {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 10px 14px;
+      background: linear-gradient(135deg, #00d293 0%, #00b47d 100%);
+      color: #070d19;
+      font-size: 13px;
+      font-weight: 800;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 210, 147, 0.25);
+    }
+    .btn-dashboard:hover {
+      background: linear-gradient(135deg, #00e5a1 0%, #00c78a 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(0, 210, 147, 0.35);
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 10px;
+      color: #64748b;
+      margin-top: 10px;
     }
   </style>
 </head>
-<body class="flex flex-col gap-3.5">
-
-  <!-- 1. Extension Header & Version Badge -->
-  <div class="flex items-center justify-between">
-    <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#161F36] border border-[#233152] text-xs text-slate-300">
-      <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-      </svg>
-      <span class="font-medium font-mono" id="popup-user-name">Surfkit user</span>
-    </div>
-    <div class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-medium">
-      v1.0.0 Active
-    </div>
-  </div>
-
-  <!-- 2. Surfkit Brand & Node Status Toggle -->
-  <div class="flex items-center justify-between p-4 rounded-2xl bg-[#0F172A]/90 border border-slate-800/80 shadow-md">
-    <div class="flex items-center gap-3">
-      <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-400 flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg shadow-emerald-500/20">
-        S
-      </div>
-      <div>
-        <h3 class="text-lg font-bold text-white tracking-tight">Surfkit</h3>
-        <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium" id="toggle-status-text">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Active &amp; Ready</span>
-        </div>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="brand">
+      <div class="brand-icon">S</div>
+      <div class="brand-name">
+        SURFKIT
+        <span class="brand-pill">v1.0.0</span>
       </div>
     </div>
-    <!-- Interactive Node Toggle Switch -->
-    <button id="extension-toggle-btn" type="button" aria-label="Toggle Extension" class="w-12 h-7 bg-emerald-500 rounded-full p-1 transition-colors duration-200 focus:outline-none flex items-center justify-end cursor-pointer">
-      <div class="w-5 h-5 bg-white rounded-full shadow-md transform transition-transform" id="toggle-thumb"></div>
-    </button>
-  </div>
-
-  <!-- 3. Available Balance Card -->
-  <div class="p-5 rounded-2xl bg-[#0F172A]/90 border border-slate-800/80 shadow-md">
-    <div class="text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">AVAILABLE BALANCE</div>
-    <div class="flex items-baseline gap-2 mb-3">
-      <span class="text-4xl font-extrabold text-white tracking-tight font-mono transition-colors" id="popup-balance">$67.819</span>
-      <span class="text-base font-semibold text-slate-400">USD</span>
-    </div>
-    <div class="flex items-center justify-between text-xs pt-2.5 border-t border-slate-800/80">
-      <span class="text-slate-400">Tokens Earned:</span>
-      <span class="font-mono font-bold text-emerald-400" id="popup-tokens">67819 SKIT</span>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      <span>Connected</span>
     </div>
   </div>
 
-  <!-- 4. Stats Summary: SKIT Tokens & Active Streak -->
-  <div class="grid grid-cols-2 gap-3">
-    <!-- Box 1: SKIT Tokens Balance -->
-    <div class="p-3.5 rounded-2xl bg-[#0F172A]/90 border border-slate-800/80 text-center flex flex-col items-center shadow-md">
-      <svg class="w-5 h-5 text-teal-400 mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" stroke-width="2"/>
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-3-9h6m-6 6h6" />
-      </svg>
-      <div class="text-xl font-extrabold text-white tracking-tight" id="popup-skit-tokens">67,819</div>
-      <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-1">SKIT TOKENS</div>
+  <!-- Primary Balance Card (SKIT primary, USD secondary) -->
+  <div class="balance-card">
+    <div class="balance-label">
+      <span>Available Balance</span>
+      <span class="balance-rate-tag">1 SKIT = $0.001 USD</span>
     </div>
-
-    <!-- Box 2: Active Streak -->
-    <div class="p-3.5 rounded-2xl bg-[#0F172A]/90 border border-slate-800/80 text-center flex flex-col items-center shadow-md">
-      <svg class="w-5 h-5 text-amber-400 mb-1.5" fill="currentColor" viewBox="0 0 20 20">
-        <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.17 2.115-1.576 3.497A9.452 9.452 0 008 8c-.767 0-1.488.163-2.146.463A1 1 0 005.178 9.9c.77 1.54 2.015 2.89 3.493 3.824C9.52 14.257 10.74 15 12 15c2.761 0 5-2.239 5-5 0-2.317-1.576-4.267-3.72-4.83a8.97 8.97 0 00-.885-2.617zM10 12c-1.105 0-2-.895-2-2 0-.374.1-.724.275-1.025.334.616.828 1.127 1.442 1.475.18.102.38.188.59.255A1.996 1.996 0 0110 12z" clip-rule="evenodd" />
-      </svg>
-      <div class="text-xl font-extrabold text-white tracking-tight" id="popup-streak">2 Days</div>
-      <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-1">ACTIVE STREAK</div>
+    <div class="balance-main">
+      <span id="popup-balance-skit">67,819</span>
+      <span class="token-unit">SKIT</span>
+    </div>
+    <div class="balance-secondary">
+      <span id="popup-balance-usd">≈ $67.819 USD</span>
+      <span style="color: #64748b;">•</span>
+      <span style="color: #00d293; font-weight: 700;">Ready to Cashout</span>
     </div>
   </div>
 
-  <!-- 5. Ad Frequency / Intensity Controls (Legacy - safely hidden via ENABLE_EXTERNAL_AD_INJECTION) -->
-  <div id="ext-intensity-control-container" class="p-3.5 rounded-2xl bg-[#0F172A]/90 border border-slate-800/80" style="display: none !important;">
-    <div class="flex items-center justify-between text-xs font-semibold mb-2.5">
-      <span class="text-slate-300">Ad Frequency / Intensity</span>
-      <span class="text-emerald-400 font-mono" id="intensity-label">High</span>
+  <!-- Mini Grid: Streak & 4-Hour Spin -->
+  <div class="mini-grid">
+    <div class="mini-card">
+      <div class="mini-card-label">
+        <span>🔥</span>
+        <span>Active Streak</span>
+      </div>
+      <div class="mini-card-val" id="popup-streak-val">2 Days</div>
+      <div class="mini-card-sub">+10% Yield Active</div>
     </div>
-    <div class="grid grid-cols-3 gap-2">
-      <button type="button" class="intensity-btn py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-900/60 text-slate-400 hover:text-white" data-mode="Low">Low</button>
-      <button type="button" class="intensity-btn py-1.5 rounded-xl text-xs font-bold transition-all bg-slate-900/60 text-slate-400 hover:text-white" data-mode="Balanced">Balanced</button>
-      <button type="button" class="intensity-btn active py-1.5 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25" data-mode="High">High</button>
+    <div class="mini-card">
+      <div class="mini-card-label">
+        <span>🎡</span>
+        <span>4-Hour Spin</span>
+      </div>
+      <div class="mini-card-val" id="popup-spin-status" style="color: #00d293;">Ready!</div>
+      <div class="mini-card-sub" id="popup-spin-sub">Spin on Dashboard</div>
     </div>
   </div>
 
-  <!-- 6. Pause Site Row (Legacy - safely hidden via ENABLE_EXTERNAL_AD_INJECTION) -->
-  <div id="ext-pause-site-container" class="flex items-center justify-between p-3 rounded-2xl bg-[#0F172A]/90 border border-slate-800/80" style="display: none !important;">
-    <div class="flex items-center gap-2.5 text-xs font-semibold text-slate-300">
-      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" stroke-width="2"/>
-        <line x1="2" y1="12" x2="22" y2="12" stroke-width="2"/>
-        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke-width="2"/>
-      </svg>
-      <span id="current-site-domain">surfkit.cloud</span>
+  <!-- Cashout Readiness -->
+  <div class="cashout-card">
+    <div class="cashout-header">
+      <span class="cashout-title">Cashout Readiness</span>
+      <span style="font-size: 10px; color: #00d293; font-weight: 700;">0% Fee</span>
     </div>
-    <button type="button" id="pause-site-btn" class="px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] font-mono font-bold text-slate-400 hover:text-white">Pause Site</button>
+    <div class="cashout-row">
+      <div class="cashout-gw">
+        <span>⚡</span>
+        <span>FaucetPay</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="cashout-threshold">Min 1,000 SKIT ($1)</span>
+        <span class="cashout-status-pill status-ready" id="popup-fp-status">Ready</span>
+      </div>
+    </div>
+    <div class="cashout-row">
+      <div class="cashout-gw">
+        <span>🅿️</span>
+        <span>PayPal</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 6px;">
+        <span class="cashout-threshold">Min 5,000 SKIT ($5)</span>
+        <span class="cashout-status-pill status-ready" id="popup-pp-status">Ready</span>
+      </div>
+    </div>
   </div>
 
-  <!-- 7. Action Button: Open Dashboard (links directly to https://surfkit.cloud/dashboard/) -->
-  <a id="popup-dashboard-btn" href="https://surfkit.cloud/dashboard/" target="_blank" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md cursor-pointer">
-    <svg class="w-4 h-4 text-emerald-400 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10" stroke-width="2"/>
-      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/>
+  <!-- Main Action Button -->
+  <a href="https://surfkit.cloud/dashboard/" target="_blank" rel="noopener noreferrer" class="btn-dashboard" id="btn-open-dashboard">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="3" width="7" height="7"></rect>
+      <rect x="14" y="3" width="7" height="7"></rect>
+      <rect x="14" y="14" width="7" height="7"></rect>
+      <rect x="3" y="14" width="7" height="7"></rect>
     </svg>
     <span>Open Dashboard</span>
   </a>
 
+  <div class="footer-note">
+    Syncs live with your Surfkit account
+  </div>
+
   <script>
-    // Feature flag: ad-network compliance & dashboard-only rewards model
-    const ENABLE_EXTERNAL_AD_INJECTION = false;
+    (function () {
+      'use strict';
+      function syncState() {
+        try {
+          // Check local storage or chrome.storage
+          let usdBalance = 67.819;
+          let streak = 2;
 
-    // Cross-browser runtime adapter
-    const browserAPI = typeof chrome !== 'undefined' && chrome.runtime ? chrome : (typeof browser !== 'undefined' ? browser : null);
+          const savedUsd = localStorage.getItem('surfkit_available_balance') || localStorage.getItem('surfkit_balance');
+          if (savedUsd && !isNaN(parseFloat(savedUsd))) {
+            usdBalance = parseFloat(savedUsd);
+          }
 
-    // Sync live state from extension storage or Supabase if available
-    if (browserAPI && browserAPI.storage && browserAPI.storage.local) {
-      browserAPI.storage.local.get(['balanceUsd', 'tokensEarned', 'activeStreakDays', 'authUser', 'masterEnabled'], (stored) => {
-        if (stored) {
-          if (typeof stored.balanceUsd === 'number') {
-            document.getElementById('popup-balance').textContent = '$' + stored.balanceUsd.toFixed(3);
+          const savedStreak = localStorage.getItem('surfkit_streak') || localStorage.getItem('surfkit_active_streak');
+          if (savedStreak && !isNaN(parseInt(savedStreak, 10))) {
+            streak = parseInt(savedStreak, 10);
           }
-          if (typeof stored.tokensEarned === 'number') {
-            document.getElementById('popup-tokens').textContent = stored.tokensEarned + ' SKIT';
-            document.getElementById('popup-skit-tokens').textContent = Number(stored.tokensEarned).toLocaleString();
+
+          const skitBalance = Math.round(usdBalance * 1000);
+          const skitEl = document.getElementById('popup-balance-skit');
+          const usdEl = document.getElementById('popup-balance-usd');
+          const streakEl = document.getElementById('popup-streak-val');
+
+          if (skitEl) skitEl.textContent = skitBalance.toLocaleString();
+          if (usdEl) usdEl.textContent = '≈ $' + usdBalance.toFixed(3) + ' USD';
+          if (streakEl) streakEl.textContent = streak + ' Days';
+
+          // Cashout thresholds
+          const fpReady = skitBalance >= 1000;
+          const ppReady = skitBalance >= 5000;
+          const fpEl = document.getElementById('popup-fp-status');
+          const ppEl = document.getElementById('popup-pp-status');
+          if (fpEl) {
+            fpEl.textContent = fpReady ? 'Ready' : Math.round((skitBalance / 1000) * 100) + '%';
+            fpEl.className = 'cashout-status-pill ' + (fpReady ? 'status-ready' : '');
           }
-          if (typeof stored.activeStreakDays === 'number') {
-            document.getElementById('popup-streak').textContent = stored.activeStreakDays + ' Days';
+          if (ppEl) {
+            ppEl.textContent = ppReady ? 'Ready' : Math.round((skitBalance / 5000) * 100) + '%';
+            ppEl.className = 'cashout-status-pill ' + (ppReady ? 'status-ready' : '');
           }
-          if (stored.authUser && stored.authUser.email) {
-            document.getElementById('popup-user-name').textContent = stored.authUser.email.split('@')[0];
+
+          // 4-Hour Spin check
+          const lastSpin = parseInt(localStorage.getItem('surfkit_pulse_last_spin') || '0', 10);
+          const now = Date.now();
+          const spinCooldown = 4 * 60 * 60 * 1000;
+          const spinStatusEl = document.getElementById('popup-spin-status');
+          const spinSubEl = document.getElementById('popup-spin-sub');
+
+          if (spinStatusEl) {
+            if (!lastSpin || (now - lastSpin) >= spinCooldown) {
+              spinStatusEl.textContent = 'Ready!';
+              spinStatusEl.style.color = '#00d293';
+              if (spinSubEl) spinSubEl.textContent = 'Spin on Dashboard';
+            } else {
+              const diffMs = spinCooldown - (now - lastSpin);
+              const hrs = Math.floor(diffMs / (60 * 60 * 1000));
+              const mins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
+              spinStatusEl.textContent = hrs + 'h ' + mins + 'm';
+              spinStatusEl.style.color = '#94a3b8';
+              if (spinSubEl) spinSubEl.textContent = 'Cooldown Active';
+            }
           }
+        } catch (e) {
+          console.warn('[Popup] Sync error:', e);
         }
-      });
-    }
+      }
 
-    // Toggle switch handler
-    const toggleBtn = document.getElementById('extension-toggle-btn');
-    const toggleThumb = document.getElementById('toggle-thumb');
-    const toggleStatusText = document.getElementById('toggle-status-text');
-    let isActive = true;
-
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        isActive = !isActive;
-        if (isActive) {
-          toggleBtn.className = "w-12 h-7 bg-emerald-500 rounded-full p-1 transition-colors duration-200 focus:outline-none flex items-center justify-end cursor-pointer";
-          toggleStatusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Active &amp; Ready</span>';
-          toggleStatusText.className = "flex items-center gap-1.5 text-xs text-emerald-400 font-medium";
-        } else {
-          toggleBtn.className = "w-12 h-7 bg-slate-700 rounded-full p-1 transition-colors duration-200 focus:outline-none flex items-center justify-start cursor-pointer";
-          toggleStatusText.innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>Paused</span>';
-          toggleStatusText.className = "flex items-center gap-1.5 text-xs text-slate-400 font-medium";
+      // Support Chrome extension messaging if running as extension popup
+      if (typeof chrome !== 'undefined' && chrome.tabs) {
+        const btn = document.getElementById('btn-open-dashboard');
+        if (btn) {
+          btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            chrome.tabs.create({ url: 'https://surfkit.cloud/dashboard/' });
+          });
         }
-        if (browserAPI && browserAPI.storage && browserAPI.storage.local) {
-          browserAPI.storage.local.set({ masterEnabled: isActive });
-        }
-      });
-    }
+      }
 
-    // Fallback handlers for legacy controls to avoid undefined errors
-    document.querySelectorAll('.intensity-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.intensity-btn').forEach(b => {
-          b.classList.remove('active', 'bg-emerald-500', 'text-slate-950');
-          b.classList.add('bg-slate-900/60', 'text-slate-400');
-        });
-        btn.classList.add('active', 'bg-emerald-500', 'text-slate-950');
-        document.getElementById('intensity-label').textContent = btn.getAttribute('data-mode');
-      });
-    });
+      syncState();
+    })();
   </script>
 </body>
 </html>

@@ -348,11 +348,14 @@
           <!-- Balance Badge Pill (Clickable -> Cashout) -->
           <button onclick="switchTab('cashout')" class="flex items-center gap-2 bg-surf-surface border border-surf-border hover:border-surf-teal/40 px-3 py-1.5 rounded-xl transition-all group">
             <div class="w-5 h-5 rounded-md bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs">
-              $
+              ⚡
             </div>
-            <div class="text-left">
-              <span class="block text-[10px] text-slate-400 leading-none">Balance</span>
-              <span id="nav-balance-val" class="text-xs font-bold text-white group-hover:text-surf-teal transition-colors">$0.00</span>
+            <div class="text-left flex flex-col">
+              <div class="flex items-center gap-1.5 leading-none">
+                <span class="text-[9px] text-slate-400 uppercase tracking-wider font-semibold">Balance:</span>
+                <span id="nav-balance-val" class="text-xs font-bold text-white group-hover:text-surf-teal transition-colors">0 SKIT</span>
+              </div>
+              <span id="nav-balance-usd" class="text-[10px] text-slate-400 font-mono leading-tight mt-0.5">≈ $0.00 USD</span>
             </div>
           </button>
 
@@ -425,11 +428,13 @@
             <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl p-5 relative overflow-hidden transition-all hover:border-surf-borderLight">
               <div class="flex flex-col">
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">AVAILABLE BALANCE</span>
-                <div class="text-2xl sm:text-3xl font-extrabold text-white mt-2 tracking-tight flex items-baseline gap-1">
-                  <span id="metric-available-balance">$0.00</span>
-                  <span class="text-lg text-slate-300 font-bold">USD</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white mt-2 tracking-tight flex items-baseline gap-1.5">
+                  <span id="metric-available-balance">0 SKIT</span>
                 </div>
-                <div class="flex items-center gap-1.5 mt-2.5 text-emerald-400 text-xs font-semibold">
+                <div class="text-xs text-slate-400 font-medium mt-1">
+                  <span id="metric-available-usd">≈ $0.00 USD</span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-2 text-emerald-400 text-xs font-semibold">
                   <svg class="w-4 h-4 fill-current text-emerald-400 shrink-0" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
                   </svg>
@@ -442,11 +447,13 @@
             <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl p-5 relative overflow-hidden transition-all hover:border-surf-borderLight">
               <div class="flex flex-col">
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">LIFETIME EARNINGS</span>
-                <div class="text-2xl sm:text-3xl font-extrabold text-white mt-2 tracking-tight flex items-baseline gap-1">
-                  <span id="metric-lifetime-earnings">$0.00</span>
-                  <span class="text-lg text-slate-300 font-bold">USD</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-white mt-2 tracking-tight flex items-baseline gap-1.5">
+                  <span id="metric-lifetime-earnings">0 SKIT</span>
                 </div>
-                <div class="flex items-center gap-1.5 mt-2.5 text-emerald-400 text-xs font-medium">
+                <div class="text-xs text-slate-400 font-medium mt-1">
+                  <span id="metric-lifetime-usd">≈ $0.00 USD</span>
+                </div>
+                <div class="flex items-center gap-1.5 mt-2 text-emerald-400 text-xs font-medium">
                   <span id="metric-growth-rate" class="text-emerald-400 font-semibold">↑ +0.0%</span>
                   <span id="metric-growth-label" class="text-slate-400">yield growth this week</span>
                 </div>
@@ -523,9 +530,11 @@
               </div>
               <div>
                 <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">REFERRAL CREW BONUS POOL</span>
-                <div class="text-2xl sm:text-3xl font-extrabold text-surf-cyan tracking-tight flex items-baseline gap-1">
-                  <span id="metric-referral-bonus">$0.00</span>
-                  <span class="text-lg font-bold">USD</span>
+                <div class="text-2xl sm:text-3xl font-extrabold text-surf-cyan tracking-tight flex items-baseline gap-1.5 mt-1">
+                  <span id="metric-referral-bonus">0 SKIT</span>
+                </div>
+                <div class="text-xs text-slate-400 font-medium mt-0.5">
+                  <span id="metric-referral-usd">≈ $0.00 USD</span>
                 </div>
                 <p id="metric-crew-pool-desc" class="text-xs text-slate-400 mt-0.5">0 active members in network earning you 10% passive commission</p>
               </div>
@@ -1807,7 +1816,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             <div class="bg-surf-surfaceCard border border-surf-border px-4 py-2.5 rounded-xl flex items-center gap-3">
               <span class="text-xs text-slate-400">Available to withdraw:</span>
-              <span id="cashout-banner-balance" class="text-lg font-bold text-white">$0.00 USD</span>
+              <div class="flex flex-col items-end">
+                <span id="cashout-banner-balance" class="text-lg font-bold text-white">0 SKIT</span>
+                <span id="cashout-banner-usd" class="text-xs text-slate-400 font-mono">≈ $0.00 USD</span>
+              </div>
               <span id="cashout-banner-locked" class="text-xs font-semibold text-amber-400 hidden"></span>
             </div>
           </div>
@@ -1828,7 +1840,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   ₿
                 </div>
                 <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  Min $1.00
+                  Min 1,000 SKIT (≈ $1.00 USD)
                 </span>
               </div>
               <h4 class="text-base font-bold text-white mt-4">FaucetPay <span class="text-emerald-400">(Crypto)</span></h4>
@@ -1855,7 +1867,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   P
                 </div>
                 <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
-                  Min $5.00
+                  Min 5,000 SKIT (≈ $5.00 USD)
                 </span>
               </div>
               <h4 class="text-base font-bold text-white mt-4">PayPal <span class="text-slate-400">(Standard)</span></h4>
@@ -1890,7 +1902,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <h3 class="text-lg font-bold text-white tracking-tight">Request Payout</h3>
                 <p class="text-xs text-slate-400">Selected Gateway: <span id="selected-gateway-label" class="text-emerald-400 font-semibold">FaucetPay (Crypto)</span></p>
               </div>
-              <span id="gateway-min-badge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surf-surface border border-surf-border text-slate-300">Min $1.00</span>
+              <span id="gateway-min-badge" class="text-xs font-semibold px-2 py-0.5 rounded-md bg-surf-surface border border-surf-border text-slate-300">Min 1,000 SKIT (≈ $1.00 USD)</span>
             </div>
 
             <form id="cashout-form" onsubmit="handleCashoutSubmit(event)" class="space-y-4">
@@ -1898,7 +1910,7 @@ document.addEventListener('DOMContentLoaded', () => {
               <div>
                 <div class="flex items-center justify-between mb-1.5">
                   <label class="text-xs font-semibold text-slate-300">Withdrawal Amount ($ USD)</label>
-                  <span class="text-xs text-slate-400">Available: <span id="form-available-max" class="text-surf-teal font-bold">$0.00</span></span>
+                  <span class="text-xs text-slate-400">Available: <span id="form-available-max" class="text-surf-teal font-bold">0 SKIT</span> <span id="form-available-usd" class="text-[11px] text-slate-400">(≈ $0.00 USD)</span></span>
                 </div>
                 
                 <div class="relative rounded-xl">
@@ -2623,8 +2635,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <!-- Body Container (300x250) -->
     <div class="flex-1 bg-[#080d16] relative overflow-hidden flex items-center justify-center" id="pushup-ad-body">
-      <iframe id="pushup-ad-iframe" class="w-full h-[250px] border-none bg-transparent"
-              src="https://surfkit.cloud/ad-frame"
+      <!-- Fallback native sponsor card (always visible underneath iframe so never black) -->
+      <a id="pushup-fallback-card" href="https://surfkit.cloud" target="_blank" rel="noopener noreferrer" class="absolute inset-0 p-3.5 flex flex-col justify-between bg-gradient-to-br from-[#0d1627] via-[#080f1d] to-[#0d1e38] z-0 select-none no-underline border border-surf-teal/20 rounded-b-xl group">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[9px] uppercase tracking-wider font-mono font-bold text-surf-teal bg-surf-teal/10 px-1.5 py-0.5 rounded border border-surf-teal/25" id="pushup-fallback-badge">Featured Crypto Partner</span>
+            <span class="text-[9px] text-slate-500 font-mono" id="pushup-fallback-slot">Ad 1/4</span>
+          </div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-surf-teal/20 to-cyan-500/20 border border-surf-teal/35 flex items-center justify-center text-surf-teal shrink-0 text-lg font-bold" id="pushup-fallback-icon">
+              ⚡
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white leading-tight group-hover:text-surf-teal transition-colors" id="pushup-fallback-title">Exodus Multi-Chain Web3 Wallet</h4>
+              <p class="text-[10px] text-surf-teal font-medium" id="pushup-fallback-sub">0% Custodial Risk • Solana, ETH & BTC</p>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed line-clamp-3" id="pushup-fallback-desc">
+            Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon with zero custodial risk.
+          </p>
+        </div>
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between mt-1">
+          <span class="text-[9px] text-slate-500 font-mono">Surfkit Verified Partner</span>
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surf-teal group-hover:bg-surf-tealHover text-slate-950 font-bold text-[11px] transition-all shadow-sm">
+            <span id="pushup-fallback-cta">Get Free Wallet</span>
+            <span>&rarr;</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- Iframe with relative z-10 and full fallback support -->
+      <iframe id="pushup-ad-iframe" class="w-full h-[250px] border-none bg-transparent relative z-10"
+              src="https://surfkit.cloud/ad-frame/index.html"
               title="Surfkit Sponsored Frame"
               sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
       </iframe>
@@ -6947,41 +6989,65 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof window.initPulseWidget === 'function') {
         window.initPulseWidget();
       }
+      // SKIT Primary and USD Secondary formatting helpers
+      function formatSkitPrimary(val) {
+        const n = Number(val);
+        if (isNaN(n) || n < 0) return '0 SKIT';
+        return Math.round(n * 1000).toLocaleString() + ' SKIT';
+      }
+      function formatUsdSecondary(val) {
+        const n = Number(val);
+        if (isNaN(n) || n < 0) return '≈ $0.00 USD';
+        return `≈ $${n.toFixed(2)} USD`;
+      }
+
       // Top nav values
       const navBalance = document.getElementById('nav-balance-val');
-      if (navBalance) navBalance.textContent = `$${state.user.availableBalance.toFixed(2)}`;
+      const navBalanceUsd = document.getElementById('nav-balance-usd');
+      if (navBalance) navBalance.textContent = formatSkitPrimary(state.user.availableBalance);
+      if (navBalanceUsd) navBalanceUsd.textContent = formatUsdSecondary(state.user.availableBalance);
 
       // Overview Metrics Cards
       const metricBalance = document.getElementById('metric-available-balance');
+      const metricBalanceUsd = document.getElementById('metric-available-usd');
       const metricLifetime = document.getElementById('metric-lifetime-earnings');
+      const metricLifetimeUsd = document.getElementById('metric-lifetime-usd');
       const metricImpressions = document.getElementById('metric-lifetime-impressions');
       const metricStreak = document.getElementById('metric-streak-days');
       const metricBonus = document.getElementById('metric-referral-bonus');
+      const metricBonusUsd = document.getElementById('metric-referral-usd');
       const streakEl = document.getElementById('sidebar-streak-days');
 
-      if (metricBalance) metricBalance.textContent = `$${state.user.availableBalance.toFixed(2)}`;
-      if (metricLifetime) metricLifetime.textContent = `$${state.user.lifetimeEarnings.toFixed(2)}`;
+      if (metricBalance) metricBalance.textContent = formatSkitPrimary(state.user.availableBalance);
+      if (metricBalanceUsd) metricBalanceUsd.textContent = formatUsdSecondary(state.user.availableBalance);
+      if (metricLifetime) metricLifetime.textContent = formatSkitPrimary(state.user.lifetimeEarnings);
+      if (metricLifetimeUsd) metricLifetimeUsd.textContent = formatUsdSecondary(state.user.lifetimeEarnings);
       if (metricImpressions) metricImpressions.textContent = state.user.lifetimeImpressions.toLocaleString();
       if (metricStreak) metricStreak.textContent = state.user.streakDays;
-      if (metricBonus) metricBonus.textContent = `$${state.user.referralBonus.toFixed(2)}`;
+      if (metricBonus) metricBonus.textContent = formatSkitPrimary(state.user.referralBonus);
+      if (metricBonusUsd) metricBonusUsd.textContent = formatUsdSecondary(state.user.referralBonus);
       if (streakEl) streakEl.textContent = state.user.streakDays;
 
       // Cashout form bounds & balance display (authoritative from DB)
       const cashoutBanner = document.getElementById('cashout-banner-balance');
+      const cashoutBannerUsd = document.getElementById('cashout-banner-usd');
       const cashoutBannerLocked = document.getElementById('cashout-banner-locked');
       const formAvailable = document.getElementById('form-available-max');
-      if (cashoutBanner) cashoutBanner.textContent = `$${state.user.availableBalance.toFixed(2)} USD`;
+      const formAvailableUsd = document.getElementById('form-available-usd');
+      if (cashoutBanner) cashoutBanner.textContent = formatSkitPrimary(state.user.availableBalance);
+      if (cashoutBannerUsd) cashoutBannerUsd.textContent = formatUsdSecondary(state.user.availableBalance);
       if (cashoutBannerLocked) {
         const lockedVal = Number(state.user.lockedBalance || 0);
         if (lockedVal > 0) {
-          cashoutBannerLocked.textContent = ` • $${lockedVal.toFixed(2)} pending in escrow`;
+          cashoutBannerLocked.textContent = ` • ${formatSkitPrimary(lockedVal)} (${formatUsdSecondary(lockedVal)}) pending in escrow`;
           cashoutBannerLocked.classList.remove('hidden');
         } else {
           cashoutBannerLocked.textContent = '';
           cashoutBannerLocked.classList.add('hidden');
         }
       }
-      if (formAvailable) formAvailable.textContent = `$${state.user.availableBalance.toFixed(2)}`;
+      if (formAvailable) formAvailable.textContent = formatSkitPrimary(state.user.availableBalance);
+      if (formAvailableUsd) formAvailableUsd.textContent = `(${formatUsdSecondary(state.user.availableBalance)})`;
 
       // API key
       const keyInput = document.getElementById('api-key-display');
@@ -8565,14 +8631,69 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const PUSH_FALLBACK_SPONSORS = [
+    {
+      badge: 'Featured Crypto Partner',
+      icon: '⚡',
+      title: 'Exodus Multi-Chain Web3 Wallet',
+      sub: '0% Custodial Risk • Solana, ETH & BTC',
+      desc: 'Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon.',
+      cta: 'Get Free Wallet'
+    },
+    {
+      badge: 'DeFi Staking Partner',
+      icon: '💎',
+      title: 'Bybit Web3 Staking & Yield',
+      sub: 'Up to 12.5% APY • Daily Compounding',
+      desc: 'Earn high-yield passive daily compounding on your crypto balance with zero lockups.',
+      cta: 'Stake Earnings'
+    },
+    {
+      badge: 'Cold Storage Security',
+      icon: '🛡️',
+      title: 'Ledger Nano Hardware Wallet',
+      sub: 'Military-Grade Security • Offline Keys',
+      desc: 'Isolate your digital assets from internet vulnerabilities. Recommended cold storage for earnings.',
+      cta: 'Secure Assets'
+    },
+    {
+      badge: 'Cyber Defense Partner',
+      icon: '🌐',
+      title: 'NordVPN Threat Protection',
+      sub: 'Encrypted Nodes • High-Speed Privacy',
+      desc: 'Protect your browser nodes and device activity with next-gen AES-256 encryption and malware defense.',
+      cta: 'Get Protection'
+    }
+  ];
+
   function triggerPushUpAd(adIndex = 0) {
     const widget = document.getElementById('surfkit-pushup-ad-widget');
     if (!widget) return;
 
+    // Rotate fallback sponsor
+    try {
+      const sp = PUSH_FALLBACK_SPONSORS[adIndex % PUSH_FALLBACK_SPONSORS.length] || PUSH_FALLBACK_SPONSORS[0];
+      const bBadge = document.getElementById('pushup-fallback-badge');
+      const bSlot = document.getElementById('pushup-fallback-slot');
+      const bIcon = document.getElementById('pushup-fallback-icon');
+      const bTitle = document.getElementById('pushup-fallback-title');
+      const bSub = document.getElementById('pushup-fallback-sub');
+      const bDesc = document.getElementById('pushup-fallback-desc');
+      const bCta = document.getElementById('pushup-fallback-cta');
+
+      if (bBadge) bBadge.textContent = sp.badge;
+      if (bSlot) bSlot.textContent = `Ad ${(adIndex % 4) + 1}/4`;
+      if (bIcon) bIcon.textContent = sp.icon;
+      if (bTitle) bTitle.textContent = sp.title;
+      if (bSub) bSub.textContent = sp.sub;
+      if (bDesc) bDesc.textContent = sp.desc;
+      if (bCta) bCta.textContent = sp.cta;
+    } catch (e) {}
+
     // Refresh iframe with cache-buster for rotation
     const iframe = document.getElementById('pushup-ad-iframe');
     if (iframe) {
-      iframe.src = 'https://surfkit.cloud/ad-frame?slot=' + (adIndex + 1) + '&t=' + Date.now();
+      iframe.src = 'https://surfkit.cloud/ad-frame/index.html?slot=' + (adIndex + 1) + '&t=' + Date.now();
     }
 
     // Display widget with slide-up animation

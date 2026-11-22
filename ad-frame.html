@@ -22,48 +22,227 @@
       justify-content: center;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    #frame {
+    #frame-container {
       position: relative;
       width: 300px;
       height: 250px;
       margin: auto;
-      z-index: 99998;
+      overflow: hidden;
+      border-radius: 8px;
+      background: #0c121e;
+    }
+    #fallback-card {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: linear-gradient(135deg, #0d1627 0%, #080f1d 50%, #0d1e38 100%);
+      border: 1px solid rgba(0, 210, 147, 0.25);
+      border-radius: 8px;
+      color: #e2e8f0;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+    #fallback-card:hover {
+      border-color: rgba(0, 210, 147, 0.5);
+    }
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      font-family: monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 210, 147, 0.15);
+      color: #00d293;
+      border: 1px solid rgba(0, 210, 147, 0.3);
+      letter-spacing: 0.5px;
+    }
+    .partner-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .partner-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(0, 210, 147, 0.2) 0%, rgba(6, 182, 212, 0.2) 100%);
+      border: 1px solid rgba(0, 210, 147, 0.35);
       display: flex;
       align-items: center;
       justify-content: center;
-      transform-origin: center center;
-      overflow: hidden;
-      border-radius: 6px;
-      background: #0c121e;
+      font-size: 18px;
+      font-weight: 800;
+      color: #00d293;
+      flex-shrink: 0;
     }
-    iframe[data-aa='2462456'], #frame iframe {
-      border: 0;
-      padding: 0;
+    .partner-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+    .partner-sub {
+      font-size: 10px;
+      color: #00d293;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+    .partner-desc {
+      font-size: 11px;
+      line-height: 1.45;
+      color: #94a3b8;
+      margin-top: 8px;
+    }
+    .footer-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 10px;
+      margin-top: 6px;
+    }
+    .footer-tag {
+      font-size: 9px;
+      font-family: monospace;
+      color: #64748b;
+    }
+    .cta-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: #00d293;
+      color: #050b14;
+      font-size: 11px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .cta-btn:hover {
+      background: #00f0aa;
+      transform: translateY(-1px);
+    }
+    #ad-iframe {
+      position: absolute;
+      inset: 0;
       width: 300px;
       height: 250px;
+      border: 0;
+      padding: 0;
       overflow: hidden;
-      background-color: transparent;
-      display: block;
-      margin: auto;
+      background: transparent;
       z-index: 2;
     }
   </style>
 </head>
 <body>
-  <!-- BEGIN AADS AD UNIT 2462456 -->
-  <div id="frame" style="width: 300px;margin: auto;z-index: 99998;height: auto">
-    <iframe data-aa='2462456' src='//ad.a-ads.com/2462456/?size=300x250'
-            style='border:0; padding:0; width:300px; height:250px; overflow:hidden;display: block;margin: auto'
+  <div id="frame-container">
+    <!-- NATIVE SPONSOR FALLBACK CARD (Underneath iframe; visible if ad blocker blocks or iframe is transparent) -->
+    <a id="fallback-card" href="https://surfkit.cloud" target="_blank" rel="noopener noreferrer">
+      <div>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="badge" id="fb-badge">Featured Web3 Partner</span>
+          <span style="font-size: 9px; color: #64748b; font-family: monospace;">Sponsored 300x250</span>
+        </div>
+        <div class="partner-row">
+          <div class="partner-icon" id="fb-icon">⚡</div>
+          <div>
+            <div class="partner-title" id="fb-title">Exodus Multi-Chain Web3 Wallet</div>
+            <div class="partner-sub" id="fb-sub">0% Custodial Risk • Solana, ETH & BTC</div>
+          </div>
+        </div>
+        <div class="partner-desc" id="fb-desc">
+          Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon with instant settlement.
+        </div>
+      </div>
+      <div class="footer-row">
+        <span class="footer-tag">Surfkit Verified Partner</span>
+        <span class="cta-btn" id="fb-cta">
+          <span>Get Free Wallet</span>
+          <span>&rarr;</span>
+        </span>
+      </div>
+    </a>
+
+    <!-- EXTERNAL A-ADS IFRAME -->
+    <iframe id="ad-iframe"
+            data-aa='2462456'
+            src='//ad.a-ads.com/2462456/?size=300x250'
             allowtransparency='true'
-            sandbox='allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox'></iframe>
+            sandbox='allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox'>
+    </iframe>
   </div>
-  <!-- END AADS AD UNIT 2462456 -->
 
   <script>
     (function () {
       'use strict';
+      // Rotating sponsor inventory matching slots
+      var SPONSORS = [
+        {
+          badge: 'Featured Crypto Partner',
+          icon: '⚡',
+          title: 'Exodus Multi-Chain Web3 Wallet',
+          sub: '0% Custodial Risk • Multi-Chain',
+          desc: 'Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon.',
+          cta: 'Get Free Wallet',
+          url: 'https://surfkit.cloud'
+        },
+        {
+          badge: 'DeFi Staking Partner',
+          icon: '💎',
+          title: 'Bybit Web3 Staking & Yield',
+          sub: 'Up to 12.5% APY • Daily Compounding',
+          desc: 'Earn high-yield passive daily compounding on your crypto balance with zero lockup periods.',
+          cta: 'Stake Earnings',
+          url: 'https://surfkit.cloud'
+        },
+        {
+          badge: 'Cold Storage Security',
+          icon: '🛡️',
+          title: 'Ledger Nano Hardware Wallet',
+          sub: 'Military-Grade Security • Offline Keys',
+          desc: 'Isolate your digital assets from internet vulnerabilities. Recommended cold storage for earnings.',
+          cta: 'Secure Assets',
+          url: 'https://surfkit.cloud'
+        },
+        {
+          badge: 'Cyber Defense Partner',
+          icon: '🌐',
+          title: 'NordVPN Threat Protection',
+          sub: 'Encrypted Nodes • High-Speed Privacy',
+          desc: 'Protect your browser nodes and device activity with next-gen AES-256 encryption and malware defense.',
+          cta: 'Get Protection',
+          url: 'https://surfkit.cloud'
+        }
+      ];
+
+      // Parse slot from query string if available
+      try {
+        var params = new URLSearchParams(window.location.search);
+        var slotParam = parseInt(params.get('slot') || '1', 10);
+        var idx = Math.abs((slotParam - 1) % SPONSORS.length);
+        var sp = SPONSORS[idx] || SPONSORS[0];
+
+        document.getElementById('fb-badge').textContent = sp.badge;
+        document.getElementById('fb-icon').textContent = sp.icon;
+        document.getElementById('fb-title').textContent = sp.title;
+        document.getElementById('fb-sub').textContent = sp.sub;
+        document.getElementById('fb-desc').textContent = sp.desc;
+        document.getElementById('fb-cta').children[0].textContent = sp.cta;
+        document.getElementById('fallback-card').href = sp.url;
+      } catch (e) {}
+
+      // Handle responsive scaling
       function handleResize() {
-        var wrapper = document.getElementById('frame');
+        var wrapper = document.getElementById('frame-container');
         if (!wrapper) return;
         var w = window.innerWidth;
         var h = window.innerHeight;
@@ -71,6 +250,7 @@
         var scale = Math.min(w / 300, h / 250);
         if (scale < 1.0) {
           wrapper.style.transform = 'scale(' + scale.toFixed(4) + ')';
+          wrapper.style.transformOrigin = 'center center';
         } else {
           wrapper.style.transform = 'scale(1)';
         }
