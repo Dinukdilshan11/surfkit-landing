@@ -11,7 +11,7 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Surfkit — Turn Your Daily Browsing into Real Rewards</title>
-  <meta name="description" content="Monetize your screen time with micro-tasks, surveys, and mini-games while keeping full control of your privacy. Join the Surfkit Early Access Public Beta.">
+  <meta name="description" content="Earn <strong>SKIT</strong> rewards through daily platform engagement — Surveys, Arcade Mini-Games, 4-Hour Spins, Daily Streaks, and Referral Crew — with zero data selling and zero ads watching required. Join the Surfkit Early Access Public Beta.">
 
   <!-- Fonts: Plus Jakarta Sans & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -577,16 +577,24 @@
           <!-- Dual Action Buttons -->
           <div class="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-8">
             <!-- Primary CTA -->
-            <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
+            <!-- Primary CTA: Open Dashboard -->
+            <a href="https://surfkit.cloud/dashboard/" target="_blank" rel="noopener noreferrer"
                class="btn-glow w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-base font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:opacity-95 shadow-lg group">
-              <svg class="w-5 h-5 fill-slate-950 transition-transform group-hover:rotate-45" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 fill-slate-950" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span>Open Dashboard</span>
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+              </svg>
+            </a>
+
+            <!-- Secondary CTA: Install Extension -->
+            <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-base font-semibold text-emerald-400 bg-white/[0.04] border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200 group">
+              <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                 <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29L1.931 5.47zm13.473 4.298a5.452 5.452 0 0 1 1.414 7.687l-3.953 6.847C12.569 24.195 12.287 24 12 24c6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.822-4.364H15.404z"/>
                 <circle cx="12" cy="12" r="3.273"/>
               </svg>
               <span>Add to Chrome — It's Free</span>
-              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-              </svg>
             </a>
 
             <!-- Live User Count Badge (Supabase Dynamic) -->
@@ -612,7 +620,7 @@
             </div>
             <div class="flex items-center gap-1.5 p-2 rounded-lg bg-white/[0.02] border border-white/5">
               <span class="text-emerald-400">✓</span>
-              <span>PayPal &bull; Bank</span>
+              <span>FaucetPay &amp; PayPal</span>
             </div>
           </div>
 
@@ -642,7 +650,7 @@
               </div>
               <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
                 <span class="w-3.5 h-3.5 rounded bg-emerald-400 text-slate-950 flex items-center justify-center text-[10px] font-black">S</span>
-                <span id="pin-badge">$8.17</span>
+                <span id="pin-badge">8,170 SKIT</span>
               </div>
             </div>
 
@@ -749,7 +757,7 @@
                   <div class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xs">★</div>
                   <div>
                     <div class="text-[11px] font-bold text-white">Rate Surfkit Extension</div>
-                    <div class="text-[9px] text-slate-400 font-mono" id="popup-rating-sync-status">Supabase Direct Sync</div>
+                    <div class="text-[9px] text-slate-400 font-mono" id="popup-rating-sync-status">Live Cloud Sync</div>
                   </div>
                 </div>
                 <button type="button" class="open-rating-modal-btn px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold transition-all cursor-pointer">
@@ -757,7 +765,7 @@
                 </button>
               </div>
 
-              <!-- 7. Dashboard Button (links directly to hub.html) -->
+              <!-- 7. Dashboard Button (links to dashboard or login based on auth) -->
               <a id="mobile-auth-btn" href="https://surfkit.cloud/dashboard/" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
                 <svg class="w-4 h-4 text-emerald-400 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke-width="2"/>
@@ -853,16 +861,16 @@
                   <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/>
                   </svg>
-                  Dual-Stream Flow
+                  Multi-Activity Rewards
                 </span>
               </div>
 
               <!-- Main Section Title & Abstract Intro -->
               <h3 class="text-xl font-black text-white group-hover:text-emerald-300 transition-colors">
-                Fair Revenue Split
+                SKIT Activity Rewards
               </h3>
               <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                A self-balancing liquidity model prioritizing user sovereignty through transparent dual-stream allocation.
+                100% of your completed Surveys, Mini-Game sessions, Spins, Streaks, and Referral bonuses are credited directly to your SKIT balance — no hidden deductions.
               </p>
 
               <!-- ABSTRACT GRAPHIC: Balanced Emerald Energy Vortex Split into 2 Streams with Central Pulse -->
@@ -915,11 +923,11 @@
               <div class="pt-2 grid grid-cols-2 gap-2 text-[11px] font-mono">
                 <div class="bg-emerald-950/40 border border-emerald-500/20 rounded-lg p-2 text-center flex items-center justify-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]"></span>
-                  <span class="text-emerald-300 font-bold text-xs">Primary User (70%)</span>
+                  <span class="text-emerald-300 font-bold text-xs">SKIT Earned (100% Yours)</span>
                 </div>
                 <div class="bg-slate-900/60 border border-white/5 rounded-lg p-2 text-center flex items-center justify-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#06B6D4]"></span>
-                  <span class="text-slate-300 font-bold text-xs">Operations (30%)</span>
+                  <span class="text-slate-300 font-bold text-xs">Instant Cloud Ledger</span>
                 </div>
               </div>
             </div>
@@ -1038,7 +1046,7 @@
                 Desktop Chrome Extension
               </h3>
               <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-                Native Manifest V3 browser client powering background ad impression rewards and sandboxed CPX Research tasks without background tab bloat.
+                Native Manifest V3 browser client powering sandboxed Earn Hub tasks (CPX Research &amp; BitLabs surveys), Arcade Arena mini-games, and 4-Hour Spin rewards — without background tab bloat.
               </p>
 
               <!-- ABSTRACT GRAPHIC: Live Active Pipelines (No mock-up tasks) -->
@@ -1057,7 +1065,7 @@
                     </linearGradient>
                   </defs>
 
-                  <!-- Fiber 1: Core to Background Ads Node -->
+                  <!-- Fiber 1: Core to Earn Hub Surveys Node -->
                   <path d="M 60 70 C 100 70, 110 30, 170 30" stroke="url(#fiberGradActive)" stroke-width="2" class="animate-fiber-active" stroke-linecap="round"/>
 
                   <!-- Fiber 2: Core to CPX Research Node -->
@@ -1073,10 +1081,10 @@
                 </svg>
 
                 <!-- Live Nodes Labeled (Real Active Features Only) -->
-                <!-- Node 1: Background Ads -->
+                <!-- Node 1: Earn Hub Surveys -->
                 <div class="absolute right-3 top-2 flex items-center gap-2 px-2.5 py-1 rounded-lg bg-emerald-950/70 border border-emerald-400/50 animate-holo-bright shadow-[0_0_15px_rgba(16,185,129,0.5)]">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#10B981]"></span>
-                  <span class="text-[11px] font-mono font-bold text-white tracking-wide">Background Ads</span>
+                  <span class="text-[11px] font-mono font-bold text-white tracking-wide">Earn Hub Surveys</span>
                 </div>
 
                 <!-- Node 2: CPX Research -->
@@ -1222,7 +1230,7 @@
           User Experience <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Path</span>
         </h2>
         <p class="mt-4 text-base sm:text-lg text-slate-400 font-normal leading-relaxed">
-          From natural background web surfing to verified multi-channel cashouts — complete transparency at every touchpoint.
+          From daily platform engagement — Surveys, Mini-Games, 4-Hour Spins, and Streaks — to verified FaucetPay &amp; PayPal cashouts. Complete transparency at every touchpoint.
         </p>
       </div>
 
@@ -1244,16 +1252,16 @@
                 <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 uppercase mb-1">
                   Starting Point
                 </div>
-                <h3 class="text-xl font-bold text-white">Your Normal Browsing Habit</h3>
+                <h3 class="text-xl font-bold text-white">Your Daily Platform Activity</h3>
                 <p class="text-xs text-slate-400 mt-1 max-w-md">
-                  Watch videos, read articles, conduct research, or work on web apps. Surfkit operates silently in the background without modifying your workflows.
+                  Complete surveys, play Arcade Mini-Games, spin the 4-Hour Pulse dial, maintain Daily Streaks, and grow your Referral Crew — Surfkit credits SKIT rewards directly to your balance.
                 </p>
               </div>
             </div>
 
             <!-- Flow Arrow Connector -->
             <div class="hidden md:flex flex-col items-center justify-center px-4">
-              <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-wider mb-1">AUTO STREAM</span>
+              <span class="text-[10px] font-mono text-emerald-400 uppercase tracking-wider mb-1">EARN STREAM</span>
               <div class="w-20 h-0.5 bg-gradient-to-r from-emerald-500/50 via-teal-400 to-cyan-500/50 relative">
                 <div class="w-2 h-2 rounded-full bg-emerald-400 absolute -top-[3px] animate-ping"></div>
               </div>
@@ -1296,12 +1304,12 @@
       <!-- WORKFLOW STAGE 2: 3 Interactive Operational Branch Cards -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
 
-        <!-- BRANCH CARD 1: Hands-Free Background Surfing -->
+        <!-- BRANCH CARD 1: Dashboard Earn Activities -->
         <div class="glass-card rounded-2xl p-7 border border-white/10 hover:border-emerald-500/40 transition-all duration-300 flex flex-col justify-between group">
           <div>
             <div class="flex items-center justify-between mb-4">
               <span class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                PASSIVE REVENUE
+                ACTIVE REWARDS
               </span>
               <span class="text-xs font-mono text-emerald-400 flex items-center gap-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> Active
@@ -1309,10 +1317,10 @@
             </div>
 
             <h3 class="text-xl font-black text-white group-hover:text-emerald-300 transition-colors">
-              Hands-Free Background Surfing
+              Dashboard Earn Activities
             </h3>
             <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-              Subtly swaps standard web ad spaces for verified high-yield sponsor banners as you browse. No clicks, no popups, zero workflow interruption.
+              Complete real Surveys &amp; Offers via CPX Research and BitLabs, play Arcade Arena HTML5 mini-games, and spin the 4-Hour Pulse dial for recurring bonus credits. No background ad injection.
             </p>
 
             <!-- Visual Mockup: Browser Ad Replacement -->
@@ -1331,9 +1339,9 @@
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                     <polyline points="9 12 11 14 15 10"/>
                   </svg>
-                  <span class="text-[10px] text-emerald-300 font-bold">Clean Sponsor Replacement</span>
+                  <span class="text-[10px] text-emerald-300 font-bold">Survey / Task Completed</span>
                 </div>
-                <span class="text-[10px] text-emerald-400 font-mono font-bold">Credited</span>
+                <span class="text-[10px] text-emerald-400 font-mono font-bold">SKIT Credited</span>
               </div>
               <div class="h-10 bg-slate-800/40 rounded mt-2"></div>
             </div>
@@ -1357,7 +1365,7 @@
 
           <div class="mt-6 pt-4 border-t border-white/10">
             <span class="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-              <i class="ri-checkbox-circle-fill"></i> Continuous Passive Stream
+              <i class="ri-checkbox-circle-fill"></i> Instant SKIT Credit on Completion
             </span>
           </div>
         </div>
@@ -1444,7 +1452,7 @@
               Verified Cashout Rails
             </h3>
             <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-              Direct, reliable cash transfers straight to your PayPal account or personal bank account via secure wire transfer. Zero conversion cuts.
+              Withdraw SKIT rewards via <strong class="text-emerald-400">FaucetPay</strong> (Instant, min 1,000 SKIT / $1.00) or <strong class="text-blue-400">PayPal</strong> (24–48h, min 5,000 SKIT / $5.00). No hidden fees, no conversion cuts.
             </p>
 
             <!-- Visual Mockup: Dual Payment Gateway Cards (Qualitative) -->
@@ -1468,12 +1476,12 @@
                 <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold shadow-[0_0_10px_rgba(16,185,129,0.25)]">
                     <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2l10 5H2l10-5z"/>
+                      <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
                     </svg>
                   </div>
                   <div>
-                    <div class="text-white font-bold text-[11px]">Bank Wire Transfer</div>
-                    <div class="text-[9px] text-slate-400">Direct Account ACH / SEPA Delivery</div>
+                    <div class="text-white font-bold text-[11px]">FaucetPay Crypto Wallet</div>
+                    <div class="text-[9px] text-slate-400">Instant · Min 1,000 SKIT ($1.00) · 0% fee</div>
                   </div>
                 </div>
                 <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded">Active</span>
@@ -1529,7 +1537,7 @@
           Start in 3 Simple <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Steps</span>
         </h2>
         <p class="mt-4 text-base sm:text-lg text-slate-400 font-normal leading-relaxed">
-          No credit card, no complex verification, no KYC required to begin earning your fair share of web ad revenue.
+          No credit card required. Install the extension, complete daily activities on your Dashboard, and cash out via FaucetPay or PayPal.
         </p>
       </div>
 
@@ -1553,7 +1561,7 @@
               Install Extension
             </h3>
             <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-              Add the official Surfkit extension to Chrome with a single click. Ready instantly inside your secure browser sandbox.
+              Create your account and add the official Surfkit extension to Chrome. <strong class="text-emerald-400">Extension installation &amp; connection is required</strong> to sync progress, maintain streak sessions, and unlock all dashboard rewards.
             </p>
 
             <!-- ABSTRACT VISUAL: Glowing Download Progress Ring + Prominent Clickable Button -->
@@ -1634,10 +1642,10 @@
             </div>
 
             <h3 class="text-2xl font-black text-white group-hover:text-emerald-300 transition-colors">
-              Browse Normally
+              Play, Spin &amp; Complete Tasks
             </h3>
             <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-              Watch videos, research articles, work, or shop. Surfkit operates silently in the background, channeling value directly into your balance.
+              Earn SKIT via real Surveys &amp; Offers (Earn Hub), Arcade Arena Mini-Games, the recurring 4-Hour Pulse Spin, and Daily Streaks — all inside your Dashboard.
             </p>
 
             <!-- ABSTRACT VISUAL: Fluid Horizontal Flow from Active Habit Node to Surfkit Node (No performance numbers) -->
@@ -1660,7 +1668,7 @@
                       <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" fill-opacity="0.3"/>
                     </svg>
                   </div>
-                  <span class="text-[9px] font-mono text-slate-400 mt-1.5">User Habit</span>
+                  <span class="text-[9px] font-mono text-slate-400 mt-1.5">Dashboard</span>
                 </div>
 
                 <!-- Center: Flowing Energy Track with Traveling Emerald Packets -->
@@ -1693,18 +1701,18 @@
             <div class="space-y-2 text-xs font-mono text-slate-300 border-t border-white/5 pt-4">
               <div class="flex items-center gap-2">
                 <i class="ri-check-line text-emerald-400"></i>
-                <span>Zero Audio or Intrusive Overlays</span>
+                <span>Surveys, Mini-Games, 4-Hour Spin &amp; Streaks</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="ri-check-line text-emerald-400"></i>
-                <span>Runs Smoothly Alongside All Normal Workflows</span>
+                <span>All Activities Inside Your Dashboard</span>
               </div>
             </div>
           </div>
 
           <div class="mt-6 pt-4 border-t border-white/10">
             <span class="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-              <i class="ri-battery-charge-line"></i> Ultra-Low Battery Consumption
+              <i class="ri-trophy-line"></i> Instant SKIT Credit Per Task
             </span>
           </div>
         </div>
@@ -1723,10 +1731,10 @@
             </div>
 
             <h3 class="text-2xl font-black text-white group-hover:text-emerald-300 transition-colors">
-              Cash Out in USD
+              Cash Out via FaucetPay &amp; PayPal
             </h3>
             <p class="text-xs text-slate-400 mt-2 leading-relaxed">
-              Once rewards accumulate, withdraw directly to PayPal or your local bank account via secure wire transfer. No point tokens.
+              Once your SKIT balance reaches the minimum threshold, withdraw via <strong class="text-emerald-400">FaucetPay</strong> (min $1.00) or <strong class="text-blue-400">PayPal</strong> (min $5.00). No complex setup required.
             </p>
 
             <!-- ABSTRACT VISUAL: Stylized Animated Piggy Bank Forming from Data + Withdrawals Ready State -->
@@ -1769,7 +1777,7 @@
                 </div>
               </div>
 
-              <!-- Output Circuit Lines to Dual Payment Logos (PayPal & Bank Wire) -->
+              <!-- Output Circuit Lines to Dual Payment Logos (PayPal & FaucetPay) -->
               <div class="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/5 font-mono text-[11px]">
                 <div class="p-2 rounded-lg bg-[#091122] border border-blue-500/30 flex items-center justify-center gap-1.5 text-blue-400 font-bold">
                   <svg class="w-3.5 h-3.5 text-blue-400 fill-current" viewBox="0 0 24 24">
@@ -1779,9 +1787,9 @@
                 </div>
                 <div class="p-2 rounded-lg bg-[#091122] border border-emerald-500/30 flex items-center justify-center gap-1.5 text-emerald-400 font-bold">
                   <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2l10 5H2l10-5z"/>
+                    <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
                   </svg>
-                  Bank Wire
+                  FaucetPay
                 </div>
               </div>
             </div>
@@ -1790,18 +1798,18 @@
             <div class="space-y-2 text-xs font-mono text-slate-300 border-t border-white/5 pt-4">
               <div class="flex items-center gap-2">
                 <i class="ri-check-line text-emerald-400"></i>
-                <span>Direct Digital Wallet &amp; Bank Delivery</span>
+                <span>FaucetPay Instant + PayPal 24–48h</span>
               </div>
               <div class="flex items-center gap-2">
                 <i class="ri-check-line text-emerald-400"></i>
-                <span>Zero Conversion Cuts or Complex Lockups</span>
+                <span>Min 1,000 SKIT ($1.00) FaucetPay / 5,000 SKIT ($5.00) PayPal</span>
               </div>
             </div>
           </div>
 
           <div class="mt-6 pt-4 border-t border-white/10">
             <span class="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
-              <i class="ri-secure-payment-line"></i> Direct Fiat Payouts
+              <i class="ri-secure-payment-line"></i> FaucetPay &amp; PayPal Payouts
             </span>
           </div>
         </div>
@@ -1892,7 +1900,7 @@
           Frequently Asked Questions
         </h2>
         <p class="text-slate-400 mt-2 text-sm sm:text-base">
-          Transparent details about how Surfkit monetizes screen time and pays out verified USD cash.
+          Transparent details about how Surfkit credits SKIT rewards and pays out via FaucetPay &amp; PayPal.
         </p>
       </div>
 
@@ -1917,7 +1925,7 @@
             <svg class="faq-icon w-5 h-5 text-slate-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <div class="faq-content hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
-            You earn through two primary avenues: (1) Background ad surfing that unobtrusively matches sponsor slots while you browse normally, and (2) Optional offerwall tasks, surveys, and mini-games currently live via CPX Research (with BitLabs and Lootably slated to connect soon). Rewards scale dynamically depending on your country tier and advertiser bid density, and you always receive a transparent 70% share of verified partner revenue.
+            You earn SKIT rewards through daily platform engagement: (1) <strong>Earn Hub</strong> — real Surveys &amp; Offers via CPX Research and BitLabs; (2) <strong>Arcade Arena</strong> — HTML5 mini-games with session boosts; (3) <strong>Surfkit Pulse</strong> — the recurring 4-Hour Spin for bonus credits; (4) <strong>Daily Streaks &amp; Leaderboard</strong> — consecutive activity multipliers; (5) <strong>Referral Crew</strong> — flat 10% lifetime commission on crew activity. Rewards are variable and depend on your engagement, regional task availability, and active offers.
           </div>
         </div>
 
@@ -1928,7 +1936,7 @@
             <svg class="faq-icon w-5 h-5 text-slate-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <div class="faq-content hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
-            Your live dashboard shows Estimated Earnings based on average global ad rates (eCPM) for your region and ad type. Because ad networks finalize and pay out actual campaign revenue on a monthly cycle (Net-30), your balance is automatically synced with the exact final amount once received—adjusting slightly up or down if needed to ensure 100% accuracy and your fair 70% revenue share.
+            Your SKIT balance is credited in real-time as you complete surveys, games, spins, and referral activities. Balances are synced with the cloud ledger after each session. Final payout amounts may vary slightly based on survey completion rates and regional task availability.
           </div>
         </div>
 
@@ -1950,7 +1958,7 @@
             <svg class="faq-icon w-5 h-5 text-slate-400 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
           <div class="faq-content hidden px-6 pb-5 text-sm text-slate-400 leading-relaxed border-t border-white/5 pt-3">
-            All payouts are processed in genuine USD cash (zero crypto volatility). You can withdraw via PayPal or Direct Bank Transfer (ACH / SEPA / SWIFT) starting at a uniform minimum threshold of $5.00 USD.
+            Withdraw your SKIT rewards via two verified payment gateways: <strong class="text-emerald-400">FaucetPay</strong> (Instant, 0% fee, minimum 1,000 SKIT ≈ $1.00) or <strong class="text-blue-400">PayPal</strong> (24–48h processing, minimum 5,000 SKIT ≈ $5.00). 1 SKIT = $0.001 USD.
           </div>
         </div>
 
@@ -1987,18 +1995,22 @@
           Start Monetizing Your Daily Browsing
         </h2>
         <p class="text-slate-300 max-w-xl mx-auto text-base sm:text-lg mb-8">
-          Join our Early Access community and turn ordinary web scrolling and micro-tasks into verified USD cash deposited straight to PayPal or your bank.
+          Join our Early Access community and earn <strong>SKIT</strong> rewards through Surveys, Arcade Games, 4-Hour Spins, Streaks, and Referral Crew — then cash out instantly via FaucetPay or PayPal.
         </p>
 
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
+          <a href="https://surfkit.cloud/dashboard/" target="_blank" rel="noopener noreferrer"
              class="btn-glow inline-flex items-center gap-2.5 px-8 py-4 rounded-xl text-base font-bold text-slate-950 bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 shadow-xl">
-            <!-- Chrome SVG -->
-            <svg class="w-5 h-5 fill-slate-950" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 fill-slate-950" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Open Dashboard</span>
+          </a>
+          <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer"
+             class="inline-flex items-center gap-2.5 px-6 py-4 rounded-xl text-base font-semibold text-emerald-400 bg-white/[0.04] border border-white/10 hover:border-emerald-500/40 hover:text-white transition-all">
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
               <path d="M12 0C8.21 0 4.831 1.757 2.632 4.501l3.953 6.848A5.454 5.454 0 0 1 12 6.545h10.691A12 12 0 0 0 12 0zM1.931 5.47A11.943 11.943 0 0 0 0 12c0 6.012 4.42 10.991 10.189 11.864l3.953-6.847a5.45 5.45 0 0 1-6.865-2.29L1.931 5.47zm13.473 4.298a5.452 5.452 0 0 1 1.414 7.687l-3.953 6.847C12.569 24.195 12.287 24 12 24c6.627 0 12-5.373 12-12 0-1.54-.29-3.011-.822-4.364H15.404z"/>
               <circle cx="12" cy="12" r="3.273"/>
             </svg>
-            <span>Add to Chrome — It's Free</span>
+            <span>Install Extension — Free</span>
           </a>
         </div>
         <div class="text-xs text-slate-400 mt-4">Compatible with Chrome, Brave, Edge &amp; Opera &bull; No Credit Card Required</div>
@@ -2181,7 +2193,7 @@
             <h3 class="text-base font-bold text-white tracking-tight">Rate Surfkit Platform</h3>
             <div class="text-[11px] font-mono text-emerald-400 flex items-center gap-1.5">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>Supabase Direct Sync Engine</span>
+              <span>Live Cloud Sync Engine</span>
             </div>
           </div>
         </div>
@@ -2224,7 +2236,7 @@
           <label for="rating-feedback-text" class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2 font-mono">
             Optional Feedback / Experience Note:
           </label>
-          <textarea id="rating-feedback-text" rows="3" placeholder="Share your experience with background ad-surfing, task speeds, or payout transparency..."
+          <textarea id="rating-feedback-text" rows="3" placeholder="Share your experience with Surfkit (surveys, games, spin, referralsurfing, task speeds, or payout transparency..."
              class="w-full px-3.5 py-2.5 rounded-xl bg-white/[0.04] border border-white/10 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-emerald-500 transition-colors resize-none"></textarea>
         </div>
 
@@ -2243,7 +2255,7 @@
             Cancel
           </button>
           <button type="submit" id="submit-rating-btn" class="btn-glow inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:opacity-95 transition-all shadow-md">
-            <span>Submit to Supabase</span>
+            <span>Submit Rating</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </button>
         </div>
@@ -2670,10 +2682,10 @@
     function applySignedIn() {
       var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
       var mBtn = getMobileBtn(),   mTxt = getMobileText();
-      if (btn)  btn.href  = '/dashboard';
-      if (icon) icon.className = 'ri-dashboard-3-line text-base';
+      if (btn)  btn.href  = '/dashboard/';
+      if (icon) icon.className = 'ri-dashboard-3-line text-base text-emerald-400';
       if (text) text.textContent = 'Dashboard';
-      if (mBtn) mBtn.href = '/dashboard';
+      if (mBtn) mBtn.href = '/dashboard/';
       if (mTxt) mTxt.textContent = 'Dashboard';
     }
 
@@ -2681,7 +2693,7 @@
       var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
       var mBtn = getMobileBtn(),   mTxt = getMobileText();
       if (btn)  btn.href  = '/login';
-      if (icon) icon.className = 'ri-login-box-line text-base';
+      if (icon) icon.className = 'ri-login-box-line text-base text-emerald-400';
       if (text) text.textContent = 'Sign In';
       if (mBtn) mBtn.href = '/login';
       if (mTxt) mTxt.textContent = 'Sign In';
