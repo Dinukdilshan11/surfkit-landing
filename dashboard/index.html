@@ -7245,10 +7245,23 @@ document.addEventListener('DOMContentLoaded', () => {
       // 2. Synchronize balance metrics: prioritize higher value.
       // Chart data (state.chartData7d) is sourced exclusively from daily_stats in Supabase —
       // never overwrite it with fake weight-distributed extension balance totals.
-      if (extBalance > 0) {
+      //
+      // GUARD: Only apply extBalance / extLifetime when the update originates from a
+      // verified user activity (spin, survey, game, referral) — NEVER from an ad impression.
+      // An ad-only update has the same completedActivities count as the current state and
+      // carries no spinCompleted / taskCompleted marker.
+      const _extActCount = Number(extState.completedActivities ?? extState.completedTasks ?? -1);
+      const _curActCount = Number(state.user.completedActivities ?? 0);
+      const _isVerifiedActivity = (
+        extState.spinCompleted === true ||
+        extState.taskCompleted === true ||
+        (_extActCount >= 0 && _extActCount > _curActCount)
+      );
+      // Only update balance from extension when a real activity happened
+      if (extBalance > 0 && _isVerifiedActivity) {
         state.user.availableBalance = Math.max(state.user.availableBalance, extBalance);
       }
-      if (extLifetime > 0) {
+      if (extLifetime > 0 && _isVerifiedActivity) {
         state.user.lifetimeEarnings = Math.max(state.user.lifetimeEarnings, extLifetime);
       }
       // Extension ad impressions do not increment completed activities or lifetime impressions

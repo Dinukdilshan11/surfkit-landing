@@ -638,7 +638,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           }
           if (Object.keys(updates).length > 0) {
             await chrome.storage.local.set(updates);
-            broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
+            // Tag the broadcast with the activity type so applyExtensionState
+            // can distinguish real-activity updates from ad impression relays.
+            const _isSpin = action === 'SPIN_COMPLETED';
+            const _broadcastPayload = Object.assign({}, state, {
+              spinCompleted: _isSpin,
+              taskCompleted: !_isSpin
+            });
+            broadcastToAllTabs({ action: 'STATE_CHANGED', payload: _broadcastPayload, data: _broadcastPayload });
           }
           sendResponse({ success: true, data: state });
           break;
@@ -659,16 +666,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
           await chrome.storage.local.set({ recentImpressionTimestamps: state.recentImpressionTimestamps });
 
+          // AD IMPRESSION — zero effect on balance/earnings
           sendResponse({
             success: true,
             rewardUsd: 0,
             tokensAwarded: 0,
-            balanceUsd: state.balanceUsd,
-            dailyEarnings: state.dailyEarnings,
-            tokensEarned: state.tokensEarned,
-            adsSeenToday: state.adsSeenToday || 0,
-            activeStreakDays: state.activeStreakDays,
-            geoTier: state.geoTier || 3
+            adsSeenToday: state.adsSeenToday || 0
           });
           break;
         }
