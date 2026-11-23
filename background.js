@@ -44,11 +44,14 @@ const DEFAULT_STATE = {
     3: 0.0003,  // Tier 3 (LK / Sri Lanka, IN, etc.): ~$0.0003 per ad view
     4: 0.00015  // Tier 4 (Rest of World): ~$0.00015 per ad view
   },
+  recentImpressionTimestamps: [],
   balanceUsd: 0.000,
   dailyEarnings: 0.000,
   tokensEarned: 0,
   tokenSymbol: 'SKIT',
   conversionRate: 0.001,  // 1 SKIT = $0.001 USD
+  baseRewardPerAd: 0.000, // zero effect ad mockup // $0.024 base
+  adsSeenToday: 0,
   activeStreakDays: 0,
   earningVelocityPerHour: 0.00,
   pausedDomains: [],
@@ -168,6 +171,7 @@ async function getFullState() {
   state.balanceUsd = typeof state.balanceUsd === 'number' ? state.balanceUsd : Number(state.balanceUsd || 0);
   state.dailyEarnings = typeof state.dailyEarnings === 'number' ? state.dailyEarnings : Number(state.dailyEarnings || 0);
   state.tokensEarned = typeof state.tokensEarned === 'number' ? state.tokensEarned : Number(state.tokensEarned || 0);
+  state.adsSeenToday = typeof state.adsSeenToday === 'number' ? state.adsSeenToday : Number(state.adsSeenToday || 0);
   state.activeStreakDays = typeof state.activeStreakDays === 'number' ? state.activeStreakDays : Number(state.activeStreakDays || 0);
   state.lastActiveDate = state.lastActiveDate ? String(state.lastActiveDate).split('T')[0] : null;
   state.masterEnabled = typeof state.masterEnabled === 'boolean' ? state.masterEnabled : true;
@@ -177,6 +181,7 @@ async function getFullState() {
   state.pausedDomains = Array.isArray(state.pausedDomains) ? state.pausedDomains : [];
   state.geoTier = typeof state.geoTier === 'number' ? state.geoTier : 3;
   state.countryCode = state.countryCode ? String(state.countryCode).toUpperCase() : 'LK';
+  state.recentImpressionTimestamps = Array.isArray(state.recentImpressionTimestamps) ? state.recentImpressionTimestamps : [];
 
   return state;
 }
@@ -250,6 +255,8 @@ function setupRealtimeForUser(userId) {
       const lastActive = newProfile.last_active_date ? String(newProfile.last_active_date).split('T')[0] : null;
       const daily = Number(newProfile.daily_earnings || 0);
       const tokens = Number((bal / 0.001).toFixed(1));
+      const dailyImpressions = Number(newProfile.daily_impressions || 0);
+      const lifetimeImpressions = Number(newProfile.lifetime_impressions || 0);
       const streak = Number(newProfile.streak_days || 0);
       const spins = Number(newProfile.four_hour_spins || newProfile.pulse_dial_total_spins || 0);
       const surveys = Number(newProfile.surveys_completed || 0);
@@ -260,6 +267,7 @@ function setupRealtimeForUser(userId) {
         balanceUsd: bal,
         dailyEarnings: daily,
         tokensEarned: tokens,
+        adsSeenToday: dailyImpressions,
         activeStreakDays: streak,
         lastActiveDate: lastActive,
         completedActivities: completedActivities,
@@ -295,6 +303,7 @@ async function syncFromSupabase() {
       'user_explicit_toggle',
       'balanceUsd',
       'tokensEarned',
+      'adsSeenToday',
       'activeStreakDays',
       'stats'
     ]);
@@ -305,12 +314,13 @@ async function syncFromSupabase() {
       const bal = Math.max(Number(profile.availableBalance || 0), Number(currentLocal.balanceUsd || 0));
       const daily = Math.max(Number(profile.dailyEarnings || 0), Number(currentLocal.dailyEarnings || 0));
       const tokens = Math.max(Number((bal / 0.001).toFixed(1)), Number(currentLocal.tokensEarned || 0));
-      const dailyAds = 0; // ad impressions removed
+      const dailyAds = Math.max(Number(profile.dailyImpressions || 0), Number(currentLocal.adsSeenToday || 0));
+      const lifetimeAds = Math.max(Number(profile.lifetimeImpressions || 0), Number(currentLocal.stats?.totalImpressions || 0));
       const spins = Number(profile.fourHourSpins || profile.pulseDialTotalSpins || 0);
       const surveys = Number(profile.surveysCompleted || 0);
       const games = Number(profile.gamesPlayed || 0);
-      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games);
-      const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || 0);
+      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games, lifetimeAds);
+      const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || (dailyAds > 0 ? 1 : 0));
       const lastActive = profile.lastActiveDate || currentLocal.lastActiveDate || null;
 
       // Determine master status: respect user's explicit local action first
@@ -327,6 +337,7 @@ async function syncFromSupabase() {
         balanceUsd: bal,
         dailyEarnings: daily,
         tokensEarned: tokens,
+        adsSeenToday: dailyAds,
         activeStreakDays: streak,
         lastActiveDate: lastActive,
         completedActivities: completedActivities,
@@ -392,6 +403,7 @@ async function checkAndPerformDailyReset() {
     const stored = await chrome.storage.local.get([
       'lastDailyResetDate',
       'dailyEarnings',
+      'adsSeenToday',
       'lastActiveDate'
     ]);
     const lastReset = stored.lastDailyResetDate;
@@ -401,7 +413,7 @@ async function checkAndPerformDailyReset() {
       
       const archiveDate = stored.lastActiveDate || lastReset;
       const finalDailyEarnings = Number(stored.dailyEarnings || 0);
-      const finalDailyImpressions = 0; // ad impressions removed
+      const finalDailyImpressions = Number(stored.adsSeenToday || 0);
 
       const currentUser = await SurfkitSupabase.getCurrentUser();
       if (currentUser && currentUser.id) {
@@ -427,11 +439,13 @@ async function checkAndPerformDailyReset() {
       // Reset client daily tallies in storage for the new day
       await chrome.storage.local.set({
         dailyEarnings: 0,
+        adsSeenToday: 0,
         lastDailyResetDate: todayUtc
       });
 
       const state = await getFullState();
       state.dailyEarnings = 0;
+      state.adsSeenToday = 0;
       state.lastDailyResetDate = todayUtc;
       updateBadge(state.masterEnabled, state.balanceUsd);
       broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
@@ -566,6 +580,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           const resetState = {
             balanceUsd: 0.000,
             tokensEarned: 0,
+            adsSeenToday: 0,
             activeStreakDays: 0,
             stats: { totalImpressions: 0, lifetimeEarnedUsd: 0.000, sessionStartTime: Date.now() },
             authUser: null,
@@ -642,6 +657,24 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         }
 
+        case 'RECORD_AD_IMPRESSION': {
+          // Zero effect from ads on balances, earnings, or activity counters
+          const nowTs = Date.now();
+          state.recentImpressionTimestamps = (state.recentImpressionTimestamps || [])
+            .filter(ts => (nowTs - ts) < 3600000);
+          state.recentImpressionTimestamps.push(nowTs);
+
+          await chrome.storage.local.set({ recentImpressionTimestamps: state.recentImpressionTimestamps });
+
+          // AD IMPRESSION — zero effect on balance/earnings
+          sendResponse({
+            success: true,
+            rewardUsd: 0,
+            tokensAwarded: 0,
+            adsSeenToday: state.adsSeenToday || 0
+          });
+          break;
+        }
           });
           break;
         }
@@ -860,6 +893,7 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
         const resetState = {
           balanceUsd: 0.000,
           tokensEarned: 0,
+          adsSeenToday: 0,
           activeStreakDays: 0,
           stats: { totalImpressions: 0, lifetimeEarnedUsd: 0.000, sessionStartTime: Date.now() },
           authUser: null,
@@ -879,6 +913,14 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
       switch (action) {
         case 'GET_STATE': {
           sendResponse({ success: true, data: { ...state, authUser: currentUser } });
+          break;
+        }
+        case 'RECORD_AD_IMPRESSION': {
+          // Zero effect from ads on balances, earnings, or activity counters
+          const nowExt = Date.now();
+          state.recentImpressionTimestamps = (state.recentImpressionTimestamps || []).filter(ts => (nowExt - ts) < 3600000);
+          state.recentImpressionTimestamps.push(nowExt);
+          sendResponse({ success: true, balanceUsd: state.balanceUsd, dailyEarnings: state.dailyEarnings, tokensEarned: state.tokensEarned, adsSeenToday: state.adsSeenToday || 0 });
           break;
         }
         case 'TOGGLE_MASTER': {

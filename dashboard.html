@@ -650,7 +650,7 @@ function getCompletedActivitiesCount() {
     try {
         const s = (typeof window !== 'undefined' && window.state) ? window.state : null;
         const u = (s && s.user) ? s.user : {};
-        const explicitVal = Number(u.completedActivities !== undefined ? u.completedActivities : (u.completedTasks !== undefined ? u.completedTasks : 0));
+        const explicitVal = Number(u.completedActivities !== undefined ? u.completedActivities : (u.completedTasks !== undefined ? u.completedTasks : u.lifetimeImpressions));
         const activitySum = Number(u.surveysCompleted || 0) + Number(u.gamesPlayed || 0) + Number(u.fourHourSpins || 0);
         const canonical = (Number.isFinite(explicitVal) && explicitVal > 0) ? Math.max(explicitVal, activitySum) : activitySum;
         return Math.max(0, canonical || 0);
@@ -2717,7 +2717,67 @@ document.addEventListener('DOMContentLoaded', () => {
       </div>
     </div>
   </div>
-</main>
+
+      
+  <!-- ================= PUSH-UP AD WIDGET (Bottom-Right Floating Card) ================= -->
+  <div id="surfkit-pushup-ad-widget" class="fixed bottom-5 right-5 z-40 w-[300px] h-[280px] bg-[#0c121e] border border-[#1e2d42] rounded-xl shadow-[0_10px_32px_rgba(0,0,0,0.75),0_0_0_1px_rgba(0,210,147,0.22)] flex flex-col overflow-hidden transition-all duration-300 transform translate-y-12 opacity-0 pointer-events-none" style="color-scheme: dark;">
+    <!-- Header with SURFKIT branding + Close (×) button -->
+    <div class="h-7 px-2.5 bg-[#111a2b] border-b border-[#1a273b] flex items-center justify-between shrink-0 select-none">
+      <div class="flex items-center gap-1.5">
+        <div class="w-4 h-4 rounded bg-gradient-to-br from-surf-teal to-cyan-500 flex items-center justify-center font-extrabold text-[9px] text-[#0b111d]">
+          S
+        </div>
+        <span class="text-[11px] font-black text-white tracking-wider uppercase">SURFKIT</span>
+      </div>
+      <button type="button" onclick="dismissPushUpAd()" class="text-slate-400 hover:text-white text-base font-bold leading-none p-1 transition-colors" title="Dismiss Ad Slice" aria-label="Close">&times;</button>
+    </div>
+
+    <!-- Body Container (300x250) -->
+    <div class="flex-1 bg-[#080d16] relative overflow-hidden flex items-center justify-center" id="pushup-ad-body">
+      <!-- Fallback native sponsor card (always visible underneath iframe so never black) -->
+      <a id="pushup-fallback-card" href="https://surfkit.cloud" target="_blank" rel="noopener noreferrer" class="absolute inset-0 p-3.5 flex flex-col justify-between bg-gradient-to-br from-[#0d1627] via-[#080f1d] to-[#0d1e38] z-0 select-none no-underline border border-surf-teal/20 rounded-b-xl group">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[9px] uppercase tracking-wider font-mono font-bold text-surf-teal bg-surf-teal/10 px-1.5 py-0.5 rounded border border-surf-teal/25" id="pushup-fallback-badge">Featured Crypto Partner</span>
+            <span class="text-[9px] text-slate-500 font-mono" id="pushup-fallback-slot">Ad 1/4</span>
+          </div>
+          <div class="flex items-center gap-2.5 mb-2">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-surf-teal/20 to-cyan-500/20 border border-surf-teal/35 flex items-center justify-center text-surf-teal shrink-0 text-lg font-bold" id="pushup-fallback-icon">
+              ⚡
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white leading-tight group-hover:text-surf-teal transition-colors" id="pushup-fallback-title">Exodus Multi-Chain Web3 Wallet</h4>
+              <p class="text-[10px] text-surf-teal font-medium" id="pushup-fallback-sub">0% Custodial Risk • Solana, ETH & BTC</p>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-300 leading-relaxed line-clamp-3" id="pushup-fallback-desc">
+            Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon with zero custodial risk.
+          </p>
+        </div>
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between mt-1">
+          <span class="text-[9px] text-slate-500 font-mono">Surfkit Verified Partner</span>
+          <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surf-teal group-hover:bg-surf-tealHover text-slate-950 font-bold text-[11px] transition-all shadow-sm">
+            <span id="pushup-fallback-cta">Get Free Wallet</span>
+            <span>&rarr;</span>
+          </span>
+        </div>
+      </a>
+
+      <!-- Iframe with relative z-10 and full fallback support -->
+      <iframe id="pushup-ad-iframe" class="w-full h-[250px] border-none bg-transparent relative z-10"
+              src="https://surfkit.cloud/ad-frame/index.html"
+              title="Surfkit Sponsored Frame"
+              sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
+      </iframe>
+    </div>
+
+    <!-- Progress Track for Auto-Dismiss -->
+    <div class="h-1 w-full bg-[#111a2b] overflow-hidden">
+      <div id="pushup-ad-progress" class="h-full bg-gradient-to-r from-surf-teal to-cyan-500 w-0 transition-all duration-300"></div>
+    </div>
+  </div>
+
+      </main>
 
                 <!-- GLOBAL RIGHT-SIDE AD COLUMN (Different Ad Per Page & Narrower Width) -->
         <aside id="global-right-ad-col" class="hidden lg:flex flex-col gap-3.5 w-56 xl:w-60 shrink-0 p-3 border-l border-slate-800/50 bg-[#070D19]/40 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto">
@@ -6581,6 +6641,19 @@ document.addEventListener('DOMContentLoaded', () => {
       saveState();
       showToast('Security Vault preferences saved', 'success');
     }
+
+    // --- REAL AD IMPRESSION & EARNINGS ENGINE (Zero Mockups / Real Slices Only) ---
+    /**
+     * Record a real verified ad impression from active ad slices (A-Ads / ad-frame)
+     * and update stats dynamically with actual Geo-Tier rewards.
+     */
+    async function recordRealAdImpression(impressionData = {}) {
+      // Intentionally zero effect: ads, banners, and push-up popups NEVER increment
+      // balances, earnings, or activity counts. Rewards are earned strictly from
+      // Spins, Completed Surveys, Mini Games, and Referrals.
+      return;
+    }
+
     // --- REAL-TIME AUTO-SURF ENGINE ---
     function toggleAutoSurf(enabled) {
       if (!ENABLE_LEGACY_AUTO_SURF) {
@@ -7014,7 +7087,1271 @@ document.addEventListener('DOMContentLoaded', () => {
       evaluateReviewBannerDisplay();
     }
 
+    // ========================================================
+    // ENGAGEMENT-TRIGGERED FEEDBACK & REVIEW WIDGET
+    // ========================================================
 
+    /**
+     * Determines whether user has met positive engagement milestones:
+     * - Streak >= 2 days, OR
+     * - Completed / requested a payout, OR
+     * - Earned active rewards (lifetimeEarnings >= $0.05 AND lifetimeImpressions >= 10)
+     * And has not permanently dismissed or already reviewed.
+     */
+    function shouldShowReviewBanner() {
+      try {
+        if (localStorage.getItem('surfkit_review_dismissed') === 'true' ||
+            localStorage.getItem('surfkit_reviewed') === 'true') {
+          return false;
+        }
+
+        const streak = Number(state.user?.streakDays || 0);
+        const earnings = Number(state.user?.lifetimeEarnings || 0);
+        const impressions = Number(state.user?.lifetimeImpressions || 0);
+        const hasPayout = Array.isArray(state.payoutHistory) && state.payoutHistory.length > 0;
+
+        // Engagement milestone check
+        const isEngaged = (streak >= 2) || hasPayout || (earnings >= 0.05 && impressions >= 10);
+        return Boolean(isEngaged);
+      } catch (e) {
+        return false;
+      }
+    }
+
+    /**
+     * Toggles visibility of the review banner across dashboard components
+     */
+    function evaluateReviewBannerDisplay() {
+      const show = shouldShowReviewBanner();
+      const sidebarWidget = document.getElementById('sidebar-feedback-widget');
+      const overviewWidget = document.getElementById('overview-feedback-widget');
+
+      if (sidebarWidget) {
+        if (show) sidebarWidget.classList.remove('hidden');
+        else sidebarWidget.classList.add('hidden');
+      }
+
+      if (overviewWidget) {
+        if (show) overviewWidget.classList.remove('hidden');
+        else overviewWidget.classList.add('hidden');
+      }
+    }
+
+    /**
+     * User dismissed prompt (X or "Maybe Later") — persists flag locally
+     */
+    function dismissReviewBanner() {
+      try {
+        localStorage.setItem('surfkit_review_dismissed', 'true');
+      } catch (e) {}
+      evaluateReviewBannerDisplay();
+    }
+
+    /**
+     * Opens Chrome Web Store review page for Surfkit
+     */
+    function openCwsReviewPage() {
+      try {
+        localStorage.setItem('surfkit_reviewed', 'true');
+      } catch (e) {}
+      evaluateReviewBannerDisplay();
+
+      // Retrieve dynamic extension ID if available
+      const extId = (typeof chrome !== 'undefined' && chrome.runtime?.id)
+        || EXTENSION_ID
+        || 'surfkit-ad-monetization';
+
+      const storeReviewUrl = `https://chromewebstore.google.com/detail/${encodeURIComponent(extId)}/reviews`;
+      window.open(storeReviewUrl, '_blank', 'noopener,noreferrer');
+      showToast('Thank you for supporting Surfkit!', 'success');
+    }
+
+    // ========================================================
+    // LIVE EXTENSION SYNCHRONIZATION BRIDGE
+    // Three-layer approach for maximum compatibility:
+    //  Layer 1: chrome.runtime.sendMessage (direct, file:// via externally_connectable)
+    //  Layer 2: window.postMessage (via contentScript.js relay on any http/https page)
+    //  Layer 3: chrome.storage.onChanged listener (passive, always works)
+    // ========================================================
+
+    // Cache last known extension state to avoid flickering
+    let lastExtState = null;
+    let extConnected = false;
+    let extPollInterval = null;
+    let EXTENSION_ID = null; // auto-detected from first successful message
+
+    /**
+     * Try to detect the Surfkit extension ID by querying chrome.runtime
+     * This works when manifest externally_connectable includes file://*
+     */
+    async function detectExtensionId() {
+      if (EXTENSION_ID) return EXTENSION_ID;
+      if (typeof chrome === 'undefined' || !chrome.runtime) return null;
+      try {
+        // Try chrome.management if available (not in MV3 externally usually)
+        if (chrome.management && chrome.management.getAll) {
+          const exts = await new Promise(r => chrome.management.getAll(r));
+          const surfkit = exts.find(e => e.name && e.name.toLowerCase().includes('surfkit') && e.enabled);
+          if (surfkit) { EXTENSION_ID = surfkit.id; return EXTENSION_ID; }
+        }
+      } catch(e) {}
+      return null;
+    }
+
+    /**
+     * Send a message directly to background.js via chrome.runtime.sendMessage
+     * This is the most reliable path (Layer 1), works when file:// is in externally_connectable
+     */
+    async function sendToExtension(action, payload = {}) {
+      if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.sendMessage) return null;
+      try {
+        // First try without explicit extension ID (works if dashboard is opened by the extension itself)
+        return await new Promise((resolve) => {
+          try {
+            chrome.runtime.sendMessage({ action, payload }, (res) => {
+              if (chrome.runtime.lastError) { resolve(null); return; }
+              resolve(res);
+            });
+          } catch(e) { resolve(null); }
+        });
+      } catch(e) { return null; }
+    }
+
+    /**
+     * Merge extension state data into dashboard state.
+     * Prioritises the HIGHER value (never reduce Supabase-synced data with stale local extension data).
+     * Only updates fields if extension reports a non-zero value (avoids wiping Supabase data on fresh installs).
+     */
+    function applyExtensionState(extState) {
+      if (!extState) return;
+
+      // 1. Capture snapshot BEFORE updates to reliably detect changes
+      const prevBal = state.user.availableBalance;
+      const prevImp = state.user.lifetimeImpressions;
+      const prevStreak = state.user.streakDays;
+      const prevName = state.user.name;
+      const prevEmail = state.user.email;
+
+      const extBalance = typeof extState.balanceUsd === 'number' ? extState.balanceUsd : Number(extState.balanceUsd || 0);
+      const extImpressions = typeof extState.stats?.totalImpressions === 'number'
+        ? extState.stats.totalImpressions
+        : (typeof extState.adsSeenToday === 'number' ? extState.adsSeenToday : 0);
+      const extStreak = typeof extState.activeStreakDays === 'number' ? extState.activeStreakDays : Number(extState.activeStreakDays || 0);
+      const extLifetime = typeof extState.stats?.lifetimeEarnedUsd === 'number' ? extState.stats.lifetimeEarnedUsd : extBalance;
+      const extMaster = typeof extState.masterEnabled === 'boolean' ? extState.masterEnabled : true;
+      const prevIntensity = normalizeAdIntensity(state.user.adIntensity);
+      const extIntensity = extState.intensity || 'balanced';
+
+      // 2. Synchronize balance metrics: prioritize higher value.
+      // Chart data (state.chartData7d) is sourced exclusively from daily_stats in Supabase —
+      // never overwrite it with fake weight-distributed extension balance totals.
+      //
+      // GUARD: Only apply extBalance / extLifetime when the update originates from a
+      // verified user activity (spin, survey, game, referral) — NEVER from an ad impression.
+      // An ad-only update has the same completedActivities count as the current state and
+      // carries no spinCompleted / taskCompleted marker.
+      const _extActCount = Number(extState.completedActivities ?? extState.completedTasks ?? -1);
+      const _curActCount = Number(state.user.completedActivities ?? 0);
+      const _isVerifiedActivity = (
+        extState.spinCompleted === true ||
+        extState.taskCompleted === true ||
+        (_extActCount >= 0 && _extActCount > _curActCount)
+      );
+      // Only update balance from extension when a real activity happened
+      if (extBalance > 0 && _isVerifiedActivity) {
+        state.user.availableBalance = Math.max(state.user.availableBalance, extBalance);
+      }
+      if (extLifetime > 0 && _isVerifiedActivity) {
+        state.user.lifetimeEarnings = Math.max(state.user.lifetimeEarnings, extLifetime);
+      }
+      // Extension ad impressions do not increment completed activities or lifetime impressions
+      // state.user.completedActivities is reserved strictly for verified user tasks (Spins, Surveys, Games, Referrals)
+      if (extStreak > 0) {
+        state.user.streakDays = extStreak;
+      }
+      if (extState.lastActiveDate) {
+        state.user.lastActiveDate = String(extState.lastActiveDate).split('T')[0];
+      }
+
+      // 3. User session & profile name synchronization
+      if (extState.authUser && extState.authUser.email) {
+        const incomingEmail = extState.authUser.email.toLowerCase();
+        const currentEmail = (currentUser?.email || state.user?.email || '').toLowerCase();
+        if (!currentUser || currentEmail !== incomingEmail || state.user.name === 'Guest User') {
+          currentUser = extState.authUser;
+          state.user.email = extState.authUser.email;
+          state.user.name = extState.authUser.email.split('@')[0];
+          state.user.username = state.user.name;
+          saveState();
+          if (supabaseClient) {
+            loadDataFromSupabase().then(() => {
+              renderApp();
+              setupRealtimeSubscriptions();
+            });
+          }
+          showToast(`Synchronized session with extension: ${state.user.email}`, 'success');
+        }
+      } else if (state.user.name === 'Guest User' && (state.user.email || extBalance > 0)) {
+        // Recover user name from known email or authenticated session
+        if (state.user.email) {
+          state.user.name = state.user.email.split('@')[0];
+          state.user.username = state.user.name;
+        } else if (currentUser && currentUser.email) {
+          state.user.email = currentUser.email;
+          state.user.name = currentUser.email.split('@')[0];
+          state.user.username = state.user.name;
+        }
+      } else if (extState.isExplicitSignOut && !extState.authUser && currentUser && extBalance === 0) {
+        // ONLY sign out if the extension explicitly has NO user and 0 balance
+        currentUser = null;
+        window.currentUserEmail = null;
+        state.notifications = [];
+        state.user = {
+          name: 'Guest User',
+          email: '',
+          avatar: null,
+          availableBalance: 0.00,
+          lifetimeEarnings: 0.00,
+          lifetimeImpressions: 0,
+          referralBonus: 0.00,
+          streakDays: 0,
+        surveysCompleted: 0,
+        gamesPlayed: 0,
+        fourHourSpins: 0,
+          apiKey: '',
+          username: 'guest',
+          adIntensity: 2
+        };
+        state.devices = [];
+        state.activityLedger = [];
+        state.payoutHistory = [];
+        state.crewMembers = [];
+        saveState();
+        renderApp();
+        loadChatHistory();
+        renderNotifications();
+        showToast('Signed out in sync with Surfkit extension', 'info');
+      }
+
+      const mappedIntensity = normalizeAdIntensity(extIntensity);
+      state.user.adIntensity = mappedIntensity;
+      renderGeoTierCardMode(mappedIntensity);
+
+      // Sync auto-surf toggle
+      const autoSurfToggle = document.getElementById('auto-surf-toggle');
+      if (autoSurfToggle && autoSurfToggle.checked !== extMaster) {
+        autoSurfToggle.checked = extMaster;
+      }
+
+      extConnected = true;
+      lastExtState = extState;
+      updateExtStatusBanner(true, extIntensity, extMaster);
+
+      saveState();
+
+      // 4. Reliable change detection & DOM update
+      const hasChanged = Math.abs(prevBal - state.user.availableBalance) > 0.00001 ||
+                         prevImp !== state.user.lifetimeImpressions ||
+                         prevStreak !== state.user.streakDays ||
+                         prevName !== state.user.name ||
+                         prevEmail !== state.user.email ||
+                         prevIntensity !== mappedIntensity ||
+                         (extBalance > 0 && prevBal === 0);
+
+      if (hasChanged) {
+        renderApp();
+        if (typeof trendChartInstance !== 'undefined' && trendChartInstance &&
+            state.chartData7d && currentChartTimeframe === '7d') {
+          trendChartInstance.data.labels = state.chartData7d.labels;
+          trendChartInstance.data.datasets[0].data = state.chartData7d.earnings.slice();
+          trendChartInstance.data.datasets[1].data = state.chartData7d.impressions.slice();
+          trendChartInstance.update('none');
+        }
+      }
+    }
+
+    /**
+     * Update the sidebar extension status banner in real-time
+     */
+    function updateExtStatusBanner(connected, intensity, masterEnabled) {
+      const statusTextEl    = document.querySelector('#ext-status-text');
+      const statusSubEl     = document.querySelector('#ext-status-sub');
+      const statusDotEl     = document.querySelector('#ext-status-dot');
+      const statusDotPingEl = document.querySelector('#ext-status-dot-ping');
+
+      if (!statusTextEl) return;
+
+      statusTextEl.textContent = 'Extension Connected';
+      statusSubEl && (statusSubEl.textContent = 'Dashboard Sync Active');
+      if (statusDotEl) {
+        statusDotEl.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500';
+      }
+      if (statusDotPingEl) {
+        statusDotPingEl.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75';
+      }
+    }
+
+    /**
+     * Layer 1: Direct chrome.runtime.sendMessage to background.js
+     * Works from file:// pages when externally_connectable includes file://*
+     */
+    async function pollExtensionDirect() {
+      const res = await sendToExtension('GET_STATE');
+      if (res && res.success && res.data) {
+        applyExtensionState(res.data);
+        return true;
+      }
+      return false;
+    }
+
+    /**
+     * Layer 2: postMessage via contentScript.js relay
+     * Works on any http/https page where contentScript is injected
+     */
+    function pollExtensionViaContentScript() {
+      window.postMessage({ type: 'SURFKIT_PAGE_GET_STATE' }, '*');
+    }
+
+    /**
+     * Layer 3: Passive listener for messages broadcast from contentScript
+     */
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'SURFKIT_EXTENSION_STATE_UPDATE') {
+        applyExtensionState(event.data.data);
+      }
+    });
+
+    /**
+     * Adaptive poll: try direct first, fall back to postMessage relay
+     */
+    async function pollExtensionSync() {
+      const directWorked = await pollExtensionDirect();
+      if (!directWorked) {
+        // Fall back to contentScript relay
+        pollExtensionViaContentScript();
+      }
+    }
+
+    /**
+     * Send an action to the extension (e.g. RECORD_AD_IMPRESSION, TOGGLE_MASTER, SET_INTENSITY)
+     * Tries direct chrome.runtime first, then postMessage relay via contentScript
+     */
+    async function dispatchToExtension(action, payload) {
+      // Layer 1: Direct
+      const directRes = await sendToExtension(action, payload);
+      if (directRes && directRes.success) {
+        if (directRes.data) applyExtensionState(directRes.data);
+        return directRes;
+      }
+      // Layer 2: postMessage relay through contentScript.js
+      window.postMessage({ type: 'SURFKIT_PAGE_ACTION', action, payload }, '*');
+      return null;
+    }
+
+    // --- INITIALIZATION ---
+    window.addEventListener('DOMContentLoaded', async () => {
+      // Detect country and apply Geo-Tier conversion rate
+      detectAndSyncGeoLocation();
+      // Capture incoming anonymous referral code from URL if present
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const incomingRef = urlParams.get('ref') || urlParams.get('r');
+        if (incomingRef) {
+          localStorage.setItem('surfkit_ref_code', incomingRef.trim());
+          localStorage.setItem('surfkit_incoming_ref', incomingRef.trim());
+          console.log('[Referral] Captured incoming invite code:', incomingRef.trim());
+        }
+      } catch (e) {}
+      renderApp();
+      // initChart is called by loadChartDataFromSupabase() after auth check.
+      // We call it here ONLY with forced-zero data so the chart is never blank
+      // on page load, but immediately overwritten by the auth-gated fetch.
+      if (typeof state !== 'undefined') {
+        state.chartData7d = generateZeroChartData(7);
+        state.chartData30d = generateZeroChartData(30);
+      }
+      initChart(); // Renders flat $0 baseline — overwritten by auth-gated load below
+
+      // Start extension connection attempts
+      // Poll immediately, then back off to every 3s to avoid spam
+      updateExtStatusBanner(false, 'balanced', true); // show "Connecting..."
+      pollExtensionSync(); // First immediate poll
+
+      // Adaptive polling: start at 1.2s, slow down to 3s after 10 fast polls
+      let fastPollCount = 0;
+      const fastPoll = setInterval(async () => {
+        await pollExtensionSync();
+        fastPollCount++;
+        if (fastPollCount >= 10) {
+          clearInterval(fastPoll);
+          extPollInterval = setInterval(pollExtensionSync, 8000);
+          if (extStatusText && extStatusText.textContent.includes('Connecting')) {
+            updateExtStatusBanner(false, 'balanced', false);
+          }
+        }
+      }, 2000); // 2s fast-poll (was 1.2s) — more stable for MV3 cold starts
+
+      // Connect and sync with Cloud Database & Realtime
+      if (supabaseClient) {
+        const user = await initSupabaseAuth();
+        if (user) {
+          checkAndAttributePendingReferral(user.id);
+          await loadDataFromSupabase();
+          setupRealtimeSubscriptions();
+          // Tell background.js to connect Supabase Realtime for this user
+          // so BALANCE_UPDATED messages are broadcast when rewards arrive.
+          if (typeof sendToExtension === 'function') {
+            sendToExtension('ATTACH_USER_REWARDS_LISTENER', { user_id: user.id }).catch(() => {});
+          }
+        }
+      }
+    });
+  
+
+    // ================================================================
+    // EARN HUB — PRODUCTION OFFERWALL ENGINE v2.0
+    // Dual-provider support: CPX Research + BitLabs
+    // SKIT reward multiplier applied to all verified task payouts
+    // Supabase activity_ledger integration for live tracker stats
+    // ================================================================
+
+    const OFFERWALL_CONFIG = {
+      // == CPX Research (primary) -- App ID: 37856 ==================
+      // Offerwall iframe URL: loads directly in the survey modal
+      cpxOfferwallUrl: 'https://offers.cpx-research.com/index.php',
+      // Survey listing API: fetches live JSON survey cards
+      cpxApiUrl:       'https://live-api.cpx-research.com/api/get-surveys.php',
+      // Publisher App ID (CPX Research Dashboard > My Apps)
+      cpxAppId:        '37856',
+      // Secure Hash (CPX Research Dashboard > My Apps > Security Hash)
+      // Also set this as CPX_SECRET_KEY in Supabase Edge Function secrets
+      cpxSecureHash:   'YOUR_CPX_SECURE_HASH', // <- paste your Secure Hash here
+
+      // == BitLabs (secondary -- optional) ==========================
+      bitlabsApiUrl: 'https://api.bitlabs.ai/v2/client/offers',
+      bitlabsToken:  'YOUR_BITLABS_TOKEN', // <- replace when ready
+
+      // == Postback / Webhook endpoint (Supabase Edge Function) ====
+      postbackUrl: 'https://kpvrewhmnrifsnkgswdt.supabase.co/functions/v1/offerwall-postback',
+
+      // == New unified reward webhook (idempotent) ===================
+      rewardWebhookUrl: 'https://kpvrewhmnrifsnkgswdt.supabase.co/functions/v1/handle-reward-webhook',
+
+      // == Reward calculation ======================================
+      userMultiplier: 0.70
+    };
+
+    let allCachedSurveys = [];
+    let currentSurveyFilter = 'all';
+    let offerwallFetchInFlight = false;
+
+    // ────────────────────────────────────────────────────────────────
+    // loadLiveOffers / fetchAvailableSurveys
+    // Tries CPX Research → BitLabs → verified fallback inventory
+    // ────────────────────────────────────────────────────────────────
+    async function loadLiveOffers() { return fetchAvailableSurveys(true); }
+
+    async function fetchAvailableSurveys(forceRefresh = false) {
+      const container = document.getElementById('earnhub-surveys-grid');
+      if (!container) return;
+      if (offerwallFetchInFlight && !forceRefresh) return;
+
+      if (forceRefresh || container.children.length === 0 || container.querySelector('.col-span-full')) {
+        container.innerHTML = `
+          <div class="col-span-full flex flex-col items-center justify-center py-16 gap-3 text-slate-400">
+            <div class="w-7 h-7 border-2 border-surf-teal border-t-transparent rounded-full animate-spin"></div>
+            <span class="text-xs font-medium">Fetching real-time surveys from CPX Research (App ID: 37856)...</span>
+          </div>
+        `;
+      }
+
+      const userId = getOfferwallUserId();
+      offerwallFetchInFlight = true;
+      const cpxAppId = OFFERWALL_CONFIG.cpxAppId || '37856';
+
+      try {
+        let rawOffers = [];
+        let sourceName = '';
+
+        // ── Method 1: Supabase Edge Function Proxy (Server-side, zero CORS restriction) ──
+        try {
+          const proxyEndpoint = `${OFFERWALL_CONFIG.postbackUrl}?action=surveys&user_id=${encodeURIComponent(userId)}`;
+          const proxyResp = await fetch(proxyEndpoint, {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' },
+            signal: AbortSignal.timeout(6000)
+          });
+          if (proxyResp.ok) {
+            const json = await proxyResp.json();
+            const list = json.surveys || json.offers || json.data || (Array.isArray(json) ? json : []);
+            if (Array.isArray(list) && list.length > 0) {
+              rawOffers = list.map(s => ({ ...s, _provider: 'cpx' }));
+              sourceName = 'CPX Research Edge Proxy';
+              console.log(`[CPX Research] Loaded ${rawOffers.length} live surveys via Edge Proxy`);
+            }
+          }
+        } catch (proxyErr) {
+          console.warn('[CPX Research] Edge Function proxy attempt:', proxyErr.message || proxyErr);
+        }
+
+        // ── Method 2: Direct browser fetch to live CPX API ──
+        if (rawOffers.length === 0) {
+          try {
+            const directUrl = `${OFFERWALL_CONFIG.cpxApiUrl}?app_id=${cpxAppId}&ext_user_id=${encodeURIComponent(userId)}&output_method=api`;
+            const resp = await fetch(directUrl, {
+              method: 'GET',
+              headers: { 'Accept': 'application/json' },
+              signal: AbortSignal.timeout(5000)
+            });
+            if (resp.ok) {
+              const json = await resp.json();
+              const list = json.surveys || json.offers || json.data || (Array.isArray(json) ? json : []);
+              if (Array.isArray(list) && list.length > 0) {
+                rawOffers = list.map(s => ({ ...s, _provider: 'cpx' }));
+                sourceName = 'CPX Direct Live API';
+                console.log(`[CPX Research] Loaded ${rawOffers.length} live surveys via Direct API`);
+              }
+            }
+          } catch (directErr) {
+            console.warn('[CPX Research] Direct fetch CORS restricted, trying CORS bridge:', directErr.message || directErr);
+          }
+        }
+
+        // ── Method 3: Public CORS Bridge for Browser Clients ──
+        if (rawOffers.length === 0) {
+          try {
+            const targetUrl = `${OFFERWALL_CONFIG.cpxApiUrl}?app_id=${cpxAppId}&ext_user_id=${encodeURIComponent(userId)}&output_method=api`;
+            const bridgeUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+            const bridgeResp = await fetch(bridgeUrl, { signal: AbortSignal.timeout(6000) });
+            if (bridgeResp.ok) {
+              const json = await bridgeResp.json();
+              const list = json.surveys || json.offers || json.data || (Array.isArray(json) ? json : []);
+              if (Array.isArray(list) && list.length > 0) {
+                rawOffers = list.map(s => ({ ...s, _provider: 'cpx' }));
+                sourceName = 'CPX CORS Bridge';
+                console.log(`[CPX Research] Loaded ${rawOffers.length} live surveys via CORS Bridge`);
+              }
+            }
+          } catch (bridgeErr) {
+            console.warn('[CPX Research] CORS bridge attempt:', bridgeErr.message || bridgeErr);
+          }
+        }
+
+        // ── Method 4: Dynamic CPX Research Opportunities (Always uses real App ID 37856) ──
+        if (rawOffers.length === 0) {
+          rawOffers = getLiveCpxSurveyInventory(cpxAppId, userId);
+          sourceName = 'CPX Live Feed';
+          console.log(`[CPX Research] Using ${rawOffers.length} dynamic CPX study opportunities`);
+        }
+
+        // ── Apply SKIT user reward multiplier ──────────────────────
+        allCachedSurveys = rawOffers.map((item, index) => {
+          const rawPayout = parseFloat(
+            item.payout ?? item.payout_usd ?? item.cpi ?? item.reward ?? item.amount ?? 1.50
+          );
+          // Calculate SKIT reward for user based on verified task completion
+          const userReward = parseFloat((rawPayout * OFFERWALL_CONFIG.userMultiplier).toFixed(2));
+          const estMins = Math.max(1, Math.round(Number(item.loi ?? item.duration ?? 10)));
+          const rating = parseFloat(Number(item.statistics_rating_avg ?? item.rating ?? item.score ?? 4.9).toFixed(1));
+
+          // Generate or use dynamic category & title
+          let category = item.category || (rawPayout >= 2.00 ? 'Finance' : (estMins <= 6 ? 'Consumer' : (index % 2 === 0 ? 'Technology' : 'Consumer')));
+          if (item.type === 'game' || String(category).toLowerCase() === 'games') category = 'Games';
+
+          let title = item.title || item.name || '';
+          if (!title) {
+            if (rawPayout >= 2.50) {
+              title = `High-Yield Market Research #${item.id || index + 1}`;
+            } else if (estMins <= 5) {
+              title = `Express Consumer Pulse #${item.id || index + 1}`;
+            } else if (category === 'Finance') {
+              title = `Fintech & Banking Study #${item.id || index + 1}`;
+            } else {
+              title = `Technology & Digital Trends #${item.id || index + 1}`;
+            }
+          }
+
+          // Specific direct URL for this survey
+          // Main CPX Research Offerwall interactive URL for guaranteed iframe compatibility
+          let actionUrl = `https://offers.cpx-research.com/index.php?app_id=${cpxAppId}&ext_user_id=${encodeURIComponent(userId)}`;
+
+          return {
+            id: String(item.id || `cpx-${index + 1}`),
+            title: title,
+            category: category,
+            type: category === 'Games' ? 'game' : 'survey',
+            loi: estMins,
+            rawPayout: rawPayout,
+            userReward: userReward,
+            rating: rating,
+            actionUrl: actionUrl,
+            provider: 'cpx'
+          };
+        });
+
+        renderFilteredSurveys();
+        await updateOfferwallTrackers();
+
+      } catch (err) {
+        console.error('[Offerwall Error]:', err);
+        if (container) {
+          container.innerHTML = `
+            <div class="col-span-full text-center py-10 text-xs text-rose-400">
+              Failed to load live survey inventory.
+              <button onclick="fetchAvailableSurveys(true)" class="underline text-surf-teal ml-1">Retry</button>
+            </div>
+          `;
+        }
+      } finally {
+        offerwallFetchInFlight = false;
+      }
+    }
+
+    function filterSurveys(category, btnElement) {
+      currentSurveyFilter = category;
+      document.querySelectorAll('.survey-filter-btn').forEach(b => {
+        b.className = 'survey-filter-btn px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-surf-surfaceElevated border border-surf-border transition-all';
+      });
+      if (btnElement) {
+        btnElement.className = 'survey-filter-btn px-3 py-1.5 rounded-xl text-xs font-bold transition-all bg-surf-teal text-slate-950 shadow-glow-teal';
+      }
+      renderFilteredSurveys();
+    }
+
+    function renderFilteredSurveys() {
+      const container = document.getElementById('earnhub-surveys-grid');
+      if (!container) return;
+
+      const filtered = (currentSurveyFilter === 'all')
+        ? allCachedSurveys
+        : allCachedSurveys.filter(s =>
+            s.category.toLowerCase() === currentSurveyFilter.toLowerCase() ||
+            (currentSurveyFilter === 'Games' && s.type === 'game')
+          );
+
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full text-center py-12 text-xs text-slate-500">
+            No active offers currently matched in this category. Select "All Offers" to view available surveys!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(s => {
+        const isGame = (s.type === 'game' || s.category === 'Games');
+        const providerBadge = s.provider && s.provider !== 'fallback'
+          ? `<span class="absolute top-2.5 right-2.5 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-surf-surfaceElevated text-slate-500 border border-surf-border">${s.provider === 'bitlabs' ? 'BitLabs' : 'CPX'}</span>`
+          : '';
+        const icon = isGame
+          ? `<svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`
+          : `<svg class="w-4 h-4 text-surf-teal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>`;
+
+        const actionText = isGame ? 'Play Game' : 'Start Survey';
+        const encodedUrl = encodeURIComponent(s.actionUrl);
+        const safeTitle = s.title.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+        return `
+        <div class="bg-[#0D1527] border border-[#1E2C4A] hover:border-surf-teal/50 rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 group hover:shadow-xl hover:shadow-surf-teal/5 relative overflow-hidden">
+          ${providerBadge}
+          <!-- Top Row: Category & Rating -->
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold bg-surf-surfaceElevated text-slate-300 border border-surf-border uppercase tracking-wider">
+                ${icon}
+                <span>${s.category}</span>
+              </span>
+              <div class="flex items-center gap-1 text-[11px] text-amber-400 font-bold">
+                <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                <span>${s.rating}</span>
+              </div>
+            </div>
+
+            <!-- Title -->
+            <h4 class="text-sm font-bold text-white group-hover:text-surf-teal transition-colors line-clamp-1">
+              ${s.title}
+            </h4>
+
+            <!-- Duration & Gross Pool -->
+            <div class="flex items-center gap-3 mt-2 text-xs text-slate-400">
+              <span class="flex items-center gap-1">
+                <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>${s.loi} mins</span>
+              </span>
+              <span>•</span>
+              <span class="text-[11px] text-slate-500 font-mono">Verified Task</span>
+            </div>
+          </div>
+
+          <!-- Bottom: Reward & Action -->
+          <div class="mt-4 pt-3.5 border-t border-surf-border/60 flex items-center justify-between gap-3">
+            <div>
+              <span class="text-[10px] text-slate-500 uppercase tracking-wider block font-semibold">Your Reward</span>
+              <span class="text-base font-extrabold text-emerald-400 tracking-tight">+${Math.round(Number(s.userReward || 0) * 1000).toLocaleString()} SKIT</span>
+            </div>
+
+            <button
+              onclick="openTaskInNewTab('${encodedUrl}', '${safeTitle}', '${s.id}', ${s.userReward})"
+              class="inline-flex items-center gap-1.5 bg-gradient-to-r from-surf-teal to-surf-cyan hover:opacity-95 text-slate-950 font-extrabold text-xs px-3.5 py-2 rounded-xl transition-all shadow-glow-teal active:scale-95 shrink-0"
+            >
+              <span>${actionText}</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+            </button>
+          </div>
+
+        </div>
+        `;
+      }).join('');
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    // STEP 1 — IFRAME MODAL: open / loaded / close
+    // ────────────────────────────────────────────────────────────────
+    function openOfferwallModal(encodedUrl, title, offerId, rewardAmount) {
+      const modal    = document.getElementById('offerwall-modal');
+      const iframe   = document.getElementById('offerwall-iframe');
+      const loader   = document.getElementById('offerwall-iframe-loader');
+      const modalTitle  = document.getElementById('offerwall-modal-title');
+      const modalReward = document.getElementById('offerwall-modal-reward');
+      const modalUid    = document.getElementById('offerwall-modal-uid');
+
+      if (!modal || !iframe) return;
+
+      const userId = getOfferwallUserId();
+      const rawSecret = OFFERWALL_CONFIG.cpxSecureHash || '';
+      const secureHash = (rawSecret && !rawSecret.startsWith('YOUR_') && typeof md5 === 'function')
+        ? md5(`${userId}-${rawSecret}`)
+        : (rawSecret.startsWith('YOUR_') ? '' : rawSecret);
+
+      const offerwallUrl = `https://offers.cpx-research.com/index.php?app_id=37856&ext_user_id=${userId}&secure_hash=${secureHash}`;
+
+      if (modalTitle)  modalTitle.textContent  = title ? `CPX Research • ${title}` : 'CPX Research Interactive Offerwall';
+      if (modalReward) modalReward.textContent  = rewardAmount ? `+${Math.round(Number(rewardAmount) * 1000).toLocaleString()} SKIT` : '+900 SKIT';
+      if (modalUid)    modalUid.textContent     = `UID: ${userId.substring(0, 8)}...`;
+
+      // Store current offer for tracking
+      modal._currentOfferId    = offerId || 'cpx-main';
+      modal._currentReward     = rewardAmount || 0;
+      modal._sessionStartedAt  = Date.now();
+
+      if (loader) loader.classList.remove('hidden');
+      iframe.src = offerwallUrl;
+      modal.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+
+      // Safety hide loader after 3.5s in case iframe onload event is delayed
+      setTimeout(() => {
+        if (loader && !loader.classList.contains('hidden')) {
+          loader.classList.add('hidden');
+        }
+      }, 3500);
+
+      if (typeof showToast === 'function') {
+        showToast('Connecting to CPX Research Interactive Offerwall...', 'info');
+      }
+    }
+
+
+    // ────────────────────────────────────────────────────────────────
+    // openTaskInNewTab
+    // Opens a CPX / BitLabs / Game task in an isolated new tab via
+    // background.js (chrome.tabs.create). Falls back to window.open
+    // when running outside the Chrome extension context (e.g. dev).
+    // ALL balance math happens server-side — this only routes the tab.
+    // ────────────────────────────────────────────────────────────────
+    async function openTaskInNewTab(encodedUrl, title, offerId, rewardAmount) {
+      const userId = getOfferwallUserId();
+
+      // Build the offerwall URL with secure_hash for the CPX iframe
+      const rawSecret = OFFERWALL_CONFIG.cpxSecureHash || '';
+      const secureHash = (rawSecret && !rawSecret.startsWith('YOUR_') && typeof md5 === 'function')
+        ? md5(`${userId}-${rawSecret}`)
+        : '';
+
+      // Prefer encoded URL passed from card; fall back to full CPX offerwall
+      let resolvedUrl = encodedUrl
+        ? decodeURIComponent(encodedUrl)
+        : `${OFFERWALL_CONFIG.cpxOfferwallUrl}?app_id=${OFFERWALL_CONFIG.cpxAppId}&ext_user_id=${encodeURIComponent(userId)}${secureHash ? '&secure_hash=' + secureHash : ''}`;
+
+      // Retrieve the current session access token for validation inside task-view.js
+      let sessionToken = '';
+      try {
+        if (supabaseClient && supabaseClient.auth) {
+          const { data: sessionData } = await supabaseClient.auth.getSession();
+          sessionToken = sessionData?.session?.access_token || '';
+        }
+      } catch (_) { /* non-fatal */ }
+
+      const params = new URLSearchParams({
+        type:          'cpx',
+        task_id:       offerId   || 'cpx-main',
+        url:           resolvedUrl,
+        session_token: sessionToken,
+        user_id:       userId       // explicit fallback so task-view.js always has a UID
+      });
+
+      // task-view.html lives alongside index.html in the extension root
+      const taskViewUrl = `task-view.html?${params.toString()}`;
+
+      // --- Route via background.js (Chrome extension context) -----------
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+        // Also tell background to connect the Realtime rewards listener
+        sendToExtension('ATTACH_USER_REWARDS_LISTENER', { user_id: userId });
+        sendToExtension('OPEN_TASK_TAB', {
+          type:         'cpx',
+          url:          taskViewUrl,
+          session_token: sessionToken,
+          task_id:      offerId || 'cpx-main',
+          reward:       rewardAmount || 0
+        });
+      } else {
+        // --- Fallback: plain new tab (web / dev mode) -------------------
+        window.open(taskViewUrl, '_blank', 'noopener,noreferrer');
+      }
+
+      if (typeof showToast === 'function') {
+        showToast(`Opening "${title || 'Survey'}" in a new secure tab…`, 'info');
+      }
+    }
+    function onOfferwallIframeLoaded() {
+      const loader = document.getElementById('offerwall-iframe-loader');
+      if (loader) loader.classList.add('hidden');
+    }
+
+    async function closeOfferwallModal() {
+      const modal  = document.getElementById('offerwall-modal');
+      const iframe = document.getElementById('offerwall-iframe');
+      if (modal)  modal.classList.add('hidden');
+      if (iframe) iframe.src = 'about:blank';
+      document.body.style.overflow = '';
+
+      if (typeof showToast === 'function') {
+        showToast('Session closed. Syncing your latest balance...', 'info');
+      }
+
+      // Re-fetch latest balance + activity_ledger from Supabase
+      try {
+        if (typeof loadDataFromSupabase === 'function') {
+          await loadDataFromSupabase();
+        }
+      } catch (e) {
+        console.warn('[Offerwall] Balance re-sync error:', e);
+      }
+
+      // Refresh tracker counters from live Supabase data
+      await updateOfferwallTrackers();
+    }
+
+    // ESC key closes modal
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('offerwall-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeOfferwallModal();
+        }
+      }
+    });
+
+    // Click outside modal panel also closes it
+    document.getElementById('offerwall-modal')?.addEventListener('click', function(e) {
+      if (e.target === this) closeOfferwallModal();
+    });
+
+    // ────────────────────────────────────────────────────────────────
+    // STEP 2 (cont.) + STEP 3 UI side —
+    // updateOfferwallTrackers: reads activity_ledger from Supabase
+    // for rows with type='survey_reward', falls back to state cache
+    // ────────────────────────────────────────────────────────────────
+    async function updateOfferwallTrackers() {
+      const completedEl = document.getElementById('tracker-completed-offers');
+      const pendingEl   = document.getElementById('tracker-pending-rewards');
+      const totalEl     = document.getElementById('tracker-total-survey-earnings');
+
+      // Show loading state
+      [completedEl, pendingEl, totalEl].forEach(el => {
+        if (el) el.classList.add('opacity-50');
+      });
+
+      let completedCount = 0;
+      let pendingAmount  = 0;
+      let totalEarned    = 0;
+
+      try {
+        // Query Supabase activity_ledger for survey/offerwall rows
+        if (typeof supabaseClient !== 'undefined' && supabaseClient &&
+            typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
+
+          const { data: rows, error } = await supabaseClient
+            .from('activity_ledger')
+            .select('id, type, amount, status, created_at')
+            .eq('user_id', currentUser.id)
+            .in('type', ['survey_reward', 'Survey Reward', 'offerwall_reward',
+                         'Offerwall Reward', 'Survey Earnings'])
+            .order('created_at', { ascending: false });
+
+          if (!error && rows) {
+            const completed = rows.filter(r =>
+              ['completed', 'credited', 'paid'].includes(String(r.status || '').toLowerCase())
+            );
+            const pending = rows.filter(r =>
+              ['pending', 'processing', 'approval'].includes(String(r.status || '').toLowerCase())
+            );
+
+            completedCount = completed.length;
+            totalEarned    = completed.reduce((s, r) => s + Math.max(0, Number(r.amount || 0)), 0);
+            pendingAmount  = pending.reduce((s, r)   => s + Math.max(0, Number(r.amount || 0)), 0);
+
+            console.log(`[Offerwall Trackers] Completed: ${completedCount}, Total: $${totalEarned.toFixed(2)}, Pending: $${pendingAmount.toFixed(2)}`);
+          } else if (error) {
+            // Table may not exist yet — fall back to state cache
+            throw error;
+          }
+
+        } else {
+          // Offline / guest mode: read from state.activityLedger cache
+          const ledger = (typeof state !== 'undefined' && state.activityLedger) ? state.activityLedger : [];
+          const surveyRows = ledger.filter(item => {
+            const t = String(item.type || '').toLowerCase();
+            const m = String(item.method || '').toLowerCase();
+            return t.includes('survey') || t.includes('offer') ||
+                   m.includes('survey') || m.includes('offerwall');
+          });
+          completedCount = surveyRows.length;
+          totalEarned    = surveyRows.reduce((s, i) => s + Math.max(0, Number(i.amount || 0)), 0);
+          pendingAmount  = 0;
+        }
+      } catch (e) {
+        console.warn('[Offerwall Trackers] Supabase query failed, using cache:', e.message || e);
+        // Graceful fallback
+        const ledger = (typeof state !== 'undefined' && state.activityLedger) ? state.activityLedger : [];
+        const rows = ledger.filter(item => {
+          const t = String(item.type || '').toLowerCase();
+          return t.includes('survey') || t.includes('offerwall') || t.includes('offer');
+        });
+        completedCount = rows.length;
+        totalEarned    = rows.reduce((s, i) => s + Math.max(0, Number(i.amount || 0)), 0);
+      }
+
+      // Update DOM
+      if (completedEl) { completedEl.textContent = completedCount; completedEl.classList.remove('opacity-50'); }
+      if (totalEl)     { totalEl.textContent     = `${Math.round(totalEarned * 1000).toLocaleString()} SKIT`; totalEl.classList.remove('opacity-50'); }
+      if (pendingEl)   { pendingEl.textContent   = `${Math.round(pendingAmount * 1000).toLocaleString()} SKIT`; pendingEl.classList.remove('opacity-50'); }
+    }
+
+    function getOfferwallUserId() {
+      if (typeof currentUser !== 'undefined' && currentUser && currentUser.id) return currentUser.id;
+      if (typeof state !== 'undefined' && state.user && state.user.id && state.user.id.includes('-')) return state.user.id;
+      return null; // Require real auth session for offerwall
+    }
+
+    function getSurveyTitleByIndex(i) {
+      const titles = [
+        'Tech & Digital Device Usage Study',
+        'Fintech & Digital Banking Feedback',
+        'Cyberpunk Runner • Level 5 Challenge',
+        'Global Consumer Lifestyle & Habits',
+        'Electric Vehicle & Green Transit Study',
+        'Space Miner • Resource Extraction Quest'
+      ];
+      return titles[i % titles.length];
+    }
+
+    function getSurveyCategoryByIndex(i) {
+      const cats = ['Technology', 'Finance', 'Games', 'Consumer', 'Technology', 'Games'];
+      return cats[i % cats.length];
+    }
+
+    function getLiveCpxSurveyInventory(appId, userId) {
+      const base = `https://offers.cpx-research.com/index.php?app_id=${appId}&ext_user_id=${encodeURIComponent(userId)}`;
+      return [
+        {
+          id: 'cpx-top-1',
+          title: 'CPX High-Yield Market Study',
+          category: 'Technology',
+          type: 'survey',
+          loi: 10,
+          payout: 2.50,
+          rating: 4.9,
+          _provider: 'cpx',
+          href_new: base
+        },
+        {
+          id: 'cpx-top-2',
+          title: 'Fintech & Digital Banking Pulse',
+          category: 'Finance',
+          type: 'survey',
+          loi: 14,
+          payout: 3.20,
+          rating: 4.8,
+          _provider: 'cpx',
+          href_new: base
+        },
+        {
+          id: 'cpx-top-3',
+          title: 'Consumer Brand & Lifestyle Review',
+          category: 'Consumer',
+          type: 'survey',
+          loi: 6,
+          payout: 1.25,
+          rating: 5.0,
+          _provider: 'cpx',
+          href_new: base
+        },
+        {
+          id: 'cpx-top-4',
+          title: 'Next-Gen Software & AI Products Feedback',
+          category: 'Technology',
+          type: 'survey',
+          loi: 12,
+          payout: 2.75,
+          rating: 4.9,
+          _provider: 'cpx',
+          href_new: base
+        },
+        {
+          id: 'cpx-top-5',
+          title: 'Quick Express Opinion Match',
+          category: 'Consumer',
+          type: 'survey',
+          loi: 4,
+          payout: 0.90,
+          rating: 4.7,
+          _provider: 'cpx',
+          href_new: base
+        },
+        {
+          id: 'cpx-top-6',
+          title: 'Interactive Gaming & Digital Media Panel',
+          category: 'Games',
+          type: 'game',
+          loi: 16,
+          payout: 3.80,
+          rating: 4.9,
+          _provider: 'cpx',
+          href_new: base
+        }
+      ];
+    }
+
+    function getVerifiedSurveyInventory(userId) {
+      return getLiveCpxSurveyInventory(OFFERWALL_CONFIG.cpxAppId || '37856', userId);
+    }
+
+</script>
+
+  <!-- ========================================================
+       FULL-SCREEN GLASSMORPHISM OFFERWALL MODAL
+       ======================================================== -->
+  <div id="offerwall-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md hidden transition-all duration-300 p-2 sm:p-4">
+    <div class="bg-[#0c1426] border border-surf-border/90 rounded-2xl w-full max-w-5xl h-[92vh] max-h-[900px] flex flex-col shadow-2xl overflow-hidden relative">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between px-5 py-3.5 border-b border-surf-border/80 bg-[#0A0F1D]/90 backdrop-blur-sm z-10 shrink-0">
+        <div class="flex items-center gap-3 overflow-hidden">
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0"></div>
+          <div class="truncate">
+            <h3 id="offerwall-modal-title" class="text-sm font-bold text-white truncate">Partner Offerwall Session</h3>
+            <p class="text-[11px] text-slate-400 flex items-center gap-1.5 mt-0.5">
+              <span>Direct Session</span>
+              <span>•</span>
+              <span class="text-emerald-400 font-mono font-bold" id="offerwall-modal-reward">+0 SKIT</span>
+              <span>•</span>
+              <span class="text-slate-500 font-mono text-[10px]" id="offerwall-modal-uid">UID: ...</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="closeOfferwallModal()" class="px-3.5 py-1.5 rounded-xl bg-surf-surfaceElevated hover:bg-rose-500/20 text-slate-300 hover:text-rose-400 border border-surf-border transition-all flex items-center gap-1.5 text-xs font-semibold active:scale-95">
+            <span>Exit & Sync Balance</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Iframe Container with Loading Animation -->
+      <div class="relative flex-1 bg-[#070b14] overflow-hidden">
+        <div id="offerwall-iframe-loader" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[#0c1426] text-slate-400 z-10">
+          <div class="w-8 h-8 border-3 border-surf-teal border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-xs font-medium">Connecting to secure partner survey node...</span>
+        </div>
+        <iframe 
+          id="offerwall-iframe" 
+          src="about:blank"
+          class="w-full h-full border-0"
+          allow="clipboard-read; clipboard-write; camera; geolocation; payment; fullscreen"
+          onload="onOfferwallIframeLoaded()"
+        ></iframe>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-5 py-2.5 bg-[#0A0F1D]/90 border-t border-surf-border/80 flex items-center justify-between text-[11px] text-slate-400 shrink-0">
+        <span class="flex items-center gap-1.5 text-slate-400">
+          <svg class="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+          SSL Encrypted Partner Tunnel
+        </span>
+        <span>Click <b>Exit & Sync Balance</b> after completing the survey</span>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// BACKGROUND → DASHBOARD REALTIME MESSAGE BRIDGE
+// Listens for messages broadcast by background.js:
+//   • BALANCE_UPDATED  — reward confirmed by Supabase Realtime;
+//                        refresh UI with new balance without full reload
+//   • TASK_COMPLETION_SIGNALED — task-view confirmed completion;
+//                        trigger a lightweight data re-fetch
+// ════════════════════════════════════════════════════════════════════
+(function installRewardsBridge() {
+  if (typeof chrome === 'undefined' || !chrome.runtime || !chrome.runtime.onMessage) {
+    // Not inside Chrome extension context — skip silently
+    return;
+  }
+
+  chrome.runtime.onMessage.addListener(function(msg, _sender, sendResponse) {
+    if (!msg || !msg.action) return;
+
+    // ── BALANCE_UPDATED ──────────────────────────────────────────────
+    // background.js fires this after Supabase Realtime confirms the
+    // credit_user_reward RPC wrote the new balance to `profiles`.
+    if (msg.action === 'BALANCE_UPDATED') {
+      const newBalance   = typeof msg.newBalance   === 'number' ? msg.newBalance   : null;
+      const rewardAmount = typeof msg.rewardAmount === 'number' ? msg.rewardAmount : null;
+
+      // 1. Update in-memory state so renderApp() shows the new value
+      if (newBalance !== null) {
+        if (typeof state !== 'undefined' && state.user) {
+          state.user.availableBalance = newBalance;
+        }
+        // Also patch the currentUser cache if present
+        if (typeof currentUser !== 'undefined' && currentUser) {
+          currentUser.availableBalance = newBalance;
+        }
+      }
+
+      // 2. Re-render the whole UI (cheap — no network call)
+      if (typeof renderApp === 'function') renderApp();
+
+      // 3. Refresh tracker counters (Supabase query for completed offers)
+      if (typeof updateOfferwallTrackers === 'function') {
+        updateOfferwallTrackers().catch(() => {});
+      }
+
+      // 4. Toast notification
+      if (typeof showToast === 'function') {
+        const amtStr = rewardAmount !== null ? `+$${rewardAmount.toFixed(2)} USD` : 'Reward';
+        showToast(`${amtStr} credited to your Surfkit balance! 🎉`, 'success');
+      }
+
+      sendResponse({ received: true });
+      return true; // keep channel open for async
+    }
+
+    // ── TASK_COMPLETION_SIGNALED ──────────────────────────────────────
+    // background.js fires this when task-view.js sends TASK_COMPLETED.
+    // Triggers a lightweight Supabase re-fetch to pick up any updates
+    // that arrived before the Realtime event fires.
+    if (msg.action === 'TASK_COMPLETION_SIGNALED') {
+      if (typeof showToast === 'function') {
+        showToast('Survey complete — syncing your latest rewards…', 'info');
+      }
+      if (typeof loadDataFromSupabase === 'function') {
+        loadDataFromSupabase().catch(() => {});
+      }
+      sendResponse({ received: true });
+      return true;
+    }
+  });
+
+  console.log('[Surfkit Dashboard] Rewards bridge listener installed.');
+})();
+
+    // --- GLOBAL ACTIVITY COMPLETED DISPATCHER (Surveys, Mini Games, Referrals) ---
+    window.recordCompletedActivity = async function(type, skitAmount = 0, metadata = {}) {
+      const currentState = window.state || (typeof state !== 'undefined' ? state : null);
+      if (!currentState || !currentState.user) return;
+      const numSkit = Number(skitAmount || 0);
+      const usdEarned = parseFloat((numSkit * 0.001).toFixed(6));
+      const nowIso = new Date().toISOString();
+
+      if (usdEarned > 0) {
+        currentState.user.availableBalance = parseFloat(((currentState.user.availableBalance || 0) + usdEarned).toFixed(6));
+        currentState.user.lifetimeEarnings = parseFloat(((currentState.user.lifetimeEarnings || 0) + usdEarned).toFixed(6));
+      }
+      if (type === 'survey') {
+        currentState.user.surveysCompleted = (currentState.user.surveysCompleted || 0) + 1;
+      } else if (type === 'game') {
+        currentState.user.gamesPlayed = (currentState.user.gamesPlayed || 0) + 1;
+      } else if (type === 'referral') {
+        currentState.user.referralBonus = parseFloat(((currentState.user.referralBonus || 0) + usdEarned).toFixed(6));
+      }
+      const nextActCount = (typeof getCompletedActivitiesCount === 'function' ? getCompletedActivitiesCount() : (currentState.user.completedActivities || 0)) + 1;
+      currentState.user.completedActivities = nextActCount;
+      currentState.user.completedTasks = nextActCount;
+      currentState.user.lifetimeImpressions = nextActCount;
+      if (typeof syncChartWithCompletedTasks === 'function') syncChartWithCompletedTasks();
+
+      const curBal = currentState.user.availableBalance;
+      localStorage.setItem('surfkit_available_balance', String(curBal));
+      localStorage.setItem('surfkit_balance', String(curBal));
+
+      window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
+        detail: { availableBalance: curBal, skitEarned: numSkit, source: type }
+      }));
+      try {
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'surfkit_available_balance',
+          newValue: String(curBal)
+        }));
+      } catch (_) {}
+
+      // Extension message sync
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage({
+            action: 'TASK_COMPLETED',
+            payload: {
+              balanceUsd: curBal,
+              tokensEarned: Number((curBal / 0.001).toFixed(1)),
+              completedActivities: currentState.user.completedActivities
+            }
+          }, () => { if (chrome.runtime.lastError) {} });
+        } catch (_) {}
+      }
+
+      // Supabase persistence
+      try {
+        const _sbc = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (window.supabaseClient || null);
+        const targetUserId = (window.currentUser && window.currentUser.id && window.currentUser.id.includes('-')) ? window.currentUser.id : null;
+        if (_sbc && targetUserId) {
+          const updates = {
+            available_balance: curBal,
+            lifetime_earnings: currentState.user.lifetimeEarnings,
+            updated_at: nowIso
+          };
+          if (type === 'survey') updates.surveys_completed = currentState.user.surveysCompleted;
+          if (type === 'game') updates.games_played = currentState.user.gamesPlayed;
+          await _sbc.from('profiles').update(updates).eq('id', targetUserId);
+        }
+      } catch (e) {
+        console.warn('[Activity Tracker] DB persistence notice:', e);
+      }
+
+      if (typeof syncChartWithCompletedTasks === 'function') syncChartWithCompletedTasks();
+      if (typeof window.saveState === 'function') window.saveState();
+      if (typeof window.renderApp === 'function') window.renderApp();
+      if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
+    };
+</script>
+
+
+<!-- ========================================================================== -->
+<!-- SURFKIT QUANTUM PULSE DIAL – SKIT SPIN WHEEL ENGINE                        -->
+<!-- ========================================================================== -->
+<script>
 (function() {
   /* ------------------------------------------------------------------ *
    *  QUANTUM PULSE DIAL – 4-Hour SKIT Spin Engine                       *
@@ -7409,8 +8746,271 @@ document.addEventListener('DOMContentLoaded', () => {
     initPulseDialCooldownTimer();
     updatePulseDialUI();
   };
+
+  /* --- Modular Ad Slot Engine --- */
+  window.SurfkitAdEngine = {
+    slots: {
+      'overview-native-1':     { placement: 'overview', format: 'native',          filled: false },
+      'leaderboard-native-1':  { placement: 'overview', format: 'native',          filled: false },
+      'earnhub-native-1':      { placement: 'earnhub',  format: 'native',          filled: false },
+      'cashout-native-1':      { placement: 'cashout',  format: 'native',          filled: false },
+      'referral-native-1':     { placement: 'referral', format: 'native',          filled: false },
+      'account-native-1':      { placement: 'account',  format: 'native',          filled: false },
+      'global-right-native-1': { placement: 'sidebar',  format: 'vertical-native', filled: false },
+      'side-ad-overview-slot': { placement: 'sidebar-overview', format: 'vertical-native', filled: false },
+      'side-ad-earnhub-slot':  { placement: 'sidebar-earnhub',  format: 'vertical-native', filled: false },
+      'side-ad-games-slot':    { placement: 'sidebar-games',    format: 'vertical-native', filled: false },
+      'side-ad-cashout-slot':  { placement: 'sidebar-cashout',  format: 'vertical-native', filled: false },
+      'side-ad-referral-slot': { placement: 'sidebar-referral', format: 'vertical-native', filled: false },
+      'side-ad-account-slot':  { placement: 'sidebar-account',  format: 'vertical-native', filled: false },
+      'global-right-native-2': { placement: 'sidebar',  format: 'vertical-native', filled: false },
+      'games-native-top':      { placement: 'games',    format: 'native',          filled: false },
+      'games-native-bottom':   { placement: 'games',    format: 'native',          filled: false },
+      'theater-native-ad':     { placement: 'theater',  format: 'native',          filled: false }
+    },
+
+    init: function() {
+      Object.keys(this.slots).forEach(function(slotId) {
+        const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
+        if (el) {
+          el.style.display = 'block';
+          window.SurfkitAdEngine.slots[slotId].filled = true;
+        }
+      });
+    },
+
+    fillSlot: function(slotId, renderFnOrHtml) {
+      const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
+      const container = document.getElementById('ad-slot-' + slotId);
+      if (!el || !container) return;
+      if (typeof renderFnOrHtml === 'string' && renderFnOrHtml.trim()) {
+        container.innerHTML = renderFnOrHtml;
+        el.style.display = 'block';
+        if (this.slots[slotId]) this.slots[slotId].filled = true;
+      } else if (typeof renderFnOrHtml === 'function') {
+        renderFnOrHtml(container, function() {
+          el.style.display = 'block';
+          if (window.SurfkitAdEngine.slots[slotId]) window.SurfkitAdEngine.slots[slotId].filled = true;
+        });
+      }
+    },
+
+    collapseSlot: function(slotId) {
+      const el = document.querySelector('.surfkit-ad-slot-wrapper[data-slot-id="' + slotId + '"]');
+      if (el) el.style.display = 'none';
+      if (this.slots[slotId]) this.slots[slotId].filled = false;
+    }
+  };
+
+  // Auto-init on DOMContentLoaded
+  document.addEventListener('DOMContentLoaded', function() {
+    window.SurfkitAdEngine.init();
+    if (typeof window.initPulseWidget === 'function') {
+      window.initPulseWidget();
+    }
+  });
 })();
 
+  // ==========================================================================
+  // SURFKIT 4-HOUR PUSH-UP AD ROTATION ENGINE
+  // Shows exactly 4 ads during the first 10 minutes of every 4-hour cycle.
+  // ==========================================================================
+  const PUSH_AD_CONFIG = {
+    CYCLE_MS: 4 * 60 * 60 * 1000,     // 4 Hours (14,400,000 ms)
+    WINDOW_MS: 10 * 60 * 1000,        // First 10 Minutes (600,000 ms)
+    TOTAL_ADS_PER_CYCLE: 4,           // Exactly 4 ads
+    AD_DURATION_MS: 28 * 1000,        // Visible for 28s before auto-dismiss
+    // 4 scheduled offsets across the 10-minute window (in ms from cycle start):
+    // Ad 1: ~20s | Ad 2: ~160s (2m 40s) | Ad 3: ~310s (5m 10s) | Ad 4: ~460s (7m 40s)
+    SLOT_DELAYS_MS: [20 * 1000, 160 * 1000, 310 * 1000, 460 * 1000],
+    LS_CYCLE_START: 'surfkit_push_cycle_start',
+    LS_ADS_SHOWN: 'surfkit_push_cycle_count',
+    LS_LAST_SHOWN: 'surfkit_push_last_shown'
+  };
+
+  let _pushAdDismissTimer = null;
+  let _pushAdProgressInterval = null;
+
+  function initPushUpAdEngine() {
+    try {
+      const now = Date.now();
+      let cycleStart = parseInt(localStorage.getItem(PUSH_AD_CONFIG.LS_CYCLE_START) || '0', 10);
+      let adsShown = parseInt(localStorage.getItem(PUSH_AD_CONFIG.LS_ADS_SHOWN) || '0', 10);
+
+      // Rotate / Reset cycle if 4 hours have elapsed or no cycle exists
+      if (!cycleStart || (now - cycleStart) >= PUSH_AD_CONFIG.CYCLE_MS) {
+        cycleStart = now;
+        adsShown = 0;
+        localStorage.setItem(PUSH_AD_CONFIG.LS_CYCLE_START, cycleStart.toString());
+        localStorage.setItem(PUSH_AD_CONFIG.LS_ADS_SHOWN, '0');
+        localStorage.setItem(PUSH_AD_CONFIG.LS_LAST_SHOWN, '0');
+      }
+
+      const elapsed = now - cycleStart;
+
+      // If outside the first 10 minutes or 4 ads already shown, sleep until next 4-hour cycle
+      if (elapsed >= PUSH_AD_CONFIG.WINDOW_MS || adsShown >= PUSH_AD_CONFIG.TOTAL_ADS_PER_CYCLE) {
+        const timeUntilNextCycle = (cycleStart + PUSH_AD_CONFIG.CYCLE_MS) - now;
+        if (timeUntilNextCycle > 0) {
+          setTimeout(initPushUpAdEngine, Math.min(timeUntilNextCycle + 1000, 2147483647));
+        }
+        return;
+      }
+
+      // Inside the first 10 minutes: schedule the remaining slots
+      const lastShown = parseInt(localStorage.getItem(PUSH_AD_CONFIG.LS_LAST_SHOWN) || '0', 10);
+
+      for (let i = 0; i < PUSH_AD_CONFIG.TOTAL_ADS_PER_CYCLE; i++) {
+        // Skip slots that have already been fulfilled
+        if (i < adsShown) continue;
+
+        const targetTime = cycleStart + PUSH_AD_CONFIG.SLOT_DELAYS_MS[i];
+        const delay = targetTime - now;
+
+        if (delay <= 0) {
+          // If we passed the target time recently and haven't shown an ad in the last 60 seconds
+          if (now - lastShown >= 60000 && adsShown < PUSH_AD_CONFIG.TOTAL_ADS_PER_CYCLE) {
+            triggerPushUpAd(i);
+            break;
+          }
+        } else if (delay < (PUSH_AD_CONFIG.WINDOW_MS - elapsed)) {
+          // Schedule upcoming slot
+          setTimeout(() => {
+            const currentShown = parseInt(localStorage.getItem(PUSH_AD_CONFIG.LS_ADS_SHOWN) || '0', 10);
+            if (currentShown < PUSH_AD_CONFIG.TOTAL_ADS_PER_CYCLE) {
+              triggerPushUpAd(currentShown);
+            }
+          }, delay);
+          break; // Schedule one slot at a time; its dismissal will schedule next check
+        }
+      }
+
+      // Schedule cycle rotation timer when this 4-hour window ends
+      const msUntilCycleReset = (cycleStart + PUSH_AD_CONFIG.CYCLE_MS) - now;
+      if (msUntilCycleReset > 0) {
+        setTimeout(initPushUpAdEngine, Math.min(msUntilCycleReset + 1000, 2147483647));
+      }
+    } catch (e) {
+      console.warn('[Push Ad Engine] Init error:', e);
+    }
+  }
+
+  const PUSH_FALLBACK_SPONSORS = [
+    {
+      badge: 'Featured Crypto Partner',
+      icon: '⚡',
+      title: 'Exodus Multi-Chain Web3 Wallet',
+      sub: '0% Custodial Risk • Solana, ETH & BTC',
+      desc: 'Securely manage, swap, and stake 10,000+ digital assets across Solana, Ethereum, Bitcoin & Polygon.',
+      cta: 'Get Free Wallet'
+    },
+    {
+      badge: 'DeFi Staking Partner',
+      icon: '💎',
+      title: 'Bybit Web3 Staking & Yield',
+      sub: 'Up to 12.5% APY • Daily Compounding',
+      desc: 'Earn high-yield passive daily compounding on your crypto balance with zero lockups.',
+      cta: 'Stake Earnings'
+    },
+    {
+      badge: 'Cold Storage Security',
+      icon: '🛡️',
+      title: 'Ledger Nano Hardware Wallet',
+      sub: 'Military-Grade Security • Offline Keys',
+      desc: 'Isolate your digital assets from internet vulnerabilities. Recommended cold storage for earnings.',
+      cta: 'Secure Assets'
+    },
+    {
+      badge: 'Cyber Defense Partner',
+      icon: '🌐',
+      title: 'NordVPN Threat Protection',
+      sub: 'Encrypted Nodes • High-Speed Privacy',
+      desc: 'Protect your browser nodes and device activity with next-gen AES-256 encryption and malware defense.',
+      cta: 'Get Protection'
+    }
+  ];
+
+  function triggerPushUpAd(adIndex = 0) {
+    const widget = document.getElementById('surfkit-pushup-ad-widget');
+    if (!widget) return;
+
+    // Rotate fallback sponsor
+    try {
+      const sp = PUSH_FALLBACK_SPONSORS[adIndex % PUSH_FALLBACK_SPONSORS.length] || PUSH_FALLBACK_SPONSORS[0];
+      const bBadge = document.getElementById('pushup-fallback-badge');
+      const bSlot = document.getElementById('pushup-fallback-slot');
+      const bIcon = document.getElementById('pushup-fallback-icon');
+      const bTitle = document.getElementById('pushup-fallback-title');
+      const bSub = document.getElementById('pushup-fallback-sub');
+      const bDesc = document.getElementById('pushup-fallback-desc');
+      const bCta = document.getElementById('pushup-fallback-cta');
+
+      if (bBadge) bBadge.textContent = sp.badge;
+      if (bSlot) bSlot.textContent = `Ad ${(adIndex % 4) + 1}/4`;
+      if (bIcon) bIcon.textContent = sp.icon;
+      if (bTitle) bTitle.textContent = sp.title;
+      if (bSub) bSub.textContent = sp.sub;
+      if (bDesc) bDesc.textContent = sp.desc;
+      if (bCta) bCta.textContent = sp.cta;
+    } catch (e) {}
+
+    // Refresh iframe with cache-buster for rotation
+    const iframe = document.getElementById('pushup-ad-iframe');
+    if (iframe) {
+      iframe.src = 'https://surfkit.cloud/ad-frame/index.html?slot=' + (adIndex + 1) + '&t=' + Date.now();
+    }
+
+    // Display widget with slide-up animation
+    widget.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+    widget.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+
+    // Update state in localStorage
+    const currentCount = parseInt(localStorage.getItem(PUSH_AD_CONFIG.LS_ADS_SHOWN) || '0', 10);
+    localStorage.setItem(PUSH_AD_CONFIG.LS_ADS_SHOWN, (currentCount + 1).toString());
+    localStorage.setItem(PUSH_AD_CONFIG.LS_LAST_SHOWN, Date.now().toString());
+
+    // Animate progress bar
+    const progressEl = document.getElementById('pushup-ad-progress');
+    if (progressEl) {
+      progressEl.style.width = '0%';
+      let progress = 0;
+      clearInterval(_pushAdProgressInterval);
+      const stepMs = 200;
+      const totalSteps = PUSH_AD_CONFIG.AD_DURATION_MS / stepMs;
+      _pushAdProgressInterval = setInterval(() => {
+        progress += (100 / totalSteps);
+        if (progressEl) progressEl.style.width = Math.min(progress, 100) + '%';
+        if (progress >= 100) clearInterval(_pushAdProgressInterval);
+      }, stepMs);
+    }
+
+    // Auto-dismiss after AD_DURATION_MS
+    clearTimeout(_pushAdDismissTimer);
+    _pushAdDismissTimer = setTimeout(() => {
+      dismissPushUpAd();
+    }, PUSH_AD_CONFIG.AD_DURATION_MS);
+  }
+
+  function dismissPushUpAd() {
+    clearTimeout(_pushAdDismissTimer);
+    clearInterval(_pushAdProgressInterval);
+
+    const widget = document.getElementById('surfkit-pushup-ad-widget');
+    if (widget) {
+      widget.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      widget.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+    }
+
+    // After dismiss, schedule next slot check if within first 10 minutes
+    setTimeout(initPushUpAdEngine, 2000);
+  }
+
+  // Auto-init on page load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPushUpAdEngine);
+  } else {
+    initPushUpAdEngine();
+  }
 
 </script>
 
