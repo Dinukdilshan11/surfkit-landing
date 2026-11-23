@@ -19,7 +19,7 @@ ALTER TABLE public.profiles
 CREATE TABLE IF NOT EXISTS public.pulse_spins (
   id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id          UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
-  skit_reward      NUMERIC(6, 2) NOT NULL CHECK (skit_reward IN (1, 2, 3, 5)),
+  skit_reward      NUMERIC(6, 2) NOT NULL CHECK (skit_reward IN (0, 0.5, 1, 2, 3, 5)),
   usd_reward       NUMERIC(10, 6) NOT NULL,
   spun_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   client_context   JSONB DEFAULT '{}'::jsonb
@@ -61,7 +61,7 @@ DECLARE
   v_total_skit      NUMERIC(12, 3);
 BEGIN
   -- 1. Validate SKIT reward: strictly 1, 2, 3, or 5
-  IF p_skit_reward NOT IN (1, 2, 3, 5) THEN
+  IF p_skit_reward NOT IN (0, 0.5, 1, 2, 3, 5) THEN
     RETURN jsonb_build_object(
       'success', false,
       'error', 'Invalid reward tier. Must be 1, 2, 3, or 5 SKIT.'

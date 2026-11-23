@@ -10,7 +10,7 @@
       margin: 0;
       padding: 0;
     }
-    body {
+    html, body {
       width: 360px;
       margin: 0;
       padding: 14px;
@@ -19,7 +19,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       font-size: 13px;
       line-height: 1.4;
-      overflow-x: hidden;
+      overflow: hidden;
       user-select: none;
     }
     /* Header */
@@ -305,8 +305,8 @@
       <span class="token-unit">SKIT</span>
     </div>
     <div class="balance-secondary">
-      <span id="popup-balance-usd">≈ $67.819 USD</span>
-      <span style="color: #64748b;">•</span>
+      <span id="popup-balance-usd">&asymp; $67.819 USD</span>
+      <span style="color: #64748b;">&bull;</span>
       <span style="color: #00d293; font-weight: 700;">Ready to Cashout</span>
     </div>
   </div>
@@ -315,7 +315,7 @@
   <div class="mini-grid">
     <div class="mini-card">
       <div class="mini-card-label">
-        <span>🔥</span>
+        <span>&#128293;</span>
         <span>Active Streak</span>
       </div>
       <div class="mini-card-val" id="popup-streak-val">2 Days</div>
@@ -323,7 +323,7 @@
     </div>
     <div class="mini-card">
       <div class="mini-card-label">
-        <span>🎡</span>
+        <span>&#127911;</span>
         <span>4-Hour Spin</span>
       </div>
       <div class="mini-card-val" id="popup-spin-status" style="color: #00d293;">Ready!</div>
@@ -339,7 +339,7 @@
     </div>
     <div class="cashout-row">
       <div class="cashout-gw">
-        <span>⚡</span>
+        <span>&#9889;</span>
         <span>FaucetPay</span>
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
@@ -349,7 +349,7 @@
     </div>
     <div class="cashout-row">
       <div class="cashout-gw">
-        <span>🅿️</span>
+        <span>&#127359;&#65039;</span>
         <span>PayPal</span>
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
@@ -377,9 +377,9 @@
   <script>
     (function () {
       'use strict';
+
       function syncState() {
         try {
-          // Check local storage or chrome.storage
           let usdBalance = 67.819;
           let streak = 2;
 
@@ -393,31 +393,44 @@
             streak = parseInt(savedStreak, 10);
           }
 
-          const skitBalance = Math.round(usdBalance * 1000);
+          // Fractional SKIT support (e.g. 0.5 SKIT)
+          const skitVal = Number((usdBalance * 1000).toFixed(1));
           const skitEl = document.getElementById('popup-balance-skit');
           const usdEl = document.getElementById('popup-balance-usd');
           const streakEl = document.getElementById('popup-streak-val');
 
-          if (skitEl) skitEl.textContent = skitBalance.toLocaleString();
-          if (usdEl) usdEl.textContent = '≈ $' + usdBalance.toFixed(3) + ' USD';
+          if (skitEl) {
+            skitEl.textContent = (skitVal % 1 !== 0)
+              ? skitVal.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+              : Math.round(skitVal).toLocaleString();
+          }
+          if (usdEl) {
+            const usdDecimals = (usdBalance < 1 && usdBalance > 0 && (usdBalance * 1000) % 1 !== 0) ? 4 : 3;
+            usdEl.innerHTML = '&asymp; $' + usdBalance.toFixed(usdDecimals) + ' USD <span style="color: #64748b;">&bull;</span> <span style="color: #00d293; font-weight: 700;">Ready to Cashout</span>';
+          }
           if (streakEl) streakEl.textContent = streak + ' Days';
 
-          // Cashout thresholds
-          const fpReady = skitBalance >= 1000;
-          const ppReady = skitBalance >= 5000;
+          // Cashout thresholds: FaucetPay Min 1,000 SKIT ($1), PayPal Min 5,000 SKIT ($5)
+          const fpReady = skitVal >= 1000;
+          const ppReady = skitVal >= 5000;
           const fpEl = document.getElementById('popup-fp-status');
           const ppEl = document.getElementById('popup-pp-status');
           if (fpEl) {
-            fpEl.textContent = fpReady ? 'Ready' : Math.round((skitBalance / 1000) * 100) + '%';
+            fpEl.textContent = fpReady ? 'Ready' : Math.round((skitVal / 1000) * 100) + '%';
             fpEl.className = 'cashout-status-pill ' + (fpReady ? 'status-ready' : '');
           }
           if (ppEl) {
-            ppEl.textContent = ppReady ? 'Ready' : Math.round((skitBalance / 5000) * 100) + '%';
+            ppEl.textContent = ppReady ? 'Ready' : Math.round((skitVal / 5000) * 100) + '%';
             ppEl.className = 'cashout-status-pill ' + (ppReady ? 'status-ready' : '');
           }
 
-          // 4-Hour Spin check
-          const lastSpin = parseInt(localStorage.getItem('surfkit_pulse_last_spin') || '0', 10);
+          // 4-Hour Spin check: check both keys
+          const lastSpin = parseInt(
+            localStorage.getItem('surfkit_pulse_dial_last_spin') ||
+            localStorage.getItem('surfkit_pulse_last_spin') ||
+            '0',
+            10
+          );
           const now = Date.now();
           const spinCooldown = 4 * 60 * 60 * 1000;
           const spinStatusEl = document.getElementById('popup-spin-status');
@@ -432,7 +445,8 @@
               const diffMs = spinCooldown - (now - lastSpin);
               const hrs = Math.floor(diffMs / (60 * 60 * 1000));
               const mins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
-              spinStatusEl.textContent = hrs + 'h ' + mins + 'm';
+              const secs = Math.floor((diffMs % (60 * 1000)) / 1000);
+              spinStatusEl.textContent = hrs + 'h ' + mins + 'm ' + String(secs).padStart(2, '0') + 's';
               spinStatusEl.style.color = '#94a3b8';
               if (spinSubEl) spinSubEl.textContent = 'Cooldown Active';
             }
@@ -440,6 +454,41 @@
         } catch (e) {
           console.warn('[Popup] Sync error:', e);
         }
+      }
+
+      // Check chrome.storage.local if running in extension context
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['balanceUsd', 'tokensEarned', 'activeStreakDays', 'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin'], function(res) {
+          if (res) {
+            if (typeof res.balanceUsd === 'number') {
+              localStorage.setItem('surfkit_available_balance', String(res.balanceUsd));
+            }
+            if (typeof res.activeStreakDays === 'number') {
+              localStorage.setItem('surfkit_streak', String(res.activeStreakDays));
+            }
+            if (res.surfkit_pulse_dial_last_spin) {
+              localStorage.setItem('surfkit_pulse_dial_last_spin', String(res.surfkit_pulse_dial_last_spin));
+            }
+            syncState();
+          }
+        });
+
+        // Listen for storage changes
+        chrome.storage.onChanged.addListener(function() {
+          syncState();
+        });
+      }
+
+      // Realtime cross-tab and window listeners
+      window.addEventListener('storage', syncState);
+      window.addEventListener('surfkit_balance_update', syncState);
+
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+        chrome.runtime.onMessage.addListener(function(msg) {
+          if (msg && (msg.action === 'STATE_CHANGED' || msg.action === 'SPIN_COMPLETED' || msg.action === 'TASK_COMPLETED')) {
+            syncState();
+          }
+        });
       }
 
       // Support Chrome extension messaging if running as extension popup
@@ -453,7 +502,9 @@
         }
       }
 
+      // Initial sync and live 1s countdown refresh for spin
       syncState();
+      setInterval(syncState, 1000);
     })();
   </script>
 </body>

@@ -254,7 +254,7 @@ function setupRealtimeForUser(userId) {
       const bal = Number(newProfile.available_balance || 0);
       const lastActive = newProfile.last_active_date ? String(newProfile.last_active_date).split('T')[0] : null;
       const daily = Number(newProfile.daily_earnings || 0);
-      const tokens = Math.round(bal / 0.001);
+      const tokens = Number((bal / 0.001).toFixed(1));
       const dailyImpressions = Number(newProfile.daily_impressions || 0);
       const lifetimeImpressions = Number(newProfile.lifetime_impressions || 0);
       const streak = Number(newProfile.streak_days || 0);
@@ -307,7 +307,7 @@ async function syncFromSupabase() {
       // Reconcile earnings: take maximum between cloud and local
       const bal = Math.max(Number(profile.availableBalance || 0), Number(currentLocal.balanceUsd || 0));
       const daily = Math.max(Number(profile.dailyEarnings || 0), Number(currentLocal.dailyEarnings || 0));
-      const tokens = Math.max(Math.round(bal / 0.001), Number(currentLocal.tokensEarned || 0));
+      const tokens = Math.max(Number((bal / 0.001).toFixed(1)), Number(currentLocal.tokensEarned || 0));
       const dailyAds = Math.max(Number(profile.dailyImpressions || 0), Number(currentLocal.adsSeenToday || 0));
       const lifetimeAds = Math.max(Number(profile.lifetimeImpressions || 0), Number(currentLocal.stats?.totalImpressions || 0));
       const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || (dailyAds > 0 ? 1 : 0));
@@ -583,6 +583,38 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case 'AUTH_GET_USER': {
           sendResponse({ success: true, user: currentUser });
+          break;
+        }
+
+        case 'SPIN_COMPLETED':
+        case 'TASK_COMPLETED':
+        case 'SYNC_STATS': {
+          const updates = {};
+          if (payload) {
+            if (typeof payload.balanceUsd === 'number') {
+              state.balanceUsd = payload.balanceUsd;
+              updates.balanceUsd = payload.balanceUsd;
+              updates.surfkit_available_balance = payload.balanceUsd;
+            }
+            if (typeof payload.tokensEarned === 'number') {
+              state.tokensEarned = payload.tokensEarned;
+              updates.tokensEarned = payload.tokensEarned;
+            }
+            if (payload.lastSpin) {
+              updates.surfkit_pulse_dial_last_spin = payload.lastSpin;
+              updates.surfkit_pulse_last_spin = payload.lastSpin;
+            }
+            if (payload.completedActivities) {
+              state.stats = state.stats || {};
+              state.stats.totalImpressions = payload.completedActivities;
+              updates.stats = state.stats;
+            }
+          }
+          if (Object.keys(updates).length > 0) {
+            await chrome.storage.local.set(updates);
+            broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
+          }
+          sendResponse({ success: true, data: state });
           break;
         }
 
