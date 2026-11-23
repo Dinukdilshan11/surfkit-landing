@@ -93,6 +93,10 @@ BEGIN
   UPDATE public.profiles
   SET
     available_balance      = v_new_balance,
+    lifetime_earnings      = COALESCE(lifetime_earnings, 0) + v_usd_reward,
+    daily_earnings         = COALESCE(daily_earnings, 0) + v_usd_reward,
+    completed_activities   = COALESCE(completed_activities, 0) + 1,
+    four_hour_spins        = v_total_spins,
     pulse_dial_last_spin   = NOW(),
     last_spin_at           = NOW(),
     pulse_dial_total_spins = v_total_spins,

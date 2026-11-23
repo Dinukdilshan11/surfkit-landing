@@ -349,7 +349,7 @@
         position: relative;
         flex-shrink: 0;
       }
-      .aads-frame {
+      .ad-mockup-frame, .aads-frame {
         width: 300px;
         height: 250px;
         border: 0;
@@ -383,9 +383,9 @@
         <button class="close-btn" id="close-btn" title="Dismiss Ad Slice" aria-label="Close">&times;</button>
       </div>
       <div class="surfkit-body">
-        <iframe class="aads-frame"
+        <iframe class="ad-mockup-frame"
                 src="https://surfkit.cloud/ad-frame"
-                title="Surfkit A-Ads Sponsored Frame"
+                title="Surfkit Sponsored Partner Mockup Frame"
                 allowtransparency="true"
                 sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox">
         </iframe>

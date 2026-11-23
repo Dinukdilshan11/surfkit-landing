@@ -50,7 +50,7 @@ const DEFAULT_STATE = {
   tokensEarned: 0,
   tokenSymbol: 'SKIT',
   conversionRate: 0.001,  // 1 SKIT = $0.001 USD
-  baseRewardPerAd: 0.024, // $0.024 base
+  baseRewardPerAd: 0.000, // zero effect ad mockup // $0.024 base
   adsSeenToday: 0,
   activeStreakDays: 0,
   earningVelocityPerHour: 0.00,
@@ -607,6 +607,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               state.balanceUsd = payload.balanceUsd;
               updates.balanceUsd = payload.balanceUsd;
               updates.surfkit_available_balance = payload.balanceUsd;
+            }
+            if (typeof payload.lifetimeEarnedUsd === 'number') {
+              state.stats = state.stats || {};
+              state.stats.lifetimeEarnedUsd = payload.lifetimeEarnedUsd;
+              updates.stats = state.stats;
+            }
+            if (typeof payload.dailyEarnings === 'number') {
+              state.dailyEarnings = payload.dailyEarnings;
+              updates.dailyEarnings = payload.dailyEarnings;
             }
             if (typeof payload.tokensEarned === 'number') {
               state.tokensEarned = payload.tokensEarned;

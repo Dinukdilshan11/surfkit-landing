@@ -3912,19 +3912,19 @@ document.addEventListener('DOMContentLoaded', () => {
           }];
         }
 
-        // 3. Ad Impressions Query (for Chart & Activity Ledger)
-        let impRows = [];
+        // 3. Pulse Spins Query (Real Activity Ledger Single Source of Truth)
+        let spinRows = [];
         try {
           const { data, error } = await supabaseClient
-            .from('ad_impressions')
+            .from('pulse_spins')
             .select('*')
             .eq('user_id', currentUser.id)
-            .order('created_at', { ascending: false });
+            .order('spun_at', { ascending: false });
           if (!error && data) {
-            impRows = data;
+            spinRows = data;
           }
         } catch (e) {
-          console.warn('Error querying ad_impressions:', e);
+          console.warn('Error querying pulse_spins:', e);
         }
 
         // 4. Payouts (Canonical Single Source of Truth: 'payout_requests')
@@ -4079,22 +4079,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
 
         // ── COMBINE REAL-TIME RECENT ACTIVITY LEDGER ─────────────────────────────
-        // a) Ad impression earnings (from 'ad_impressions')
+        // a) Verified 4-Hour Spins (from 'pulse_spins' & local ledger)
         // b) Referral bonuses (from 'referrals')
         // c) Cashout requests (from 'payouts')
+        // NOTE: Popup ads are pure visual mockups with zero balance or activity impact
         const combinedLedger = [];
 
-        (impRows || []).forEach((imp, idx) => {
-          const earn = Number(imp.reward_usd ?? imp.earnings ?? imp.earn ?? 0.024);
-          const domain = imp.website_domain || imp.site_name || imp.domain || 'Browsing Node';
-          const slices = imp.slices_earned || Math.round(earn / 0.001);
+        (spinRows || []).forEach((sp, idx) => {
+          const skitVal = Number(sp.skit_reward !== undefined ? sp.skit_reward : 0);
+          const earnUsd = Number(sp.usd_reward !== undefined ? sp.usd_reward : (skitVal * 0.001));
           combinedLedger.push({
-            id: imp.id ? `imp-${imp.id}` : `imp-${idx}`,
-            type: 'Ad Earnings',
-            amount: earn,
-            method: `${domain} (${slices} slices)`,
-            date: formatFriendlyDate(imp.created_at),
-            rawDate: new Date(imp.created_at || Date.now()).getTime(),
+            id: sp.id ? `spin-${sp.id}` : `spin-${idx}`,
+            type: '4-Hour Spin',
+            amount: earnUsd,
+            skitAmount: skitVal,
+            method: skitVal > 0 ? `Quantum Pulse (+${skitVal} SKIT)` : 'Quantum Pulse (0 SKIT)',
+            date: formatFriendlyDate(sp.spun_at || sp.created_at),
+            rawDate: new Date(sp.spun_at || sp.created_at || Date.now()).getTime(),
             status: 'Credited'
           });
         });
@@ -8523,7 +8524,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const nowIso = new Date(nowMs).toISOString();
       setPulseDialLastSpin(nowMs);
 
-      // Credit SKIT balance locally (supports 0, 0.5, 1, 2, 3, 5 SKIT)
+      // Credit SKIT balance locally (supports 0, 0.5, 1, 2, 3, 5 SKIT at 1 SKIT = $0.001 USD)
       const skitEarned = Number(chosenSkit);
       const usdEarned  = parseFloat((skitEarned * SKIT_TO_USD).toFixed(6));
 
@@ -8531,17 +8532,29 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentState && currentState.user) {
         currentState.user.availableBalance = parseFloat(((currentState.user.availableBalance || 0) + usdEarned).toFixed(6));
         currentState.user.lifetimeEarnings = parseFloat(((currentState.user.lifetimeEarnings || 0) + usdEarned).toFixed(6));
+        currentState.user.dailyEarnings = parseFloat(((currentState.user.dailyEarnings || 0) + usdEarned).toFixed(6));
         currentState.user.fourHourSpins = (currentState.user.fourHourSpins || 0) + 1;
         const nextCount = (typeof getCompletedActivitiesCount === 'function' ? getCompletedActivitiesCount() : (currentState.user.completedActivities || 0)) + 1;
         currentState.user.completedActivities = nextCount;
         currentState.user.completedTasks = nextCount;
         currentState.user.lifetimeImpressions = nextCount;
+
+        // Keep Today chart earnings updated immediately
+        if (currentState.chartData7d && Array.isArray(currentState.chartData7d.earnings) && currentState.chartData7d.earnings.length > 0) {
+          currentState.chartData7d.earnings[currentState.chartData7d.earnings.length - 1] = Math.round(currentState.user.dailyEarnings * 1000);
+        }
+        if (currentState.chartData30d && Array.isArray(currentState.chartData30d.earnings) && currentState.chartData30d.earnings.length > 0) {
+          currentState.chartData30d.earnings[currentState.chartData30d.earnings.length - 1] = Math.round(currentState.user.dailyEarnings * 1000);
+        }
       }
       if (window.currentUser && currentState && currentState.user) {
         window.currentUser.availableBalance = currentState.user.availableBalance;
       }
 
       const curBal = (currentState && currentState.user) ? currentState.user.availableBalance : usdEarned;
+      const curLifetime = (currentState && currentState.user) ? currentState.user.lifetimeEarnings : usdEarned;
+      const curDaily = (currentState && currentState.user) ? currentState.user.dailyEarnings : usdEarned;
+      const curSpins = (currentState && currentState.user) ? currentState.user.fourHourSpins : 1;
       const completedCount = (currentState && currentState.user) ? currentState.user.completedActivities : 1;
 
       // Log to activity ledger
@@ -8559,6 +8572,8 @@ document.addEventListener('DOMContentLoaded', () => {
       // Sync to localStorage keys immediately for popup and cross-tab sync
       localStorage.setItem('surfkit_available_balance', String(curBal));
       localStorage.setItem('surfkit_balance', String(curBal));
+      localStorage.setItem('surfkit_lifetime_earnings', String(curLifetime));
+      localStorage.setItem('surfkit_daily_earnings', String(curDaily));
       localStorage.setItem(LS_KEY_SPIN, String(nowMs));
       localStorage.setItem('surfkit_pulse_dial_last_spin', String(nowMs));
       localStorage.setItem('surfkit_pulse_last_spin', String(nowMs));
@@ -8567,6 +8582,7 @@ document.addEventListener('DOMContentLoaded', () => {
       window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
         detail: {
           availableBalance: curBal,
+          lifetimeEarnings: curLifetime,
           skitEarned: skitEarned,
           source: 'spin'
         }
@@ -8578,7 +8594,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }));
       } catch (_) {}
 
-      // Persist to Supabase via authoritative RPC + direct profile update
+      // Persist to Supabase: atomic RPC + pulse_spins audit insert + profiles direct update
       try {
         const _sbc = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (window.supabaseClient || null);
         let targetUserId = (window.currentUser && window.currentUser.id && window.currentUser.id.includes('-')) ? window.currentUser.id : null;
@@ -8594,6 +8610,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (_sbc && targetUserId) {
           const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
+
+          // 1. Authoritative RPC claim
           try {
             await _sbc.rpc('claim_pulse_spin_reward', {
               p_user_id: targetUserId,
@@ -8604,20 +8622,59 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn('[Pulse Dial] RPC notice:', rpcErr);
           }
 
-          // Direct profile update to guarantee four_hour_spins and pulse_dial_total_spins are updated
+          // 2. Direct insert into pulse_spins audit log table
           try {
-            const { data: curProf } = await _sbc.from('profiles').select('available_balance, pulse_dial_total_spins, four_hour_spins').eq('id', targetUserId).maybeSingle();
-            const newSpins = (curProf?.four_hour_spins || curProf?.pulse_dial_total_spins || 0) + 1;
+            await _sbc.from('pulse_spins').insert({
+              user_id: targetUserId,
+              skit_reward: skitEarned,
+              usd_reward: usdEarned,
+              spun_at: nowIso,
+              client_context: ctx
+            });
+          } catch (spinErr) {
+            console.warn('[Pulse Dial] pulse_spins insert notice:', spinErr);
+          }
+
+          // 3. Direct profile update ensuring available_balance, lifetime_earnings, daily_earnings, and counters persist
+          try {
+            const { data: curProf } = await _sbc.from('profiles')
+              .select('available_balance, lifetime_earnings, daily_earnings, pulse_dial_total_spins, four_hour_spins, completed_activities')
+              .eq('id', targetUserId)
+              .maybeSingle();
+
+            const newSpins = Math.max(Number(curProf?.four_hour_spins || 0), Number(curProf?.pulse_dial_total_spins || 0), (curSpins - 1)) + 1;
+            const dbBal = curProf && curProf.available_balance !== undefined ? Number(curProf.available_balance || 0) : 0;
+            const dbLifetime = curProf && curProf.lifetime_earnings !== undefined ? Number(curProf.lifetime_earnings || 0) : 0;
+            const dbDaily = curProf && curProf.daily_earnings !== undefined ? Number(curProf.daily_earnings || 0) : 0;
+
+            const finalBal = Math.max(curBal, parseFloat((dbBal + usdEarned).toFixed(6)));
+            const finalLifetime = Math.max(curLifetime, parseFloat((dbLifetime + usdEarned).toFixed(6)));
+            const finalDaily = Math.max(curDaily, parseFloat((dbDaily + usdEarned).toFixed(6)));
+            const finalCompleted = Math.max(Number(curProf?.completed_activities || 0) + 1, completedCount);
+
+            if (currentState && currentState.user) {
+              currentState.user.availableBalance = finalBal;
+              currentState.user.lifetimeEarnings = finalLifetime;
+              currentState.user.dailyEarnings = finalDaily;
+              currentState.user.fourHourSpins = newSpins;
+              currentState.user.completedActivities = finalCompleted;
+              currentState.user.completedTasks = finalCompleted;
+              currentState.user.lifetimeImpressions = finalCompleted;
+            }
+
             await _sbc.from('profiles').update({
-              pulse_dial_last_spin: nowIso,
-              last_spin_at: nowIso,
+              available_balance: finalBal,
+              lifetime_earnings: finalLifetime,
+              daily_earnings: finalDaily,
               four_hour_spins: newSpins,
               pulse_dial_total_spins: newSpins,
-              available_balance: curBal,
+              completed_activities: finalCompleted,
+              pulse_dial_last_spin: nowIso,
+              last_spin_at: nowIso,
               updated_at: nowIso
             }).eq('id', targetUserId);
           } catch (e2) {
-            console.warn('[Pulse Dial] Direct update notice:', e2);
+            console.warn('[Pulse Dial] Direct profile update notice:', e2);
           }
         }
       } catch (dbErr) {
@@ -8631,6 +8688,8 @@ document.addEventListener('DOMContentLoaded', () => {
             action: 'SPIN_COMPLETED',
             payload: {
               balanceUsd: curBal,
+              lifetimeEarnedUsd: curLifetime,
+              dailyEarnings: curDaily,
               tokensEarned: Number((curBal / 0.001).toFixed(1)),
               lastSpin: nowMs,
               completedActivities: completedCount
