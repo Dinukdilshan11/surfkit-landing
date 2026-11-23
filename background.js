@@ -44,7 +44,6 @@ const DEFAULT_STATE = {
     3: 0.0003,  // Tier 3 (LK / Sri Lanka, IN, etc.): ~$0.0003 per ad view
     4: 0.00015  // Tier 4 (Rest of World): ~$0.00015 per ad view
   },
-  recentImpressionTimestamps: [],
   balanceUsd: 0.000,
   dailyEarnings: 0.000,
   tokensEarned: 0,
@@ -178,7 +177,6 @@ async function getFullState() {
   state.pausedDomains = Array.isArray(state.pausedDomains) ? state.pausedDomains : [];
   state.geoTier = typeof state.geoTier === 'number' ? state.geoTier : 3;
   state.countryCode = state.countryCode ? String(state.countryCode).toUpperCase() : 'LK';
-  // recentImpressionTimestamps removed
 
   return state;
 }
@@ -252,8 +250,6 @@ function setupRealtimeForUser(userId) {
       const lastActive = newProfile.last_active_date ? String(newProfile.last_active_date).split('T')[0] : null;
       const daily = Number(newProfile.daily_earnings || 0);
       const tokens = Number((bal / 0.001).toFixed(1));
-      const dailyImpressions = Number(newProfile.daily_impressions || 0);
-      const lifetimeImpressions = Number(newProfile.lifetime_impressions || 0);
       const streak = Number(newProfile.streak_days || 0);
       const spins = Number(newProfile.four_hour_spins || newProfile.pulse_dial_total_spins || 0);
       const surveys = Number(newProfile.surveys_completed || 0);
@@ -310,12 +306,11 @@ async function syncFromSupabase() {
       const daily = Math.max(Number(profile.dailyEarnings || 0), Number(currentLocal.dailyEarnings || 0));
       const tokens = Math.max(Number((bal / 0.001).toFixed(1)), Number(currentLocal.tokensEarned || 0));
       const dailyAds = 0; // ad impressions removed
-      const lifetimeAds = Math.max(Number(profile.lifetimeImpressions || 0), Number(currentLocal.stats?.totalImpressions || 0));
       const spins = Number(profile.fourHourSpins || profile.pulseDialTotalSpins || 0);
       const surveys = Number(profile.surveysCompleted || 0);
       const games = Number(profile.gamesPlayed || 0);
-      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games, lifetimeAds);
-      const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || (dailyAds > 0 ? 1 : 0));
+      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games);
+      const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || 0);
       const lastActive = profile.lastActiveDate || currentLocal.lastActiveDate || null;
 
       // Determine master status: respect user's explicit local action first

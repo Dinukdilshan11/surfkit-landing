@@ -650,7 +650,7 @@ function getCompletedActivitiesCount() {
     try {
         const s = (typeof window !== 'undefined' && window.state) ? window.state : null;
         const u = (s && s.user) ? s.user : {};
-        const explicitVal = Number(u.completedActivities !== undefined ? u.completedActivities : (u.completedTasks !== undefined ? u.completedTasks : u.lifetimeImpressions));
+        const explicitVal = Number(u.completedActivities !== undefined ? u.completedActivities : (u.completedTasks !== undefined ? u.completedTasks : 0));
         const activitySum = Number(u.surveysCompleted || 0) + Number(u.gamesPlayed || 0) + Number(u.fourHourSpins || 0);
         const canonical = (Number.isFinite(explicitVal) && explicitVal > 0) ? Math.max(explicitVal, activitySum) : activitySum;
         return Math.max(0, canonical || 0);
@@ -7013,6 +7013,404 @@ document.addEventListener('DOMContentLoaded', () => {
       renderGeoTierCardMode(normalizeAdIntensity(state.user.adIntensity));
       evaluateReviewBannerDisplay();
     }
+
+
+(function() {
+  /* ------------------------------------------------------------------ *
+   *  QUANTUM PULSE DIAL – 4-Hour SKIT Spin Engine                       *
+   *  Rewards: 1 SKIT / 2 SKIT / 3 SKIT / 5 SKIT (1 SKIT = $0.001 USD) *
+   * ------------------------------------------------------------------ */
+  const PULSE_DIAL_COOLDOWN_MS = 14400 * 1000;   // 4 hours
+  const SKIT_TO_USD = 0.001;
+  const LS_KEY_SPIN = 'surfkit_pulse_dial_last_spin';
+
+  // ── Weight Profiles (0, 0.5, 1, 2, 3, 5 SKIT) ─────────────────────────
+    // Weights sum to 100%. Supported rewards strictly: [0, 0.5, 1, 2, 3, 5]
+    // 1 SKIT = $0.001 USD
+    const SPIN_WEIGHT_PROFILES = {
+      standard: {
+        label: 'Default / Balanced',
+        weights: { 0: 4, 0.5: 20, 1: 46, 2: 18, 3: 9, 5: 3 },
+        ev: 1.34  // EV = 0*0.04 + 0.5*0.20 + 1*0.46 + 2*0.18 + 3*0.09 + 5*0.03 = ~1.34 SKIT ($0.00134)
+      },
+      conservative: {
+        label: 'Conservative / Low eCPM / Tier-3 Geo',
+        weights: { 0: 5, 0.5: 24, 1: 49, 2: 14, 3: 6, 5: 2 },
+        ev: 1.17  // EV = 0*0.05 + 0.5*0.24 + 1*0.49 + 2*0.14 + 3*0.06 + 5*0.02 = ~1.17 SKIT ($0.00117)
+      }
+    };
+
+    // ── Context-aware profile selector ───────────────────────────────────
+    function getSpinWeightsForContext({ geoTier = 2, fillRate = 0.7, ecpm = 1.5, adRevenueFactor = 1.0 } = {}) {
+      const score = (adRevenueFactor || 1) * (fillRate || 0.7) * Math.min((ecpm || 1.5) / 2, 1);
+      if (geoTier >= 3 || score < 0.45) return SPIN_WEIGHT_PROFILES.conservative.weights;
+      return SPIN_WEIGHT_PROFILES.standard.weights;
+    }
+
+    // ── Weighted Random Reward Selection (0, 0.5, 1, 2, 3, 5 SKIT) ──────
+    function selectPulseReward(weightsObj) {
+      const candidates = [0, 0.5, 1, 2, 3, 5];
+      const totalW = candidates.reduce((s, k) => s + (weightsObj[k] || 0), 0);
+      let rand = Math.random() * totalW;
+      for (const k of candidates) {
+        rand -= (weightsObj[k] || 0);
+        if (rand <= 0) return k;
+      }
+      return 1; // safe fallback
+    }
+
+  // ── State ─────────────────────────────────────────────────────────────
+  let isPulseDialSpinning = false;
+  let pulseDialTotalRotation = 0;
+  let pulseCooldownInterval = null;
+
+  // ── Persistence helpers ───────────────────────────────────────────────
+  function getPulseDialLastSpin() {
+    const fromProfile = (typeof state !== 'undefined' && state.user && (state.user.pulseDialLastSpin || state.user.lastSpinAt))
+      ? new Date(state.user.pulseDialLastSpin || state.user.lastSpinAt).getTime() : 0;
+    const fromLocal = parseInt(localStorage.getItem(LS_KEY_SPIN) || '0', 10);
+    return Math.max(fromProfile || 0, fromLocal || 0);
+  }
+
+  function setPulseDialLastSpin(ts) {
+    localStorage.setItem(LS_KEY_SPIN, String(ts));
+    if (typeof state !== 'undefined' && state.user) {
+      state.user.pulseDialLastSpin = new Date(ts).toISOString();
+    }
+  }
+
+  function isPulseDialOnCooldown() {
+    const last = getPulseDialLastSpin();
+    if (!last) return false;
+    return (Date.now() - last) < PULSE_DIAL_COOLDOWN_MS;
+  }
+
+  // ── UI updater ────────────────────────────────────────────────────────
+  function updatePulseDialUI() {
+    const pill     = document.getElementById('pulse-dial-status-pill');
+    const pillText = document.getElementById('pulse-dial-status-pill-text');
+    const btn      = document.getElementById('pulse-spin-btn');
+    const btnText  = document.getElementById('pulse-spin-btn-text');
+    const hEl      = document.getElementById('pulse-cd-h');
+    const mEl      = document.getElementById('pulse-cd-m');
+    const sEl      = document.getElementById('pulse-cd-s');
+    const progEl   = document.getElementById('pulse-recharge-progress');
+
+    const last      = getPulseDialLastSpin();
+    const elapsed   = last ? Math.max(0, Date.now() - last) : PULSE_DIAL_COOLDOWN_MS;
+    const remaining = Math.max(0, PULSE_DIAL_COOLDOWN_MS - elapsed);
+    const pct       = Math.min(100, (elapsed / PULSE_DIAL_COOLDOWN_MS) * 100);
+
+    if (progEl) progEl.style.width = pct + '%';
+
+    if (remaining <= 0) {
+      // READY
+      if (pillText) pillText.textContent = 'Ready to Spin';
+      if (pill) pill.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30';
+      if (hEl) hEl.textContent = '00';
+      if (mEl) mEl.textContent = '00';
+      if (sEl) sEl.textContent = '00';
+      if (hEl) hEl.className = 'text-sm font-black text-emerald-400 font-mono animate-pulse';
+      if (btn && !isPulseDialSpinning) {
+        btn.disabled = false;
+        btn.className = 'w-full lg:w-auto px-8 py-3 rounded-xl font-black text-sm bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 transition-all shadow-[0_0_20px_rgba(34,211,238,0.3)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer';
+        if (btnText) btnText.textContent = 'Spin Now';
+      }
+      // Update overview banner
+      const ovBadge = document.getElementById('overview-pulse-badge');
+      const ovSub   = document.getElementById('overview-pulse-sub');
+      if (ovBadge) { ovBadge.textContent = 'READY'; ovBadge.className = 'text-xs font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'; }
+      if (ovSub) ovSub.textContent = 'Tap to spin now!';
+    } else {
+      // COOLDOWN
+      const totalSecs = Math.floor(remaining / 1000);
+      const h = Math.floor(totalSecs / 3600);
+      const m = Math.floor((totalSecs % 3600) / 60);
+      const s = totalSecs % 60;
+      if (hEl) { hEl.textContent = String(h).padStart(2,'0'); hEl.className = 'text-sm font-black text-cyan-400 font-mono'; }
+      if (mEl) mEl.textContent = String(m).padStart(2,'0');
+      if (sEl) sEl.textContent = String(s).padStart(2,'0');
+      if (pillText) pillText.textContent = 'Cooldown Active';
+      if (pill) pill.className = 'px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30';
+      if (btn) {
+        btn.disabled = true;
+        btn.className = 'w-full lg:w-auto px-8 py-3 rounded-xl font-black text-sm bg-slate-800 text-slate-500 border border-slate-700/60 cursor-not-allowed flex items-center justify-center gap-2 opacity-70';
+        if (btnText) btnText.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+      }
+      // Overview banner
+      const ovBadge = document.getElementById('overview-pulse-badge');
+      const ovSub   = document.getElementById('overview-pulse-sub');
+      if (ovBadge) { ovBadge.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0'); ovBadge.className = 'text-xs font-black px-2 py-0.5 rounded-full bg-slate-700/50 text-slate-400 border border-slate-700/60'; }
+      if (ovSub) ovSub.textContent = 'Next spin available soon';
+    }
+  }
+
+  // ── Cooldown timer init ───────────────────────────────────────────────
+  function initPulseDialCooldownTimer() {
+    updatePulseDialUI();
+    if (pulseCooldownInterval) clearInterval(pulseCooldownInterval);
+    pulseCooldownInterval = setInterval(updatePulseDialUI, 1000);
+  }
+
+  // ── Spin trigger ──────────────────────────────────────────────────────
+  window.triggerPulseDialSpin = async function() {
+    if (isPulseDialSpinning) return;
+    if (isPulseDialOnCooldown()) {
+      if (typeof showToast === 'function') {
+        const rem = Math.max(0, PULSE_DIAL_COOLDOWN_MS - (Date.now() - getPulseDialLastSpin()));
+        const totalSecs = Math.floor(rem / 1000);
+        const h = Math.floor(totalSecs / 3600), m = Math.floor((totalSecs % 3600) / 60), s = totalSecs % 60;
+        showToast('Pulse recharging! Available in ' + String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0'), 'info');
+      }
+      return;
+    }
+
+    isPulseDialSpinning = true;
+    const btn = document.getElementById('pulse-spin-btn');
+    const btnText = document.getElementById('pulse-spin-btn-text');
+    const svg = document.getElementById('pulse-wheel-svg');
+    if (btn) btn.disabled = true;
+    if (btnText) btnText.textContent = 'Spinning...';
+
+    // Determine weights from geo context
+    const appState = window.state || (typeof state !== 'undefined' ? state : null);
+    const geoTier = (appState && appState.user && appState.user.geoTier) ? parseInt(appState.user.geoTier) || 2 : 2;
+    const weights = getSpinWeightsForContext({ geoTier });
+    const chosenSkit = selectPulseReward(weights);
+
+    // Target angle: 6-sector wheel (0.5=330°, 1=270°, 2=210°, 0=150°, 3=90°, 5=30°)
+    const sectorAngles = { 0.5: 330, 1: 270, 2: 210, 0: 150, 3: 90, 5: 30 };
+    const targetAngle  = sectorAngles[chosenSkit] !== undefined ? sectorAngles[chosenSkit] : 270;
+    const fullSpins    = 5 + Math.floor(Math.random() * 3);
+    const jitter       = (Math.random() - 0.5) * 16;
+    const targetRot    = fullSpins * 360 + targetAngle + jitter;
+    pulseDialTotalRotation += targetRot;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const duration      = reducedMotion ? 400 : 4200 + Math.random() * 800;
+
+    if (svg) {
+      svg.style.transition = `transform ${duration}ms cubic-bezier(0.17,0.67,0.12,0.99)`;
+      svg.style.transform  = `rotate(${pulseDialTotalRotation}deg)`;
+    }
+
+    setTimeout(async () => {
+      isPulseDialSpinning = false;
+      const nowMs  = Date.now();
+      const nowIso = new Date(nowMs).toISOString();
+      setPulseDialLastSpin(nowMs);
+
+      // Credit SKIT balance locally (supports 0, 0.5, 1, 2, 3, 5 SKIT at 1 SKIT = $0.001 USD)
+      const skitEarned = Number(chosenSkit);
+      const usdEarned  = parseFloat((skitEarned * SKIT_TO_USD).toFixed(6));
+
+      const currentState = window.state || (typeof state !== 'undefined' ? state : null);
+      if (currentState && currentState.user) {
+        currentState.user.availableBalance = parseFloat(((currentState.user.availableBalance || 0) + usdEarned).toFixed(6));
+        currentState.user.lifetimeEarnings = parseFloat(((currentState.user.lifetimeEarnings || 0) + usdEarned).toFixed(6));
+        currentState.user.dailyEarnings = parseFloat(((currentState.user.dailyEarnings || 0) + usdEarned).toFixed(6));
+        currentState.user.fourHourSpins = (currentState.user.fourHourSpins || 0) + 1;
+        const nextCount = (typeof getCompletedActivitiesCount === 'function' ? getCompletedActivitiesCount() : (currentState.user.completedActivities || 0)) + 1;
+        currentState.user.completedActivities = nextCount;
+        currentState.user.completedTasks = nextCount;
+        currentState.user.lifetimeImpressions = nextCount;
+
+        // Keep Today chart earnings updated immediately
+        if (currentState.chartData7d && Array.isArray(currentState.chartData7d.earnings) && currentState.chartData7d.earnings.length > 0) {
+          currentState.chartData7d.earnings[currentState.chartData7d.earnings.length - 1] = Math.round(currentState.user.dailyEarnings * 1000);
+        }
+        if (currentState.chartData30d && Array.isArray(currentState.chartData30d.earnings) && currentState.chartData30d.earnings.length > 0) {
+          currentState.chartData30d.earnings[currentState.chartData30d.earnings.length - 1] = Math.round(currentState.user.dailyEarnings * 1000);
+        }
+      }
+      if (window.currentUser && currentState && currentState.user) {
+        window.currentUser.availableBalance = currentState.user.availableBalance;
+      }
+
+      const curBal = (currentState && currentState.user) ? currentState.user.availableBalance : usdEarned;
+      const curLifetime = (currentState && currentState.user) ? currentState.user.lifetimeEarnings : usdEarned;
+      const curDaily = (currentState && currentState.user) ? currentState.user.dailyEarnings : usdEarned;
+      const curSpins = (currentState && currentState.user) ? currentState.user.fourHourSpins : 1;
+      const completedCount = (currentState && currentState.user) ? currentState.user.completedActivities : 1;
+
+      // Log to activity ledger
+      if (currentState && Array.isArray(currentState.activityLedger)) {
+        currentState.activityLedger.unshift({
+          id: 'pulse_' + nowMs,
+          type: 'Pulse Reward',
+          amount: usdEarned,
+          skitAmount: skitEarned,
+          description: skitEarned > 0 ? `+${skitEarned} SKIT from Quantum Pulse Dial` : '0 SKIT — Spin Completed',
+          timestamp: nowIso
+        });
+      }
+
+      // Sync to localStorage keys immediately for popup and cross-tab sync
+      localStorage.setItem('surfkit_available_balance', String(curBal));
+      localStorage.setItem('surfkit_balance', String(curBal));
+      localStorage.setItem('surfkit_lifetime_earnings', String(curLifetime));
+      localStorage.setItem('surfkit_daily_earnings', String(curDaily));
+      localStorage.setItem(LS_KEY_SPIN, String(nowMs));
+      localStorage.setItem('surfkit_pulse_dial_last_spin', String(nowMs));
+      localStorage.setItem('surfkit_pulse_last_spin', String(nowMs));
+
+      // Dispatch storage and custom window events
+      window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
+        detail: {
+          availableBalance: curBal,
+          lifetimeEarnings: curLifetime,
+          skitEarned: skitEarned,
+          source: 'spin'
+        }
+      }));
+      try {
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'surfkit_available_balance',
+          newValue: String(curBal)
+        }));
+      } catch (_) {}
+
+      // Persist to Supabase: atomic RPC + pulse_spins audit insert + profiles direct update
+      try {
+        const _sbc = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (window.supabaseClient || null);
+        let targetUserId = (window.currentUser && window.currentUser.id && window.currentUser.id.includes('-')) ? window.currentUser.id : null;
+        if (!targetUserId && _sbc && _sbc.auth) {
+          try {
+            const { data: uData } = await _sbc.auth.getUser();
+            if (uData?.user?.id) {
+              targetUserId = uData.user.id;
+              window.currentUser = uData.user;
+            }
+          } catch (_) {}
+        }
+
+        if (_sbc && targetUserId) {
+          const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
+
+          // 1. Authoritative RPC claim
+          try {
+            await _sbc.rpc('claim_pulse_spin_reward', {
+              p_user_id: targetUserId,
+              p_skit_reward: skitEarned,
+              p_client_context: ctx
+            });
+          } catch (rpcErr) {
+            console.warn('[Pulse Dial] RPC notice:', rpcErr);
+          }
+
+          // 2. Direct insert into pulse_spins audit log table
+          try {
+            await _sbc.from('pulse_spins').insert({
+              user_id: targetUserId,
+              skit_reward: skitEarned,
+              usd_reward: usdEarned,
+              spun_at: nowIso,
+              client_context: ctx
+            });
+          } catch (spinErr) {
+            console.warn('[Pulse Dial] pulse_spins insert notice:', spinErr);
+          }
+
+          // 3. Direct profile update ensuring available_balance, lifetime_earnings, daily_earnings, and counters persist
+          try {
+            const { data: curProf } = await _sbc.from('profiles')
+              .select('available_balance, lifetime_earnings, daily_earnings, pulse_dial_total_spins, four_hour_spins, completed_activities')
+              .eq('id', targetUserId)
+              .maybeSingle();
+
+            const newSpins = Math.max(Number(curProf?.four_hour_spins || 0), Number(curProf?.pulse_dial_total_spins || 0), (curSpins - 1)) + 1;
+            const dbBal = curProf && curProf.available_balance !== undefined ? Number(curProf.available_balance || 0) : 0;
+            const dbLifetime = curProf && curProf.lifetime_earnings !== undefined ? Number(curProf.lifetime_earnings || 0) : 0;
+            const dbDaily = curProf && curProf.daily_earnings !== undefined ? Number(curProf.daily_earnings || 0) : 0;
+
+            const finalBal = Math.max(curBal, parseFloat((dbBal + usdEarned).toFixed(6)));
+            const finalLifetime = Math.max(curLifetime, parseFloat((dbLifetime + usdEarned).toFixed(6)));
+            const finalDaily = Math.max(curDaily, parseFloat((dbDaily + usdEarned).toFixed(6)));
+            const finalCompleted = Math.max(Number(curProf?.completed_activities || 0) + 1, completedCount);
+
+            if (currentState && currentState.user) {
+              currentState.user.availableBalance = finalBal;
+              currentState.user.lifetimeEarnings = finalLifetime;
+              currentState.user.dailyEarnings = finalDaily;
+              currentState.user.fourHourSpins = newSpins;
+              currentState.user.completedActivities = finalCompleted;
+              currentState.user.completedTasks = finalCompleted;
+              currentState.user.lifetimeImpressions = finalCompleted;
+            }
+
+            await _sbc.from('profiles').update({
+              available_balance: finalBal,
+              lifetime_earnings: finalLifetime,
+              daily_earnings: finalDaily,
+              four_hour_spins: newSpins,
+              pulse_dial_total_spins: newSpins,
+              completed_activities: finalCompleted,
+              pulse_dial_last_spin: nowIso,
+              last_spin_at: nowIso,
+              updated_at: nowIso
+            }).eq('id', targetUserId);
+          } catch (e2) {
+            console.warn('[Pulse Dial] Direct profile update notice:', e2);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[Pulse Dial] Persistence error:', dbErr);
+      }
+
+      // Extension message sync if running with Chrome Extension
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage({
+            action: 'SPIN_COMPLETED',
+            payload: {
+              balanceUsd: curBal,
+              lifetimeEarnedUsd: curLifetime,
+              dailyEarnings: curDaily,
+              tokensEarned: Number((curBal / 0.001).toFixed(1)),
+              lastSpin: nowMs,
+              completedActivities: completedCount
+            }
+          }, () => { if (chrome.runtime.lastError) {} });
+        } catch (_) {}
+      }
+
+      // Show result banner
+      const banner   = document.getElementById('pulse-dial-result-banner');
+      const resTitle = document.getElementById('pulse-result-title');
+      const resMsg   = document.getElementById('pulse-result-msg');
+      if (banner && resTitle && resMsg) {
+        if (skitEarned > 0) {
+          resTitle.textContent = `+${skitEarned} SKIT Earned!`;
+          resMsg.textContent   = `≈ $${usdEarned.toFixed(4)} USD credited to your balance.`;
+        } else {
+          resTitle.textContent = `0 SKIT — Nice Try!`;
+          resMsg.textContent   = `Quantum recharge has started. Spin again in 4 hours!`;
+        }
+        banner.classList.remove('hidden');
+        setTimeout(() => banner.classList.add('hidden'), 6000);
+      }
+
+      if (typeof showToast === 'function') {
+        if (skitEarned > 0) {
+          showToast(`⚡ +${skitEarned} SKIT earned from Quantum Pulse Dial! (+$${usdEarned.toFixed(4)} USD)`, 'success');
+        } else {
+          showToast(`⚡ Spin completed! Recharging now — try again in 4 hours.`, 'info');
+        }
+      }
+
+      if (typeof window.saveState === 'function') window.saveState();
+      if (typeof window.renderApp === 'function') window.renderApp();
+      if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
+      updatePulseDialUI();
+    }, duration);
+  };
+
+  window.initPulseWidget = function() {
+    initPulseDialCooldownTimer();
+    updatePulseDialUI();
+  };
+})();
+
 
 </script>
 
