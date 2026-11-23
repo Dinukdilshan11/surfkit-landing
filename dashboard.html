@@ -1331,16 +1331,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   <span id="pulse-spin-btn-text">Spin Now</span>
                 </button>
 
-                <!-- Reward tier chips (0, 0.5, 1, 2, 3, 5 SKIT) -->
-                <div class="flex flex-wrap justify-center lg:justify-start gap-2 pt-1">
-                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-slate-500/10 text-slate-400 border border-slate-500/25">0 SKIT · Reset</span>
-                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/25">0.5 SKIT · $0.0005</span>
-                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-sky-500/10 text-sky-400 border border-sky-500/25">1 SKIT · $0.001</span>
-                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">2 SKIT · $0.002</span>
-                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-indigo-500/10 text-indigo-400 border border-indigo-500/25">3 SKIT · $0.003</span>
-                  <span class="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/25">5 SKIT · $0.005</span>
                 </div>
-              </div>
 
               <!-- Right: SVG Spin Wheel (6 Slices: 0, 0.5, 1, 2, 3, 5 SKIT) -->
               <div class="shrink-0 relative flex flex-col items-center gap-3">
@@ -1383,7 +1374,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <circle cx="150" cy="150" r="8" fill="#22d3ee" opacity="0.9"/>
                   </svg>
                 </div>
-                <p class="text-[11px] text-slate-500 font-mono">1 SKIT = $0.001 USD</p>
               </div>
 
             </div>
@@ -3342,8 +3332,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let state = loadState();
+    window.state = state;
+    window.currentUser = currentUser;
 
     function saveState() {
+      window.state = state;
+      window.currentUser = currentUser;
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (e) {
@@ -3746,7 +3740,11 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.streakDays = Number(profile.streak_days || 0);
           state.user.surveysCompleted = Number(profile.surveys_completed || 0);
           state.user.gamesPlayed = Number(profile.games_played || 0);
-          state.user.fourHourSpins = Number(profile.four_hour_spins || 0);
+          state.user.fourHourSpins = Number(profile.four_hour_spins || profile.pulse_dial_total_spins || 0);
+          state.user.completedActivities = (state.user.completedActivities !== undefined && state.user.completedActivities !== null)
+            ? Math.max(state.user.completedActivities, (state.user.surveysCompleted || 0) + (state.user.gamesPlayed || 0) + (state.user.fourHourSpins || 0))
+            : ((state.user.surveysCompleted || 0) + (state.user.gamesPlayed || 0) + (state.user.fourHourSpins || 0));
+          state.user.lifetimeImpressions = state.user.completedActivities;
           if (profile.last_spin_at) {
             state.user.lastSpinAt = profile.last_spin_at;
           }
@@ -4295,6 +4293,9 @@ document.addEventListener('DOMContentLoaded', () => {
           .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles', filter: `id=eq.${currentUser.id}` }, () => {
             loadDataFromSupabase();
           })
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'pulse_spins', filter: `user_id=eq.${currentUser.id}` }, () => {
+            loadDataFromSupabase();
+          })
           .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${currentUser.id}` }, () => {
             loadDataFromSupabase();
           })
@@ -4529,7 +4530,7 @@ document.addEventListener('DOMContentLoaded', () => {
                   yAxisID: 'y'
                 },
                 {
-                  label: 'Impressions',
+                  label: 'Completed Tasks',
                   data: dataToUse.impressions,
                   type: 'line',
                   borderColor: '#00E5FF',
@@ -4566,6 +4567,9 @@ document.addEventListener('DOMContentLoaded', () => {
                   callbacks: {
                     label: function(context) {
                       let label = context.dataset.label || '';
+                      if (label.toLowerCase().includes('impression')) {
+                        label = 'Completed Tasks';
+                      }
                       if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards') || label.includes('SKIT')) {
                         return `  ${label}: ${Number(context.parsed.y).toLocaleString()} SKIT`;
                       }
@@ -6554,201 +6558,10 @@ document.addEventListener('DOMContentLoaded', () => {
      * and update stats dynamically with actual Geo-Tier rewards.
      */
     async function recordRealAdImpression(impressionData = {}) {
-      if (!currentUser || !currentUser.email) return;
-
-      const domain = impressionData.domain || impressionData.website_domain || 'surfkit.cloud/ad-frame';
-      const earnedUsd = typeof impressionData.rewardUsd === 'number' ? impressionData.rewardUsd : 0.0003;
-      const credsEarned = impressionData.impressionCount || 10;
-
-      state.user.availableBalance = Number(((state.user.availableBalance || 0) + earnedUsd).toFixed(6));
-      state.user.lifetimeEarnings = Number(((state.user.lifetimeEarnings || 0) + earnedUsd).toFixed(6));
-      state.user.lifetimeImpressions = (state.user.lifetimeImpressions || 0) + 1;
-      state.user.dailyImpressions = (state.user.dailyImpressions || 0) + 1;
-      state.user.dailyEarnings = Number(((state.user.dailyEarnings || 0) + earnedUsd).toFixed(6));
-
-      // Dynamic Daily Streak check (UTC calendar day)
-      const todayDateStr = new Date().toISOString().substring(0, 10);
-      let newStreak = state.user.streakDays || 1;
-      if (state.user.lastActiveDate !== todayDateStr) {
-        if (state.user.lastActiveDate) {
-          const yesterday = new Date();
-          yesterday.setDate(yesterday.getDate() - 1);
-          const yestDateStr = yesterday.toISOString().substring(0, 10);
-          if (state.user.lastActiveDate === yestDateStr) {
-            newStreak += 1;
-          } else {
-            newStreak = 1;
-          }
-        }
-        state.user.streakDays = newStreak;
-        state.user.lastActiveDate = todayDateStr;
-      }
-
-      state.activityLedger.unshift({
-        id: 'act-' + Date.now(),
-        type: 'Ad Slice Reward',
-        amount: earnedUsd,
-        method: domain,
-        date: 'Today',
-        status: 'Credited'
-      });
-
-      const lastIndex7 = state.chartData7d?.earnings ? state.chartData7d.earnings.length - 1 : -1;
-      if (lastIndex7 >= 0) {
-        state.chartData7d.earnings[lastIndex7] = Number(((state.chartData7d.earnings[lastIndex7] || 0) + earnedUsd).toFixed(6));
-        state.chartData7d.impressions[lastIndex7] = (state.chartData7d.impressions[lastIndex7] || 0) + 1;
-      }
-      const lastIndex30 = state.chartData30d?.earnings ? state.chartData30d.earnings.length - 1 : -1;
-      if (lastIndex30 >= 0) {
-        state.chartData30d.earnings[lastIndex30] = Number(((state.chartData30d.earnings[lastIndex30] || 0) + earnedUsd).toFixed(6));
-        state.chartData30d.impressions[lastIndex30] = (state.chartData30d.impressions[lastIndex30] || 0) + 1;
-      }
-
-      state.notifications.unshift({
-        id: Date.now(),
-        title: 'Ad Slice Credited',
-        message: `+$${earnedUsd.toFixed(4)} earned on ${domain}`,
-        time: 'Just now',
-        read: false
-      });
-
-      saveState();
-      renderApp();
-
-      if (trendChartInstance && currentChartTimeframe === '7d') {
-        trendChartInstance.data.datasets[0].data = [...state.chartData7d.earnings];
-        trendChartInstance.data.datasets[1].data = [...state.chartData7d.impressions];
-        trendChartInstance.update('none');
-      } else if (!trendChartInstance) {
-        initChart();
-      }
-
-      showToast(`+ $${earnedUsd.toFixed(4)} Credited • Verified Ad Slice`, 'earnings');
-
-      // Persist to Supabase Database: ad_impressions table and RPC
-      if (supabaseClient && currentUser) {
-        try {
-          await supabaseClient.from('ad_impressions').insert({
-            user_id: currentUser.id,
-            website_domain: domain,
-            slices_earned: credsEarned,
-            reward_usd: earnedUsd,
-            multiplier: 1.2,
-            created_at: new Date().toISOString()
-          });
-        } catch (dbErr) {
-          console.warn('Supabase activity log notice:', dbErr);
-        }
-
-        try {
-          await supabaseClient.rpc('record_impression', {
-            p_user_id: currentUser.id,
-            p_site_name: domain,
-            p_ad_count: 1,
-            p_earn: earnedUsd
-          });
-        } catch (e) {
-          console.warn('RPC record_impression notice:', e);
-        }
-
-        // Direct profile increment fallback
-        try {
-          const { data: curProf } = await supabaseClient
-            .from('profiles')
-            .select('available_balance, lifetime_earnings, lifetime_impressions, daily_earnings, daily_impressions')
-            .eq('id', currentUser.id)
-            .maybeSingle();
-
-          if (curProf) {
-            await supabaseClient.from('profiles').update({
-              available_balance: Number(((curProf.available_balance || 0) + earnedUsd).toFixed(6)),
-              lifetime_earnings: Number(((curProf.lifetime_earnings || 0) + earnedUsd).toFixed(6)),
-              lifetime_impressions: (curProf.lifetime_impressions || 0) + 1,
-              daily_earnings: Number(((curProf.daily_earnings || 0) + earnedUsd).toFixed(6)),
-              daily_impressions: (curProf.daily_impressions || 0) + 1,
-              updated_at: new Date().toISOString()
-            }).eq('id', currentUser.id);
-          }
-        } catch (dbErr) {
-          console.warn('Direct profile increment notice:', dbErr);
-        }
-
-        // ── Referral Passive Commission (10%) ────────────────────────────
-        try {
-          const { data: myProfile } = await supabaseClient
-            .from('profiles')
-            .select('referred_by')
-            .eq('id', currentUser.id)
-            .maybeSingle();
-
-          let referrerId = myProfile?.referred_by || null;
-          if (!referrerId) {
-            const { data: refRowLookup } = await supabaseClient
-              .from('referrals')
-              .select('referrer_id')
-              .eq('referred_id', currentUser.id)
-              .maybeSingle();
-            if (refRowLookup?.referrer_id) referrerId = refRowLookup.referrer_id;
-          }
-
-          if (referrerId && referrerId !== currentUser.id) {
-            const commission = Number((earnedUsd * 0.10).toFixed(6));
-            if (commission > 0) {
-              const { error: rpcCommErr } = await supabaseClient.rpc('credit_referral_commission', {
-                p_referrer_id: referrerId,
-                p_referred_id: currentUser.id,
-                p_amount: commission
-              });
-
-              if (rpcCommErr) {
-                const { data: refProf } = await supabaseClient
-                  .from('profiles')
-                  .select('available_balance, lifetime_earnings, referral_bonus')
-                  .eq('id', referrerId)
-                  .maybeSingle();
-
-                if (refProf) {
-                  await supabaseClient.from('profiles').update({
-                    available_balance: Number(((refProf.available_balance || 0) + commission).toFixed(6)),
-                    lifetime_earnings: Number(((refProf.lifetime_earnings || 0) + commission).toFixed(6)),
-                    referral_bonus: Number(((refProf.referral_bonus || 0) + commission).toFixed(6)),
-                    updated_at: new Date().toISOString()
-                  }).eq('id', referrerId);
-
-                  const { data: refRow } = await supabaseClient
-                    .from('referrals')
-                    .select('commission_earned')
-                    .eq('referrer_id', referrerId)
-                    .eq('referred_id', currentUser.id)
-                    .maybeSingle();
-
-                  if (refRow) {
-                    await supabaseClient.from('referrals').update({
-                      commission_earned: Number(((refRow.commission_earned || 0) + commission).toFixed(6)),
-                      updated_at: new Date().toISOString()
-                    })
-                    .eq('referrer_id', referrerId)
-                    .eq('referred_id', currentUser.id);
-                  } else {
-                    await supabaseClient.from('referrals').upsert({
-                      referrer_id: referrerId,
-                      referred_id: currentUser.id,
-                      user_id: currentUser.id,
-                      referred_username: state.user.username ? ('@' + state.user.username) : '@crew_mate',
-                      commission_earned: commission,
-                      status: 'Active',
-                      updated_at: new Date().toISOString()
-                    }, { onConflict: 'referrer_id,referred_id' });
-                  }
-                }
-              }
-              console.log(`[Referral] +$${commission.toFixed(6)} commission credited to referrer ${referrerId}`);
-            }
-          }
-        } catch (commErr) {
-          console.warn('[Referral Commission] Credit notice:', commErr);
-        }
-      }
+      // Intentionally zero effect: ads, banners, and push-up popups NEVER increment
+      // balances, earnings, or activity counts. Rewards are earned strictly from
+      // Spins, Completed Surveys, Mini Games, and Referrals.
+      return;
     }
 
     // --- REAL-TIME AUTO-SURF ENGINE ---
@@ -7021,14 +6834,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderApp() {
+      window.state = state;
+      window.currentUser = currentUser;
+      if (typeof renderActivityMilestones === 'function') {
+        renderActivityMilestones();
+      }
       if (typeof window.initPulseWidget === 'function') {
         window.initPulseWidget();
       }
-      // SKIT Primary and USD Secondary formatting helpers
+      // SKIT Primary and USD Secondary formatting helpers (supports fractional SKIT like 0.5)
       function formatSkitPrimary(val) {
         const n = Number(val);
         if (isNaN(n) || n < 0) return '0 SKIT';
-        return Math.round(n * 1000).toLocaleString() + ' SKIT';
+        const tokens = n * 1000;
+        return (tokens % 1 !== 0)
+          ? tokens.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' SKIT'
+          : Math.round(tokens).toLocaleString() + ' SKIT';
       }
       function formatUsdSecondary(val) {
         const n = Number(val);
@@ -7057,7 +6878,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (metricBalanceUsd) metricBalanceUsd.textContent = formatUsdSecondary(state.user.availableBalance);
       if (metricLifetime) metricLifetime.textContent = formatSkitPrimary(state.user.lifetimeEarnings);
       if (metricLifetimeUsd) metricLifetimeUsd.textContent = formatUsdSecondary(state.user.lifetimeEarnings);
-      if (metricImpressions) metricImpressions.textContent = state.user.lifetimeImpressions.toLocaleString();
+      const totalCompleted = (state.user.completedActivities !== undefined && state.user.completedActivities !== null)
+        ? state.user.completedActivities
+        : ((state.user.surveysCompleted || 0) + (state.user.gamesPlayed || 0) + (state.user.fourHourSpins || 0));
+      if (metricImpressions) metricImpressions.textContent = totalCompleted.toLocaleString();
       if (metricStreak) metricStreak.textContent = state.user.streakDays;
       if (metricBonus) metricBonus.textContent = formatSkitPrimary(state.user.referralBonus);
       if (metricBonusUsd) metricBonusUsd.textContent = '';
@@ -7329,9 +7153,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (extLifetime > 0) {
         state.user.lifetimeEarnings = Math.max(state.user.lifetimeEarnings, extLifetime);
       }
-      if (extImpressions > 0) {
-        state.user.lifetimeImpressions = Math.max(state.user.lifetimeImpressions, extImpressions);
-      }
+      // Extension ad impressions do not increment completed activities or lifetime impressions
+      // state.user.completedActivities is reserved strictly for verified user tasks (Spins, Surveys, Games, Referrals)
       if (extStreak > 0) {
         state.user.streakDays = extStreak;
       }
@@ -8334,6 +8157,79 @@ document.addEventListener('DOMContentLoaded', () => {
 
   console.log('[Surfkit Dashboard] Rewards bridge listener installed.');
 })();
+
+    // --- GLOBAL ACTIVITY COMPLETED DISPATCHER (Surveys, Mini Games, Referrals) ---
+    window.recordCompletedActivity = async function(type, skitAmount = 0, metadata = {}) {
+      const currentState = window.state || (typeof state !== 'undefined' ? state : null);
+      if (!currentState || !currentState.user) return;
+      const numSkit = Number(skitAmount || 0);
+      const usdEarned = parseFloat((numSkit * 0.001).toFixed(6));
+      const nowIso = new Date().toISOString();
+
+      if (usdEarned > 0) {
+        currentState.user.availableBalance = parseFloat(((currentState.user.availableBalance || 0) + usdEarned).toFixed(6));
+        currentState.user.lifetimeEarnings = parseFloat(((currentState.user.lifetimeEarnings || 0) + usdEarned).toFixed(6));
+      }
+      if (type === 'survey') {
+        currentState.user.surveysCompleted = (currentState.user.surveysCompleted || 0) + 1;
+      } else if (type === 'game') {
+        currentState.user.gamesPlayed = (currentState.user.gamesPlayed || 0) + 1;
+      } else if (type === 'referral') {
+        currentState.user.referralBonus = parseFloat(((currentState.user.referralBonus || 0) + usdEarned).toFixed(6));
+      }
+      currentState.user.completedActivities = (currentState.user.completedActivities || 0) + 1;
+      currentState.user.lifetimeImpressions = currentState.user.completedActivities;
+
+      const curBal = currentState.user.availableBalance;
+      localStorage.setItem('surfkit_available_balance', String(curBal));
+      localStorage.setItem('surfkit_balance', String(curBal));
+
+      window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
+        detail: { availableBalance: curBal, skitEarned: numSkit, source: type }
+      }));
+      try {
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'surfkit_available_balance',
+          newValue: String(curBal)
+        }));
+      } catch (_) {}
+
+      // Extension message sync
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        try {
+          chrome.runtime.sendMessage({
+            action: 'TASK_COMPLETED',
+            payload: {
+              balanceUsd: curBal,
+              tokensEarned: Number((curBal / 0.001).toFixed(1)),
+              completedActivities: currentState.user.completedActivities
+            }
+          }, () => { if (chrome.runtime.lastError) {} });
+        } catch (_) {}
+      }
+
+      // Supabase persistence
+      try {
+        const _sbc = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (window.supabaseClient || null);
+        const targetUserId = (window.currentUser && window.currentUser.id && window.currentUser.id.includes('-')) ? window.currentUser.id : null;
+        if (_sbc && targetUserId) {
+          const updates = {
+            available_balance: curBal,
+            lifetime_earnings: currentState.user.lifetimeEarnings,
+            updated_at: nowIso
+          };
+          if (type === 'survey') updates.surveys_completed = currentState.user.surveysCompleted;
+          if (type === 'game') updates.games_played = currentState.user.gamesPlayed;
+          await _sbc.from('profiles').update(updates).eq('id', targetUserId);
+        }
+      } catch (e) {
+        console.warn('[Activity Tracker] DB persistence notice:', e);
+      }
+
+      if (typeof window.saveState === 'function') window.saveState();
+      if (typeof window.renderApp === 'function') window.renderApp();
+      if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
+    };
 </script>
 
 
@@ -8499,12 +8395,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnText) btnText.textContent = 'Spinning...';
 
     // Determine weights from geo context
-    const geoTier = (typeof state !== 'undefined' && state.user && state.user.geoTier) ? parseInt(state.user.geoTier) || 2 : 2;
+    const appState = window.state || (typeof state !== 'undefined' ? state : null);
+    const geoTier = (appState && appState.user && appState.user.geoTier) ? parseInt(appState.user.geoTier) || 2 : 2;
     const weights = getSpinWeightsForContext({ geoTier });
     const chosenSkit = selectPulseReward(weights);
 
     // Target angle: 6-sector wheel (0.5=330°, 1=270°, 2=210°, 0=150°, 3=90°, 5=30°)
-    // Rotate clockwise so the chosen sector arrives under 12 o'clock pointer
     const sectorAngles = { 0.5: 330, 1: 270, 2: 210, 0: 150, 3: 90, 5: 30 };
     const targetAngle  = sectorAngles[chosenSkit] !== undefined ? sectorAngles[chosenSkit] : 270;
     const fullSpins    = 5 + Math.floor(Math.random() * 3);
@@ -8529,18 +8425,25 @@ document.addEventListener('DOMContentLoaded', () => {
       // Credit SKIT balance locally (supports 0, 0.5, 1, 2, 3, 5 SKIT)
       const skitEarned = Number(chosenSkit);
       const usdEarned  = parseFloat((skitEarned * SKIT_TO_USD).toFixed(6));
-      if (typeof state !== 'undefined' && state.user) {
-        state.user.availableBalance  = parseFloat(((state.user.availableBalance  || 0) + usdEarned).toFixed(6));
-        state.user.lifetimeEarnings  = parseFloat(((state.user.lifetimeEarnings  || 0) + usdEarned).toFixed(6));
-        state.user.completedActivities = (state.user.completedActivities || state.user.lifetimeImpressions || 0) + 1;
+
+      const currentState = window.state || (typeof state !== 'undefined' ? state : null);
+      if (currentState && currentState.user) {
+        currentState.user.availableBalance = parseFloat(((currentState.user.availableBalance || 0) + usdEarned).toFixed(6));
+        currentState.user.lifetimeEarnings = parseFloat(((currentState.user.lifetimeEarnings || 0) + usdEarned).toFixed(6));
+        currentState.user.fourHourSpins = (currentState.user.fourHourSpins || 0) + 1;
+        currentState.user.completedActivities = (currentState.user.completedActivities || 0) + 1;
+        currentState.user.lifetimeImpressions = currentState.user.completedActivities;
       }
-      if (typeof currentUser !== 'undefined' && currentUser && typeof state !== 'undefined' && state.user) {
-        currentUser.availableBalance = state.user.availableBalance;
+      if (window.currentUser && currentState && currentState.user) {
+        window.currentUser.availableBalance = currentState.user.availableBalance;
       }
 
+      const curBal = (currentState && currentState.user) ? currentState.user.availableBalance : usdEarned;
+      const completedCount = (currentState && currentState.user) ? currentState.user.completedActivities : 1;
+
       // Log to activity ledger
-      if (typeof state !== 'undefined' && Array.isArray(state.activityLedger)) {
-        state.activityLedger.unshift({
+      if (currentState && Array.isArray(currentState.activityLedger)) {
+        currentState.activityLedger.unshift({
           id: 'pulse_' + nowMs,
           type: 'Pulse Reward',
           amount: usdEarned,
@@ -8551,15 +8454,16 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Sync to localStorage keys immediately for popup and cross-tab sync
-      localStorage.setItem('surfkit_available_balance', String(state.user.availableBalance));
-      localStorage.setItem('surfkit_balance', String(state.user.availableBalance));
+      localStorage.setItem('surfkit_available_balance', String(curBal));
+      localStorage.setItem('surfkit_balance', String(curBal));
       localStorage.setItem(LS_KEY_SPIN, String(nowMs));
+      localStorage.setItem('surfkit_pulse_dial_last_spin', String(nowMs));
       localStorage.setItem('surfkit_pulse_last_spin', String(nowMs));
 
       // Dispatch storage and custom window events
       window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
         detail: {
-          availableBalance: state.user.availableBalance,
+          availableBalance: curBal,
           skitEarned: skitEarned,
           source: 'spin'
         }
@@ -8567,33 +8471,54 @@ document.addEventListener('DOMContentLoaded', () => {
       try {
         window.dispatchEvent(new StorageEvent('storage', {
           key: 'surfkit_available_balance',
-          newValue: String(state.user.availableBalance)
+          newValue: String(curBal)
         }));
       } catch (_) {}
 
-      // Persist to Supabase via authoritative RPC
-      if (typeof supabaseClient !== 'undefined' && supabaseClient &&
-          typeof currentUser !== 'undefined' && currentUser && currentUser.id) {
-        try {
-          const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
-          await supabaseClient.rpc('claim_pulse_spin_reward', {
-            p_user_id: currentUser.id,
-            p_skit_reward: skitEarned,
-            p_client_context: ctx
-          });
-        } catch (err) {
-          console.warn('[Pulse Dial] Supabase RPC fallback (balance updated locally):', err);
-          // Fallback: direct profile update
+      // Persist to Supabase via authoritative RPC + direct profile update
+      try {
+        const _sbc = (typeof supabaseClient !== 'undefined' && supabaseClient) ? supabaseClient : (window.supabaseClient || null);
+        let targetUserId = (window.currentUser && window.currentUser.id && window.currentUser.id.includes('-')) ? window.currentUser.id : null;
+        if (!targetUserId && _sbc && _sbc.auth) {
           try {
-            await supabaseClient.from('profiles').update({
+            const { data: uData } = await _sbc.auth.getUser();
+            if (uData?.user?.id) {
+              targetUserId = uData.user.id;
+              window.currentUser = uData.user;
+            }
+          } catch (_) {}
+        }
+
+        if (_sbc && targetUserId) {
+          const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
+          try {
+            await _sbc.rpc('claim_pulse_spin_reward', {
+              p_user_id: targetUserId,
+              p_skit_reward: skitEarned,
+              p_client_context: ctx
+            });
+          } catch (rpcErr) {
+            console.warn('[Pulse Dial] RPC notice:', rpcErr);
+          }
+
+          // Direct profile update to guarantee four_hour_spins and pulse_dial_total_spins are updated
+          try {
+            const { data: curProf } = await _sbc.from('profiles').select('available_balance, pulse_dial_total_spins, four_hour_spins').eq('id', targetUserId).maybeSingle();
+            const newSpins = (curProf?.four_hour_spins || curProf?.pulse_dial_total_spins || 0) + 1;
+            await _sbc.from('profiles').update({
               pulse_dial_last_spin: nowIso,
               last_spin_at: nowIso,
-              available_balance: (typeof state !== 'undefined' && state.user) ? state.user.availableBalance : undefined
-            }).eq('id', currentUser.id);
+              four_hour_spins: newSpins,
+              pulse_dial_total_spins: newSpins,
+              available_balance: curBal,
+              updated_at: nowIso
+            }).eq('id', targetUserId);
           } catch (e2) {
-            console.warn('[Pulse Dial] Fallback update failed:', e2);
+            console.warn('[Pulse Dial] Direct update notice:', e2);
           }
         }
+      } catch (dbErr) {
+        console.warn('[Pulse Dial] Persistence error:', dbErr);
       }
 
       // Extension message sync if running with Chrome Extension
@@ -8602,18 +8527,19 @@ document.addEventListener('DOMContentLoaded', () => {
           chrome.runtime.sendMessage({
             action: 'SPIN_COMPLETED',
             payload: {
-              balanceUsd: state.user.availableBalance,
-              tokensEarned: Number((state.user.availableBalance / 0.001).toFixed(1)),
-              lastSpin: nowMs
+              balanceUsd: curBal,
+              tokensEarned: Number((curBal / 0.001).toFixed(1)),
+              lastSpin: nowMs,
+              completedActivities: completedCount
             }
           }, () => { if (chrome.runtime.lastError) {} });
         } catch (_) {}
       }
 
       // Show result banner
-      const banner    = document.getElementById('pulse-dial-result-banner');
-      const resTitle  = document.getElementById('pulse-result-title');
-      const resMsg    = document.getElementById('pulse-result-msg');
+      const banner   = document.getElementById('pulse-dial-result-banner');
+      const resTitle = document.getElementById('pulse-result-title');
+      const resMsg   = document.getElementById('pulse-result-msg');
       if (banner && resTitle && resMsg) {
         if (skitEarned > 0) {
           resTitle.textContent = `+${skitEarned} SKIT Earned!`;
@@ -8634,12 +8560,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
-      if (typeof renderApp === 'function') renderApp();
+      if (typeof window.saveState === 'function') window.saveState();
+      if (typeof window.renderApp === 'function') window.renderApp();
+      if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
       updatePulseDialUI();
     }, duration);
   };
 
-  // ── Backwards-compatible alias (renderApp calls window.initPulseWidget) ──
   window.initPulseWidget = function() {
     initPulseDialCooldownTimer();
     updatePulseDialUI();

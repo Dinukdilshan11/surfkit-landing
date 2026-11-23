@@ -625,64 +625,27 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
 
         case 'RECORD_AD_IMPRESSION': {
-          if (!currentUser || !currentUser.id) {
-            sendResponse({ success: false, error: 'Sign in required to view ads and earn rewards' });
-            break;
-          }
-
-          const domain = (payload && (payload.website_domain || payload.domain)) || 'web';
-          // Geo-Tier based dynamic reward calculation (Tier 1: ~$0.0025, Tier 3: ~$0.0003)
-          const rewardUsd = parseFloat(calculateGeoTierReward(state).toFixed(6));
-          const slicesEarned = 10; // Standard 10 Surf Creds per ad impression
-
-          let newBal = parseFloat((state.balanceUsd + rewardUsd).toFixed(6));
-          let newDaily = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(6));
-          let newDailyImp = (state.adsSeenToday || 0) + 1;
-          let newLifetimeImp = ((state.stats && state.stats.totalImpressions) || 0) + 1;
-          const streakRes = calculateUpdatedStreak(state.lastActiveDate, state.activeStreakDays);
-          let newStreak = streakRes.streak;
-          state.lastActiveDate = streakRes.lastActiveDate;
-
-          // Track hourly impression timestamps for strict frequency limit enforcement
+          // Zero effect from ads on balances, earnings, or activity counters
           const nowTs = Date.now();
           state.recentImpressionTimestamps = (state.recentImpressionTimestamps || [])
             .filter(ts => (nowTs - ts) < 3600000);
           state.recentImpressionTimestamps.push(nowTs);
 
-          state.balanceUsd = newBal;
-          state.dailyEarnings = newDaily;
-          state.tokensEarned = (state.tokensEarned || 0) + slicesEarned;
-          state.adsSeenToday = newDailyImp;
-          state.activeStreakDays = newStreak;
-          state.stats = state.stats || {};
-          state.stats.totalImpressions = newLifetimeImp;
-          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(6));
-
-          await chrome.storage.local.set(state);
-          updateBadge(state.masterEnabled, state.balanceUsd);
-
-          // Persist to Supabase atomically
-          if (currentUser && currentUser.id) {
-            SurfkitSupabase.recordAdImpression(
-              currentUser.id,
-              domain,
-              slicesEarned,
-              rewardUsd
-            ).catch((err) => console.warn('[Surfkit] recordAdImpression error:', err));
-          }
-
-          broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
+          await chrome.storage.local.set({ recentImpressionTimestamps: state.recentImpressionTimestamps });
 
           sendResponse({
             success: true,
-            rewardUsd: rewardUsd,
-            tokensAwarded: slicesEarned,
+            rewardUsd: 0,
+            tokensAwarded: 0,
             balanceUsd: state.balanceUsd,
             dailyEarnings: state.dailyEarnings,
             tokensEarned: state.tokensEarned,
-            adsSeenToday: state.adsSeenToday,
+            adsSeenToday: state.adsSeenToday || 0,
             activeStreakDays: state.activeStreakDays,
             geoTier: state.geoTier || 3
+          });
+          break;
+        }
           });
           break;
         }
@@ -924,41 +887,11 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
           break;
         }
         case 'RECORD_AD_IMPRESSION': {
-          if (!currentUser || !currentUser.id) {
-            sendResponse({ success: false, error: 'Sign in required to view ads and earn rewards' });
-            break;
-          }
-
-          const domain = (payload && (payload.domain || payload.website_domain)) || 'web-dashboard';
-          const rewardUsd = parseFloat(calculateGeoTierReward(state).toFixed(6));
-          const slicesEarned = 10;
-
-          state.balanceUsd = parseFloat((state.balanceUsd + rewardUsd).toFixed(6));
-          state.dailyEarnings = parseFloat(((state.dailyEarnings || 0) + rewardUsd).toFixed(6));
-          state.tokensEarned = (state.tokensEarned || 0) + slicesEarned;
-          state.adsSeenToday = (state.adsSeenToday || 0) + 1;
-          const extStreakRes = calculateUpdatedStreak(state.lastActiveDate, state.activeStreakDays);
-          state.activeStreakDays = extStreakRes.streak;
-          state.lastActiveDate = extStreakRes.lastActiveDate;
-          state.stats = state.stats || {};
-          state.stats.totalImpressions = (state.stats.totalImpressions || 0) + 1;
-          state.stats.lifetimeEarnedUsd = parseFloat(((state.stats.lifetimeEarnedUsd || 0) + rewardUsd).toFixed(6));
-
+          // Zero effect from ads on balances, earnings, or activity counters
           const nowExt = Date.now();
           state.recentImpressionTimestamps = (state.recentImpressionTimestamps || []).filter(ts => (nowExt - ts) < 3600000);
           state.recentImpressionTimestamps.push(nowExt);
-
-          await chrome.storage.local.set(state);
-          updateBadge(state.masterEnabled, state.balanceUsd);
-
-          if (currentUser && currentUser.id) {
-            SurfkitSupabase.recordAdImpression(currentUser.id, domain, slicesEarned, rewardUsd).catch((err) => {
-              console.warn('[Surfkit External] recordAdImpression error:', err);
-            });
-          }
-
-          broadcastToAllTabs({ action: 'STATE_CHANGED', payload: state, data: state });
-          sendResponse({ success: true, balanceUsd: state.balanceUsd, dailyEarnings: state.dailyEarnings, tokensEarned: state.tokensEarned, adsSeenToday: state.adsSeenToday });
+          sendResponse({ success: true, balanceUsd: state.balanceUsd, dailyEarnings: state.dailyEarnings, tokensEarned: state.tokensEarned, adsSeenToday: state.adsSeenToday || 0 });
           break;
         }
         case 'TOGGLE_MASTER': {

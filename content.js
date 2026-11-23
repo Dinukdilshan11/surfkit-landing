@@ -459,7 +459,7 @@
         clearInterval(activeCountdownTimer);
         activeCountdownTimer = null;
 
-        // Dispatch impression to background service worker for Geo-Tier calculation
+        // Notify background for impression frequency pacing
         safeSendMessage({
           action: 'RECORD_AD_IMPRESSION',
           payload: {
@@ -468,7 +468,7 @@
           }
         }, (res) => {
           if (res && res.success) {
-            console.log('[Surfkit Content] Verified impression recorded cleanly.');
+            console.log('[Surfkit Content] Ad display completed cleanly.');
           }
         });
 
