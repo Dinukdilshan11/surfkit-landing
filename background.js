@@ -920,7 +920,8 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
           const nowExt = Date.now();
           state.recentImpressionTimestamps = (state.recentImpressionTimestamps || []).filter(ts => (nowExt - ts) < 3600000);
           state.recentImpressionTimestamps.push(nowExt);
-          sendResponse({ success: true, balanceUsd: state.balanceUsd, dailyEarnings: state.dailyEarnings, tokensEarned: state.tokensEarned, adsSeenToday: state.adsSeenToday || 0 });
+          // Visual mockup display only — zero effect on balances, earnings, or counters
+          sendResponse({ success: true, rewardUsd: 0, tokensAwarded: 0 });
           break;
         }
         case 'TOGGLE_MASTER': {

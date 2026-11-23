@@ -301,11 +301,11 @@
       <span class="balance-rate-tag">1 SKIT = $0.001 USD</span>
     </div>
     <div class="balance-main">
-      <span id="popup-balance-skit">67,819</span>
+      <span id="popup-balance-skit">0</span>
       <span class="token-unit">SKIT</span>
     </div>
     <div class="balance-secondary">
-      <span id="popup-balance-usd">&asymp; $67.819 USD</span>
+      <span id="popup-balance-usd">&asymp; $0.00 USD</span>
       <span style="color: #64748b;">&bull;</span>
       <span style="color: #00d293; font-weight: 700;">Ready to Cashout</span>
     </div>
@@ -378,23 +378,12 @@
     (function () {
       'use strict';
 
-      function syncState() {
+      function renderBalance(usdVal, streakVal, lastSpinVal) {
         try {
-          let usdBalance = 67.819;
-          let streak = 2;
-
-          const savedUsd = localStorage.getItem('surfkit_available_balance') || localStorage.getItem('surfkit_balance');
-          if (savedUsd && !isNaN(parseFloat(savedUsd))) {
-            usdBalance = parseFloat(savedUsd);
-          }
-
-          const savedStreak = localStorage.getItem('surfkit_streak') || localStorage.getItem('surfkit_active_streak');
-          if (savedStreak && !isNaN(parseInt(savedStreak, 10))) {
-            streak = parseInt(savedStreak, 10);
-          }
-
-          // Fractional SKIT support (e.g. 0.5 SKIT)
+          const usdBalance = typeof usdVal === 'number' ? usdVal : (parseFloat(usdVal) || 0);
+          const streak = typeof streakVal === 'number' ? streakVal : (parseInt(streakVal, 10) || 0);
           const skitVal = Number((usdBalance * 1000).toFixed(1));
+
           const skitEl = document.getElementById('popup-balance-skit');
           const usdEl = document.getElementById('popup-balance-usd');
           const streakEl = document.getElementById('popup-streak-val');
@@ -405,8 +394,8 @@
               : Math.round(skitVal).toLocaleString();
           }
           if (usdEl) {
-            const usdDecimals = (usdBalance < 1 && usdBalance > 0 && (usdBalance * 1000) % 1 !== 0) ? 4 : 3;
-            usdEl.innerHTML = '&asymp; $' + usdBalance.toFixed(usdDecimals) + ' USD <span style="color: #64748b;">&bull;</span> <span style="color: #00d293; font-weight: 700;">Ready to Cashout</span>';
+            const usdDecimals = (usdBalance < 1 && usdBalance > 0 && (usdBalance * 1000) % 1 !== 0) ? 4 : 2;
+            usdEl.innerHTML = '&asymp; $' + usdBalance.toFixed(usdDecimals) + ' USD <span style="color: #64748b;">&bull;</span> <span style="color: #00d293; font-weight: 700;">Live Balance</span>';
           }
           if (streakEl) streakEl.textContent = streak + ' Days';
 
@@ -424,13 +413,8 @@
             ppEl.className = 'cashout-status-pill ' + (ppReady ? 'status-ready' : '');
           }
 
-          // 4-Hour Spin check: check both keys
-          const lastSpin = parseInt(
-            localStorage.getItem('surfkit_pulse_dial_last_spin') ||
-            localStorage.getItem('surfkit_pulse_last_spin') ||
-            '0',
-            10
-          );
+          // 4-Hour Spin status
+          const lastSpin = parseInt(lastSpinVal || '0', 10);
           const now = Date.now();
           const spinCooldown = 4 * 60 * 60 * 1000;
           const spinStatusEl = document.getElementById('popup-spin-status');
@@ -452,46 +436,76 @@
             }
           }
         } catch (e) {
-          console.warn('[Popup] Sync error:', e);
+          console.warn('[Popup] Render error:', e);
         }
       }
 
-      // Check chrome.storage.local if running in extension context
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['balanceUsd', 'tokensEarned', 'activeStreakDays', 'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin'], function(res) {
-          if (res) {
-            if (typeof res.balanceUsd === 'number') {
-              localStorage.setItem('surfkit_available_balance', String(res.balanceUsd));
+      function fetchLiveState() {
+        // 1. Check chrome.storage.local
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          chrome.storage.local.get([
+            'balanceUsd', 'tokensEarned', 'activeStreakDays',
+            'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin'
+          ], function(res) {
+            if (res && (typeof res.balanceUsd === 'number' || typeof res.tokensEarned === 'number')) {
+              const bal = typeof res.balanceUsd === 'number' ? res.balanceUsd : (res.tokensEarned * 0.001);
+              renderBalance(bal, res.activeStreakDays, res.surfkit_pulse_dial_last_spin || res.surfkit_pulse_last_spin);
             }
-            if (typeof res.activeStreakDays === 'number') {
-              localStorage.setItem('surfkit_streak', String(res.activeStreakDays));
-            }
-            if (res.surfkit_pulse_dial_last_spin) {
-              localStorage.setItem('surfkit_pulse_dial_last_spin', String(res.surfkit_pulse_dial_last_spin));
-            }
-            syncState();
-          }
-        });
+          });
+        }
 
-        // Listen for storage changes
-        chrome.storage.onChanged.addListener(function() {
-          syncState();
-        });
+        // 2. Query background.js for authoritative runtime state
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+          try {
+            chrome.runtime.sendMessage({ action: 'GET_STATE' }, function(res) {
+              if (res && res.success && res.data) {
+                const d = res.data;
+                const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
+                const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
+                const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin;
+                renderBalance(bal, st, spin);
+              }
+            });
+            chrome.runtime.sendMessage({ action: 'SYNC_WITH_SUPABASE' }, function(res) {
+              if (res && res.success && res.data) {
+                const d = res.data;
+                const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
+                renderBalance(bal, d.activeStreakDays, d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin);
+              }
+            });
+          } catch (_) {}
+        }
+
+        // 3. Fallback to localStorage keys
+        const savedUsd = localStorage.getItem('surfkit_available_balance') || localStorage.getItem('surfkit_balance');
+        const savedStreak = localStorage.getItem('surfkit_streak');
+        const savedSpin = localStorage.getItem('surfkit_pulse_dial_last_spin') || localStorage.getItem('surfkit_pulse_last_spin');
+        if (savedUsd !== null && !isNaN(parseFloat(savedUsd))) {
+          renderBalance(parseFloat(savedUsd), savedStreak, savedSpin);
+        }
       }
 
-      // Realtime cross-tab and window listeners
-      window.addEventListener('storage', syncState);
-      window.addEventListener('surfkit_balance_update', syncState);
+      // Live listeners
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+        chrome.storage.onChanged.addListener(function(changes, area) {
+          if (area === 'local') {
+            fetchLiveState();
+          }
+        });
+      }
 
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener(function(msg) {
           if (msg && (msg.action === 'STATE_CHANGED' || msg.action === 'SPIN_COMPLETED' || msg.action === 'TASK_COMPLETED')) {
-            syncState();
+            fetchLiveState();
           }
         });
       }
 
-      // Support Chrome extension messaging if running as extension popup
+      window.addEventListener('storage', fetchLiveState);
+      window.addEventListener('surfkit_balance_update', fetchLiveState);
+
+      // Open Dashboard button handler
       if (typeof chrome !== 'undefined' && chrome.tabs) {
         const btn = document.getElementById('btn-open-dashboard');
         if (btn) {
@@ -502,9 +516,9 @@
         }
       }
 
-      // Initial sync and live 1s countdown refresh for spin
-      syncState();
-      setInterval(syncState, 1000);
+      // Initial execution and live polling interval
+      fetchLiveState();
+      setInterval(fetchLiveState, 1000);
     })();
   </script>
 </body>
