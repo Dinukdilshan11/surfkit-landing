@@ -649,6 +649,9 @@ function generateZeroChartData(days = 7) {
     const labels = [];
     const earnings = [];
     const impressions = [];
+    const currentCompleted = (typeof getCompletedActivitiesCount === 'function')
+        ? getCompletedActivitiesCount()
+        : Number(window.state?.user?.completedActivities || 0);
     for (let i = days - 1; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
@@ -658,7 +661,7 @@ function generateZeroChartData(days = 7) {
             labels.push(i === 0 ? 'Today' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
         }
         earnings.push(0);
-        impressions.push(0);
+        impressions.push(i === 0 ? currentCompleted : 0);
     }
     return { labels, earnings, impressions };
 }
@@ -786,10 +789,13 @@ async function loadChartDataFromSupabase() {
         earnings7d.push(Math.round(Number(past.earnings || 0) * 1000));
         impressions7d.push(Number(past.impressions || 0));
     }
-    // Final data point (Today) pushed directly from fetched profiles row
+    // Final data point (Today) unified strictly with completed activities count
+    const activeTasks7d = (typeof getCompletedActivitiesCount === 'function')
+        ? getCompletedActivitiesCount()
+        : Number(window.state?.user?.completedActivities || 0);
     labels7d.push('Today');
     earnings7d.push(Math.round(liveEarn * 1000));
-    impressions7d.push(Number(liveImp));
+    impressions7d.push(activeTasks7d);
 
     // ── 3b. Chart Assembly & Zero-Filling: 30-Day Window ───────────────────────
     const labels30d = [];
@@ -805,10 +811,13 @@ async function loadChartDataFromSupabase() {
         earnings30d.push(Math.round(Number(past.earnings || 0) * 1000));
         impressions30d.push(Number(past.impressions || 0));
     }
-    // Final data point (Today) pushed directly from fetched profiles row
+    // Final data point (Today) unified strictly with completed activities count
+    const activeTasks30d = (typeof getCompletedActivitiesCount === 'function')
+        ? getCompletedActivitiesCount()
+        : Number(window.state?.user?.completedActivities || 0);
     labels30d.push('Today');
     earnings30d.push(Math.round(liveEarn * 1000));
-    impressions30d.push(Number(liveImp));
+    impressions30d.push(activeTasks30d);
 
     if (typeof state !== 'undefined') {
         state.chartData7d = { labels: labels7d, earnings: earnings7d, impressions: impressions7d };
@@ -3173,6 +3182,54 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let realtimeChannel = null;
 
+    // ── CANONICAL SINGLE SOURCE OF TRUTH FOR COMPLETED ACTIVITIES & TASKS ──
+    function getCompletedActivitiesCount() {
+      const u = (typeof state !== 'undefined' && state && state.user) ? state.user : (window.state && window.state.user ? window.state.user : {});
+      const explicitVal = Number(u.completedActivities !== undefined ? u.completedActivities : (u.completedTasks !== undefined ? u.completedTasks : u.lifetimeImpressions));
+      const activitySum = Number(u.surveysCompleted || 0) + Number(u.gamesPlayed || 0) + Number(u.fourHourSpins || 0);
+      const canonical = (!isNaN(explicitVal) && explicitVal > 0) ? Math.max(explicitVal, activitySum) : activitySum;
+      return Math.max(0, canonical || 0);
+    }
+    window.getCompletedActivitiesCount = getCompletedActivitiesCount;
+
+    // ── STRICT SYNCHRONIZER: COMPLETED ACTIVITIES === COMPLETED TASKS ──
+    function syncChartWithCompletedTasks() {
+      const currentTasks = getCompletedActivitiesCount();
+      if (typeof state !== 'undefined' && state) {
+        if (state.user) {
+          state.user.completedActivities = currentTasks;
+          state.user.completedTasks = currentTasks;
+          state.user.lifetimeImpressions = currentTasks;
+        }
+        if (state.chartData7d && Array.isArray(state.chartData7d.impressions) && state.chartData7d.impressions.length > 0) {
+          state.chartData7d.impressions[state.chartData7d.impressions.length - 1] = currentTasks;
+        }
+        if (state.chartData30d && Array.isArray(state.chartData30d.impressions) && state.chartData30d.impressions.length > 0) {
+          state.chartData30d.impressions[state.chartData30d.impressions.length - 1] = currentTasks;
+        }
+      }
+
+      const metricImpressions = document.getElementById('metric-lifetime-impressions');
+      if (metricImpressions) {
+        metricImpressions.textContent = currentTasks.toLocaleString();
+      }
+
+      const chart = window.trendChartInstance || (typeof trendChartInstance !== 'undefined' ? trendChartInstance : null);
+      if (chart && chart.ctx && chart.data && chart.data.datasets && chart.data.datasets[1]) {
+        const is30d = (window.currentChartTimeframe === '30d');
+        const sourceArr = is30d ? (state?.chartData30d?.impressions || []) : (state?.chartData7d?.impressions || []);
+        if (sourceArr.length > 0) {
+          chart.data.datasets[1].data = [...sourceArr];
+          chart.data.datasets[1].data[chart.data.datasets[1].data.length - 1] = currentTasks;
+          if (chart.options && chart.options.scales && chart.options.scales.y1) {
+            chart.options.scales.y1.suggestedMax = Math.max(...chart.data.datasets[1].data, 5) * 1.25;
+          }
+          chart.update('none');
+        }
+      }
+    }
+    window.syncChartWithCompletedTasks = syncChartWithCompletedTasks;
+
 
     function formatFriendlyDate(dateStr) {
       if (!dateStr) return 'Today';
@@ -4006,20 +4063,33 @@ document.addEventListener('DOMContentLoaded', () => {
         // c) Cashout requests (from 'payouts')
         const combinedLedger = [];
 
-        (impRows || []).forEach((imp, idx) => {
-          const earn = Number(imp.reward_usd ?? imp.earnings ?? imp.earn ?? 0.024);
-          const domain = imp.website_domain || imp.site_name || imp.domain || 'Browsing Node';
-          const slices = imp.slices_earned || Math.round(earn / 0.001);
-          combinedLedger.push({
-            id: imp.id ? `imp-${imp.id}` : `imp-${idx}`,
-            type: 'Ad Earnings',
-            amount: earn,
-            method: `${domain} (${slices} slices)`,
-            date: formatFriendlyDate(imp.created_at),
-            rawDate: new Date(imp.created_at || Date.now()).getTime(),
-            status: 'Credited'
-          });
-        });
+        // Query verified pulse_spins for recent activity ledger
+        try {
+          const { data: spinsData } = await supabaseClient
+            .from('pulse_spins')
+            .select('*')
+            .eq('user_id', currentUser.id)
+            .order('spun_at', { ascending: false })
+            .limit(15);
+          if (spinsData && Array.isArray(spinsData)) {
+            spinsData.forEach((sp, idx) => {
+              const skit = Number(sp.skit_reward || 0);
+              const usd = Number(sp.usd_reward || (skit * 0.001));
+              combinedLedger.push({
+                id: sp.id ? `spin-${sp.id}` : `spin-${idx}`,
+                type: 'Spin Reward',
+                amount: usd,
+                skitAmount: skit,
+                method: skit > 0 ? `Quantum Pulse Dial (+${skit} SKIT)` : 'Quantum Pulse Dial (0 SKIT)',
+                date: formatFriendlyDate(sp.spun_at || sp.created_at),
+                rawDate: new Date(sp.spun_at || sp.created_at || Date.now()).getTime(),
+                status: 'Credited'
+              });
+            });
+          }
+        } catch (sErr) {
+          console.warn('pulse_spins query notice:', sErr);
+        }
 
         (refRows || []).forEach((r, idx) => {
           const comm = Number(r.commission_earned || 0);
@@ -4186,10 +4256,11 @@ document.addEventListener('DOMContentLoaded', () => {
           earnings7d.push(Math.round(Number(day.earnings || 0) * 1000));
           impressions7d.push(Number(day.impressions || 0));
         }
-        // Final data point (Today) pushed directly from fetched profiles row
+        // Final data point (Today) unified strictly with completed activities count
+        const activeTasks7d = getCompletedActivitiesCount();
         labels7d.push('Today');
         earnings7d.push(Math.round(Number(liveEarn || 0) * 1000));
-        impressions7d.push(Number(liveImp));
+        impressions7d.push(activeTasks7d);
 
         // ── Chart Assembly & Zero-Filling: 30-Day Window ─────────────────────────────
         const labels30d      = [];
@@ -4205,10 +4276,11 @@ document.addEventListener('DOMContentLoaded', () => {
           earnings30d.push(Math.round(Number(day.earnings || 0) * 1000));
           impressions30d.push(Number(day.impressions || 0));
         }
-        // Final data point (Today) pushed directly from fetched profiles row
+        // Final data point (Today) unified strictly with completed activities count
+        const activeTasks30d = getCompletedActivitiesCount();
         labels30d.push('Today');
         earnings30d.push(Math.round(Number(liveEarn || 0) * 1000));
-        impressions30d.push(Number(liveImp));
+        impressions30d.push(activeTasks30d);
 
         // Store in state — strictly real per-day data with continuous zero-filling
         state.chartData7d  = { labels: labels7d,  earnings: earnings7d,  impressions: impressions7d  };
@@ -4273,10 +4345,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (realtimeChannel) supabaseClient.removeChannel(realtimeChannel);
 
         realtimeChannel = supabaseClient.channel('surfkit-live-channel')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'ad_impressions', filter: `user_id=eq.${currentUser.id}` }, (payload) => {
-            console.log('[Supabase Realtime] ad_impressions changed:', payload);
-            loadDataFromSupabase();
-          })
           .on('postgres_changes', { event: '*', schema: 'public', table: 'payout_requests', filter: `user_id=eq.${currentUser.id}` }, (payload) => {
             console.log('[Supabase Realtime] payout_requests changed:', payload);
             loadDataFromSupabase();
@@ -4567,8 +4635,13 @@ document.addEventListener('DOMContentLoaded', () => {
                   callbacks: {
                     label: function(context) {
                       let label = context.dataset.label || '';
-                      if (label.toLowerCase().includes('impression')) {
+                      if (label.toLowerCase().includes('impression') || label.toLowerCase().includes('completed tasks') || label.toLowerCase().includes('tasks')) {
                         label = 'Completed Tasks';
+                        const isToday = (context.label === 'Today' || context.dataIndex === context.dataset.data.length - 1);
+                        const val = isToday && typeof getCompletedActivitiesCount === 'function'
+                          ? getCompletedActivitiesCount()
+                          : Number(context.parsed.y || 0);
+                        return `  ${label}: ${val.toLocaleString()}`;
                       }
                       if (label.includes('Earnings') || label.includes('Activity Rewards') || label.includes('Rewards') || label.includes('SKIT')) {
                         return `  ${label}: ${Number(context.parsed.y).toLocaleString()} SKIT`;
@@ -6878,10 +6951,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (metricBalanceUsd) metricBalanceUsd.textContent = formatUsdSecondary(state.user.availableBalance);
       if (metricLifetime) metricLifetime.textContent = formatSkitPrimary(state.user.lifetimeEarnings);
       if (metricLifetimeUsd) metricLifetimeUsd.textContent = formatUsdSecondary(state.user.lifetimeEarnings);
-      const totalCompleted = (state.user.completedActivities !== undefined && state.user.completedActivities !== null)
-        ? state.user.completedActivities
-        : ((state.user.surveysCompleted || 0) + (state.user.gamesPlayed || 0) + (state.user.fourHourSpins || 0));
-      if (metricImpressions) metricImpressions.textContent = totalCompleted.toLocaleString();
+      const activeCount = getCompletedActivitiesCount();
+      state.user.completedActivities = activeCount;
+      state.user.completedTasks = activeCount;
+      state.user.lifetimeImpressions = activeCount;
+      if (metricImpressions) metricImpressions.textContent = activeCount.toLocaleString();
+      if (typeof syncChartWithCompletedTasks === 'function') {
+        syncChartWithCompletedTasks();
+      }
       if (metricStreak) metricStreak.textContent = state.user.streakDays;
       if (metricBonus) metricBonus.textContent = formatSkitPrimary(state.user.referralBonus);
       if (metricBonusUsd) metricBonusUsd.textContent = '';
@@ -8177,8 +8254,11 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (type === 'referral') {
         currentState.user.referralBonus = parseFloat(((currentState.user.referralBonus || 0) + usdEarned).toFixed(6));
       }
-      currentState.user.completedActivities = (currentState.user.completedActivities || 0) + 1;
-      currentState.user.lifetimeImpressions = currentState.user.completedActivities;
+      const nextActCount = (typeof getCompletedActivitiesCount === 'function' ? getCompletedActivitiesCount() : (currentState.user.completedActivities || 0)) + 1;
+      currentState.user.completedActivities = nextActCount;
+      currentState.user.completedTasks = nextActCount;
+      currentState.user.lifetimeImpressions = nextActCount;
+      if (typeof syncChartWithCompletedTasks === 'function') syncChartWithCompletedTasks();
 
       const curBal = currentState.user.availableBalance;
       localStorage.setItem('surfkit_available_balance', String(curBal));
@@ -8431,8 +8511,10 @@ document.addEventListener('DOMContentLoaded', () => {
         currentState.user.availableBalance = parseFloat(((currentState.user.availableBalance || 0) + usdEarned).toFixed(6));
         currentState.user.lifetimeEarnings = parseFloat(((currentState.user.lifetimeEarnings || 0) + usdEarned).toFixed(6));
         currentState.user.fourHourSpins = (currentState.user.fourHourSpins || 0) + 1;
-        currentState.user.completedActivities = (currentState.user.completedActivities || 0) + 1;
-        currentState.user.lifetimeImpressions = currentState.user.completedActivities;
+        const nextCount = (typeof getCompletedActivitiesCount === 'function' ? getCompletedActivitiesCount() : (currentState.user.completedActivities || 0)) + 1;
+        currentState.user.completedActivities = nextCount;
+        currentState.user.completedTasks = nextCount;
+        currentState.user.lifetimeImpressions = nextCount;
       }
       if (window.currentUser && currentState && currentState.user) {
         window.currentUser.availableBalance = currentState.user.availableBalance;
@@ -8560,6 +8642,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
 
+      if (typeof syncChartWithCompletedTasks === 'function') syncChartWithCompletedTasks();
       if (typeof window.saveState === 'function') window.saveState();
       if (typeof window.renderApp === 'function') window.renderApp();
       if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
