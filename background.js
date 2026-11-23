@@ -258,10 +258,6 @@ function setupRealtimeForUser(userId) {
       const dailyImpressions = Number(newProfile.daily_impressions || 0);
       const lifetimeImpressions = Number(newProfile.lifetime_impressions || 0);
       const streak = Number(newProfile.streak_days || 0);
-      const spins = Number(newProfile.four_hour_spins || newProfile.pulse_dial_total_spins || 0);
-      const surveys = Number(newProfile.surveys_completed || 0);
-      const games = Number(newProfile.games_played || 0);
-      const completedActivities = Math.max(Number(newProfile.completed_activities || 0), spins + surveys + games, lifetimeImpressions);
 
       const updates = {
         balanceUsd: bal,
@@ -270,10 +266,8 @@ function setupRealtimeForUser(userId) {
         adsSeenToday: dailyImpressions,
         activeStreakDays: streak,
         lastActiveDate: lastActive,
-        completedActivities: completedActivities,
-        completedTasks: completedActivities,
         stats: {
-          totalImpressions: completedActivities,
+          totalImpressions: lifetimeImpressions,
           lifetimeEarnedUsd: Number(newProfile.lifetime_earnings || bal),
           sessionStartTime: Date.now()
         }
@@ -316,10 +310,6 @@ async function syncFromSupabase() {
       const tokens = Math.max(Number((bal / 0.001).toFixed(1)), Number(currentLocal.tokensEarned || 0));
       const dailyAds = Math.max(Number(profile.dailyImpressions || 0), Number(currentLocal.adsSeenToday || 0));
       const lifetimeAds = Math.max(Number(profile.lifetimeImpressions || 0), Number(currentLocal.stats?.totalImpressions || 0));
-      const spins = Number(profile.fourHourSpins || profile.pulseDialTotalSpins || 0);
-      const surveys = Number(profile.surveysCompleted || 0);
-      const games = Number(profile.gamesPlayed || 0);
-      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games, lifetimeAds);
       const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || (dailyAds > 0 ? 1 : 0));
       const lastActive = profile.lastActiveDate || currentLocal.lastActiveDate || null;
 
@@ -340,12 +330,10 @@ async function syncFromSupabase() {
         adsSeenToday: dailyAds,
         activeStreakDays: streak,
         lastActiveDate: lastActive,
-        completedActivities: completedActivities,
-        completedTasks: completedActivities,
         intensity: currentLocal.intensity || profile.adIntensity || 'balanced',
         masterEnabled: resolvedMaster,
         stats: {
-          totalImpressions: completedActivities,
+          totalImpressions: lifetimeAds,
           lifetimeEarnedUsd: Math.max(Number(profile.lifetimeEarnings || 0), Number(currentLocal.stats?.lifetimeEarnedUsd || 0), bal),
           sessionStartTime: currentLocal.stats?.sessionStartTime || Date.now()
         }
