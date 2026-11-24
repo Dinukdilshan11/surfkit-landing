@@ -387,6 +387,17 @@
             }));
           } catch(e) {}
           try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
+          try {
+            window.postMessage({
+              type: 'SURFKIT_AUTH_SESSION_UPDATE',
+              session: {
+                access_token: res.data.session.access_token,
+                refresh_token: res.data.session.refresh_token,
+                expires_at: res.data.session.expires_at,
+                user: u
+              }
+            }, '*');
+          } catch(e) {}
 
           var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
           if (pRef && u && u.id) {
@@ -450,6 +461,17 @@
             }));
           } catch(e) {}
           try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
+          try {
+            window.postMessage({
+              type: 'SURFKIT_AUTH_SESSION_UPDATE',
+              session: {
+                access_token: res.data.session.access_token,
+                refresh_token: res.data.session.refresh_token,
+                expires_at: res.data.session.expires_at,
+                user: u
+              }
+            }, '*');
+          } catch(e) {}
 
           if (pRef && u && u.id) {
             attributeReferral(u.id, pRef, u.email).catch(function(){});

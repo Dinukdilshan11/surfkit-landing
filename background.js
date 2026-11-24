@@ -15,6 +15,223 @@ try {
   // Graceful fallback for standalone extension execution
 }
 
+const SUPA_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
+
+// Built-in resilient Supabase Auth & REST engine for MV3 Service Worker
+const SurfkitSupabase = {
+  currentSession: null,
+
+  async getSession() {
+    if (this.currentSession && this.currentSession.access_token) {
+      if (!this.currentSession.expires_at || Date.now() / 1000 < this.currentSession.expires_at) {
+        return this.currentSession;
+      }
+    }
+    const st = await chrome.storage.local.get(['supabase_session', 'authUser', 'surfkit_auth_user', 'sb-kpvrewhmnrifsnkgswdt-auth-token']);
+    if (st.supabase_session && st.supabase_session.access_token) {
+      this.currentSession = st.supabase_session;
+      return this.currentSession;
+    }
+    if (st['sb-kpvrewhmnrifsnkgswdt-auth-token']) {
+      try {
+        const parsed = JSON.parse(st['sb-kpvrewhmnrifsnkgswdt-auth-token']);
+        const s = parsed.currentSession || parsed;
+        if (s && s.access_token) {
+          this.currentSession = s;
+          return this.currentSession;
+        }
+      } catch (_) {}
+    }
+    return null;
+  },
+
+  async getCurrentUser() {
+    const session = await this.getSession();
+    if (session && session.user && session.user.id) {
+      return session.user;
+    }
+    const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'supabaseUserId', 'isExplicitSignOut']);
+    if (st.isExplicitSignOut) return null;
+    const u = st.authUser || st.surfkit_auth_user;
+    if (u && u.id && u.email) {
+      return u;
+    }
+    return null;
+  },
+
+  async setSession(tokenData) {
+    if (!tokenData) return;
+    this.currentSession = tokenData;
+    const user = tokenData.user || (tokenData.id ? tokenData : null);
+    const updates = {
+      isExplicitSignOut: false,
+      supabase_session: tokenData,
+      'sb-kpvrewhmnrifsnkgswdt-auth-token': JSON.stringify(tokenData)
+    };
+    if (user && user.id) {
+      updates.authUser = user;
+      updates.surfkit_auth_user = user;
+      updates.supabaseUserId = user.id;
+    }
+    await chrome.storage.local.set(updates);
+  },
+
+  async signOut() {
+    this.currentSession = null;
+    await chrome.storage.local.remove([
+      'authUser',
+      'surfkit_auth_user',
+      'supabaseUserId',
+      'supabase_session',
+      'sb-kpvrewhmnrifsnkgswdt-auth-token'
+    ]);
+    await chrome.storage.local.set({ isExplicitSignOut: true });
+  },
+
+  async signIn(email, password) {
+    try {
+      const res = await fetch(`${SUPA_URL}/auth/v1/token?grant_type=password`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data.error_description || data.msg || 'Sign in failed' };
+      }
+      await this.setSession(data);
+      return { success: true, user: data.user, session: data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async signUp(email, password) {
+    try {
+      const res = await fetch(`${SUPA_URL}/auth/v1/signup`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data.error_description || data.msg || 'Sign up failed' };
+      }
+      if (data.session) {
+        await this.setSession(data.session);
+      }
+      return { success: true, user: data.user || data };
+    } catch (err) {
+      return { success: false, error: err.message };
+    }
+  },
+
+  async getLiveProfile(userId, email) {
+    try {
+      const session = await this.getSession();
+      const authHeader = (session && session.access_token) ? `Bearer ${session.access_token}` : `Bearer ${SUPA_KEY}`;
+      const filter = (userId && String(userId).includes('-')) ? `id=eq.${userId}` : (email ? `email=ilike.${encodeURIComponent(email)}` : null);
+      if (!filter) return null;
+
+      const res = await fetch(`${SUPA_URL}/rest/v1/profiles?${filter}&select=*`, {
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': authHeader
+        }
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          const p = rows[0];
+          return {
+            id: p.id,
+            email: p.email,
+            availableBalance: Number(p.available_balance || 0),
+            lifetimeEarnings: Number(p.lifetime_earnings || 0),
+            dailyEarnings: Number(p.daily_earnings || 0),
+            dailyImpressions: Number(p.daily_impressions || 0),
+            lifetimeImpressions: Number(p.lifetime_impressions || 0),
+            streakDays: Number(p.streak_days || 0),
+            fourHourSpins: Number(p.four_hour_spins || p.pulse_dial_total_spins || 0),
+            pulseDialTotalSpins: Number(p.pulse_dial_total_spins || p.four_hour_spins || 0),
+            surveysCompleted: Number(p.surveys_completed || 0),
+            gamesPlayed: Number(p.games_played || 0),
+            completedActivities: Number(p.completed_activities || 0),
+            pulse_dial_last_spin: p.pulse_dial_last_spin,
+            last_spin_at: p.last_spin_at,
+            lastActiveDate: p.last_active_date,
+            adIntensity: p.ad_intensity,
+            autoSurfEnabled: p.auto_surf_enabled
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('[Surfkit Supabase] getLiveProfile error:', e);
+    }
+    return null;
+  },
+
+  async updateProfileSetting(userId, fields) {
+    try {
+      if (!userId || !fields) return;
+      const session = await this.getSession();
+      const authHeader = (session && session.access_token) ? `Bearer ${session.access_token}` : `Bearer ${SUPA_KEY}`;
+      await fetch(`${SUPA_URL}/rest/v1/profiles?id=eq.${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': authHeader,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(fields)
+      });
+    } catch (e) {}
+  },
+
+  async getDailyEarningsHistory(userId, days = 7) {
+    try {
+      if (!userId) return [];
+      const session = await this.getSession();
+      const authHeader = (session && session.access_token) ? `Bearer ${session.access_token}` : `Bearer ${SUPA_KEY}`;
+      const res = await fetch(`${SUPA_URL}/rest/v1/daily_earnings_history?user_id=eq.${userId}&order=date.desc&limit=${days}`, {
+        headers: {
+          'apikey': SUPA_KEY,
+          'Authorization': authHeader
+        }
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return [];
+  },
+
+  async resolveUuid(rawId, email) {
+    if (rawId && String(rawId).includes('-')) return rawId;
+    if (email) {
+      try {
+        const prof = await this.getLiveProfile(null, email);
+        if (prof && prof.id) return prof.id;
+      } catch (e) {}
+    }
+    return rawId;
+  },
+
+  subscribeToProfileChanges(userId, callback) {
+    return { userId, callback };
+  },
+
+  unsubscribe(channel) {}
+};
+
 // Feature flag: ad-network compliance & dashboard-only rewards model
 const ENABLE_EXTERNAL_AD_INJECTION = false;
 
@@ -555,6 +772,49 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           break;
         }
 
+        case 'AUTH_SET_SESSION_TOKENS': {
+          const session = payload || {};
+          let targetUser = session.user;
+          const userEmail = (targetUser && targetUser.email) || session.email;
+          const rawId = (targetUser && targetUser.id) || (userEmail ? 'usr_' + userEmail.split('@')[0] : null);
+          const realId = await SurfkitSupabase.resolveUuid(rawId, userEmail);
+          if (realId) {
+            targetUser = {
+              id: realId,
+              email: userEmail,
+              user_metadata: (targetUser && targetUser.user_metadata) || {},
+              emailName: userEmail ? userEmail.split('@')[0] : 'user'
+            };
+          } else if (!targetUser && userEmail) {
+            targetUser = {
+              id: rawId,
+              email: userEmail,
+              user_metadata: {},
+              emailName: userEmail.split('@')[0]
+            };
+          }
+
+          if (targetUser && targetUser.id) {
+            state.isExplicitSignOut = false;
+            await chrome.storage.local.remove(['isExplicitSignOut']);
+            const tokenData = {
+              access_token: session.access_token || null,
+              refresh_token: session.refresh_token || null,
+              expires_at: session.expires_at || null,
+              user: targetUser
+            };
+            await SurfkitSupabase.setSession(tokenData);
+            setupRealtimeForUser(targetUser.id);
+            const fresh = await syncFromSupabase();
+            const fullData = { ...(fresh || state), authUser: targetUser, isExplicitSignOut: false };
+            broadcastToAllTabs({ action: 'STATE_CHANGED', payload: fullData, data: fullData });
+            sendResponse({ success: true, user: targetUser, data: fullData });
+          } else {
+            sendResponse({ success: false, error: 'Invalid session payload' });
+          }
+          break;
+        }
+
         case 'AUTH_SET_SESSION': {
           const { user, email } = payload || {};
           let targetUser = user;
@@ -861,6 +1121,49 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
       const { action, payload } = message;
 
       // Handle authentication requests from external dashboard (Bidirectional SSO)
+      if (action === 'AUTH_SET_SESSION_TOKENS') {
+        const session = payload || {};
+        let targetUser = session.user;
+        const userEmail = (targetUser && targetUser.email) || session.email;
+        const rawId = (targetUser && targetUser.id) || (userEmail ? 'usr_' + userEmail.split('@')[0] : null);
+        const realId = await SurfkitSupabase.resolveUuid(rawId, userEmail);
+        if (realId) {
+          targetUser = {
+            id: realId,
+            email: userEmail,
+            user_metadata: (targetUser && targetUser.user_metadata) || {},
+            emailName: userEmail ? userEmail.split('@')[0] : 'user'
+          };
+        } else if (!targetUser && userEmail) {
+          targetUser = {
+            id: rawId,
+            email: userEmail,
+            user_metadata: {},
+            emailName: userEmail.split('@')[0]
+          };
+        }
+
+        if (targetUser && targetUser.id) {
+          state.isExplicitSignOut = false;
+          await chrome.storage.local.remove(['isExplicitSignOut']);
+          const tokenData = {
+            access_token: session.access_token || null,
+            refresh_token: session.refresh_token || null,
+            expires_at: session.expires_at || null,
+            user: targetUser
+          };
+          await SurfkitSupabase.setSession(tokenData);
+          setupRealtimeForUser(targetUser.id);
+          const fresh = await syncFromSupabase();
+          const fullData = { ...(fresh || state), authUser: targetUser, isExplicitSignOut: false };
+          broadcastToAllTabs({ action: 'STATE_CHANGED', payload: fullData, data: fullData });
+          sendResponse({ success: true, user: targetUser, data: fullData });
+        } else {
+          sendResponse({ success: false, error: 'Invalid session payload' });
+        }
+        return;
+      }
+
       if (action === 'AUTH_SET_SESSION') {
         const { user, email } = payload || {};
         let targetUser = user;

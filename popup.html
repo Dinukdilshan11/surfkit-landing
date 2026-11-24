@@ -496,6 +496,68 @@
         }
       }
 
+      // Query active session from any open dashboard tab (eliminate race conditions on popup open)
+      async function queryActiveDashboardSession() {
+        if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.tabs.query) return null;
+        try {
+          const tabs = await new Promise((resolve) => {
+            chrome.tabs.query({
+              url: [
+                '*://surfkit.cloud/*',
+                '*://*.surfkit.cloud/*',
+                '*://localhost/*',
+                '*://127.0.0.1/*'
+              ]
+            }, (res) => {
+              if (chrome.runtime.lastError) resolve([]);
+              else resolve(res || []);
+            });
+          });
+
+          if (!tabs || tabs.length === 0) return null;
+
+          for (const tab of tabs) {
+            if (!tab.id) continue;
+            const sessionRes = await new Promise((resolve) => {
+              try {
+                chrome.tabs.sendMessage(tab.id, { action: 'GET_ACTIVE_DASHBOARD_SESSION' }, (res) => {
+                  if (chrome.runtime.lastError) resolve(null);
+                  else resolve(res);
+                });
+              } catch (e) {
+                resolve(null);
+              }
+            });
+
+            if (sessionRes && sessionRes.success && sessionRes.session && sessionRes.session.user) {
+              const sess = sessionRes.session;
+              // Forward to background to store & restore session
+              if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+                chrome.runtime.sendMessage({
+                  action: 'AUTH_SET_SESSION_TOKENS',
+                  payload: sess
+                });
+              }
+              // Set directly in local storage for instant sync
+              const u = sess.user;
+              await new Promise((resolve) => {
+                chrome.storage.local.set({
+                  authUser: u,
+                  surfkit_auth_user: u,
+                  supabaseUserId: u.id,
+                  supabase_session: sess,
+                  isExplicitSignOut: false
+                }, resolve);
+              });
+              return sess;
+            }
+          }
+        } catch (err) {
+          console.warn('[Popup] queryActiveDashboardSession error:', err);
+        }
+        return null;
+      }
+
       // Direct REST API sync from Supabase
       async function fetchDirectFromSupabase() {
         try {
@@ -506,11 +568,13 @@
           let userEmail = null;
 
           if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'userId', 'userEmail']);
-            if (st.authUser?.id) userId = st.authUser.id;
-            else if (st.surfkit_auth_user?.id) userId = st.surfkit_auth_user.id;
-            if (st.authUser?.email) userEmail = st.authUser.email;
-            else if (st.surfkit_auth_user?.email) userEmail = st.surfkit_auth_user.email;
+            const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'userId', 'userEmail', 'isExplicitSignOut']);
+            if (!st.isExplicitSignOut) {
+              if (st.authUser?.id) userId = st.authUser.id;
+              else if (st.surfkit_auth_user?.id) userId = st.surfkit_auth_user.id;
+              if (st.authUser?.email) userEmail = st.authUser.email;
+              else if (st.surfkit_auth_user?.email) userEmail = st.surfkit_auth_user.email;
+            }
           }
 
           if (!userId) {
@@ -520,6 +584,15 @@
               const u = p.user || (p.currentSession && p.currentSession.user);
               if (u?.id) userId = u.id;
               if (u?.email) userEmail = u.email;
+            }
+          }
+
+          // Fallback handshake: if no session yet, query open dashboard tabs before giving up
+          if (!userId && !userEmail) {
+            const queriedSess = await queryActiveDashboardSession();
+            if (queriedSess && queriedSess.user) {
+              userId = queriedSess.user.id;
+              userEmail = queriedSess.user.email;
             }
           }
 
@@ -667,6 +740,24 @@
             chrome.tabs.create({ url: 'https://surfkit.cloud/dashboard/' });
           } else {
             window.open('https://surfkit.cloud/dashboard/', '_blank');
+          }
+        });
+      }
+
+      // Immediate handshake on popup open: query open dashboard tab if storage has no valid session
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'supabase_session', 'isExplicitSignOut'], function(st) {
+          const hasSession = st && !st.isExplicitSignOut && (
+            (st.authUser && st.authUser.id) ||
+            (st.surfkit_auth_user && st.surfkit_auth_user.id) ||
+            (st.supabase_session && st.supabase_session.access_token)
+          );
+          if (!hasSession) {
+            queryActiveDashboardSession().then(function(sess) {
+              if (sess) {
+                fetchLiveState();
+              }
+            });
           }
         });
       }

@@ -3611,6 +3611,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (e) {}
       try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (e) {}
+      try { window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*'); } catch (e) {}
       saveState();
       closeAuthModal();
       showToast('Signed out of account', 'info');
@@ -3626,20 +3627,154 @@ document.addEventListener('DOMContentLoaded', () => {
       showToast('Sync complete', 'success');
     }
 
-    // --- ACCOUNT SESSION & DATA ENGINE ---
+    // --- ACCOUNT SESSION & CONTINUOUS EXTENSION BRIDGE ---
+    function forwardSessionToExtension(session) {
+      try {
+        if (!session) return;
+        const u = session.user || currentUser;
+        if (!u || !u.email) return;
+
+        const token = session.access_token || null;
+        const rToken = session.refresh_token || null;
+        const expAt = session.expires_at || null;
+
+        try {
+          localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
+            id: u.id,
+            email: u.email.trim().toLowerCase(),
+            name: (u.user_metadata && (u.user_metadata.display_name || u.user_metadata.full_name)) || u.email.split('@')[0],
+            timestamp: Date.now()
+          }));
+        } catch (_) {}
+
+        window.postMessage({
+          type: 'SURFKIT_AUTH_SESSION_UPDATE',
+          session: {
+            access_token: token,
+            refresh_token: rToken,
+            expires_at: expAt,
+            user: {
+              id: u.id,
+              email: u.email.trim().toLowerCase(),
+              user_metadata: u.user_metadata || {},
+              app_metadata: u.app_metadata || {}
+            }
+          }
+        }, '*');
+      } catch (e) {
+        console.warn('[Dashboard Bridge] forwardSessionToExtension error:', e);
+      }
+    }
+    window.forwardSessionToExtension = forwardSessionToExtension;
+
+    function forwardSessionClearToExtension() {
+      try {
+        localStorage.removeItem('surfkit_ext_auth_user');
+        window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*');
+        window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*');
+      } catch (e) {}
+    }
+    window.forwardSessionClearToExtension = forwardSessionClearToExtension;
+
+    function broadcastAuthSession() {
+      if (supabaseClient && supabaseClient.auth) {
+        supabaseClient.auth.getSession().then(({ data }) => {
+          if (data && data.session) {
+            forwardSessionToExtension(data.session);
+          } else if (currentUser) {
+            forwardSessionToExtension({ user: currentUser });
+          }
+        }).catch(() => {
+          if (currentUser) forwardSessionToExtension({ user: currentUser });
+        });
+      } else if (currentUser) {
+        forwardSessionToExtension({ user: currentUser });
+      }
+    }
+    window.broadcastAuthSession = broadcastAuthSession;
+
     async function initSupabaseAuth() {
       if (!supabaseClient) return null;
       try {
-        // Dynamic verification using supabase.auth.getUser()
-        const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
-        let authUser = (!userErr && userData && userData.user) ? userData.user : null;
+        // Persistent listener: re-hydrates currentUser and continuously syncs to extension
+        if (!window.__supabaseAuthListenerSet__ && supabaseClient.auth) {
+          window.__supabaseAuthListenerSet__ = true;
+          supabaseClient.auth.onAuthStateChange((event, newSession) => {
+            console.log('[Dashboard Auth] onAuthStateChange:', event, newSession);
+            if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+              if (newSession && (newSession.user || newSession.access_token)) {
+                currentUser = newSession.user;
+                window.currentUser = newSession.user;
+                if (currentUser && currentUser.email) {
+                  window.currentUserEmail = currentUser.email.trim().toLowerCase();
+                }
+                state.user.id = currentUser.id;
+                state.user.email = currentUser.email || '';
+                state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
+                  || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
+                state.user.username = state.user.name;
+                saveState();
+                renderApp();
 
-        if (!authUser) {
-          const { data: sessionData } = await supabaseClient.auth.getSession();
-          if (sessionData && sessionData.session && sessionData.session.user) {
-            authUser = sessionData.session.user;
-          }
+                // Continuous Session Sync: forward to content script -> background -> extension
+                forwardSessionToExtension(newSession);
+              }
+            } else if (event === 'SIGNED_OUT') {
+              currentUser = null;
+              window.currentUser = null;
+              window.currentUserEmail = null;
+              state.notifications = [];
+              state.user = {
+                id: '',
+                name: 'Guest User',
+                email: '',
+                avatar: null,
+                availableBalance: 0.00,
+                lockedBalance: 0.00,
+                lifetimeEarnings: 0.00,
+                lifetimeImpressions: 0,
+                referralBonus: 0.00,
+                referralCode: '',
+                streakDays: 0,
+                surveysCompleted: 0,
+                gamesPlayed: 0,
+                fourHourSpins: 0,
+                lastActiveDate: null,
+                apiKey: '',
+                username: 'guest',
+                adIntensity: 2,
+                countryCode: state.user.countryCode || 'LK',
+                countryName: state.user.countryName || 'Sri Lanka',
+                geoTier: state.user.geoTier || 3,
+                currentTier: state.user.geoTier || 3,
+                ratePer1k: state.user.ratePer1k || 0.30
+              };
+              state.devices = [];
+              state.activityLedger = [];
+              state.payoutHistory = [];
+              state.crewMembers = [];
+              saveState();
+              renderApp();
+              loadChatHistory();
+              renderNotifications();
+
+              // Clear session from extension
+              forwardSessionClearToExtension();
+            }
+          });
         }
+
+        // Dynamic verification using supabase.auth.getSession() and getUser()
+        let activeSession = null;
+        try {
+          const { data: sessionData } = await supabaseClient.auth.getSession();
+          if (sessionData && sessionData.session) {
+            activeSession = sessionData.session;
+          }
+        } catch (_) {}
+
+        const { data: userData, error: userErr } = await supabaseClient.auth.getUser();
+        let authUser = (!userErr && userData && userData.user) ? userData.user : (activeSession ? activeSession.user : null);
 
         // Direct synchronous fallback from localStorage JWT / extension cache if getSession in flight
         if (!authUser) {
@@ -3647,6 +3782,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const rawToken = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
             if (rawToken) {
               const p = JSON.parse(rawToken);
+              activeSession = p.currentSession || p;
               const u = p.user || (p.currentSession && p.currentSession.user);
               if (u && u.id && u.email) authUser = u;
             }
@@ -3674,65 +3810,9 @@ document.addEventListener('DOMContentLoaded', () => {
             || (currentUser.email ? currentUser.email.split('@')[0] : 'Surfkit User');
           state.user.username = state.user.name;
 
-          // Persistent listener: re-hydrates currentUser on JWT refresh
-          if (!window.__supabaseAuthListenerSet__) {
-            window.__supabaseAuthListenerSet__ = true;
-            supabaseClient.auth.onAuthStateChange((event, newSession) => {
-              if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                if (newSession && newSession.user) {
-                  currentUser = newSession.user;
-                  window.currentUser = newSession.user;
-                  state.user.id = currentUser.id;
-                  state.user.email = currentUser.email || '';
-                  state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
-                    || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
-                  state.user.username = state.user.name;
-                  saveState();
-                  renderApp();
-                }
-              } else if (event === 'SIGNED_OUT') {
-                if (currentUser) {
-                  currentUser = null;
-                  window.currentUser = null;
-                  window.currentUserEmail = null;
-                  state.notifications = [];
-                  state.user = {
-                    id: '',
-                    name: 'Guest User',
-                    email: '',
-                    avatar: null,
-                    availableBalance: 0.00,
-                    lockedBalance: 0.00,
-                    lifetimeEarnings: 0.00,
-                    lifetimeImpressions: 0,
-                    referralBonus: 0.00,
-                    referralCode: '',
-                    streakDays: 0,
-        surveysCompleted: 0,
-        gamesPlayed: 0,
-        fourHourSpins: 0,
-                    lastActiveDate: null,
-                    apiKey: '',
-                    username: 'guest',
-                    adIntensity: 2,
-                    countryCode: state.user.countryCode || 'LK',
-                    countryName: state.user.countryName || 'Sri Lanka',
-                    geoTier: state.user.geoTier || 3,
-                    currentTier: state.user.geoTier || 3,
-                    ratePer1k: state.user.ratePer1k || 0.30
-                  };
-                  state.devices = [];
-                  state.activityLedger = [];
-                  state.payoutHistory = [];
-                  state.crewMembers = [];
-                  saveState();
-                  renderApp();
-                  loadChatHistory();
-                  renderNotifications();
-                }
-              }
-            });
-          }
+          // Forward session on initial page load
+          forwardSessionToExtension(activeSession || { user: authUser });
+
           return currentUser;
         }
 
@@ -7490,6 +7570,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('message', (event) => {
       if (event.data && event.data.type === 'SURFKIT_EXTENSION_STATE_UPDATE') {
         applyExtensionState(event.data.data);
+      } else if (event.data && event.data.type === 'SURFKIT_PAGE_GET_AUTH_SESSION') {
+        if (typeof broadcastAuthSession === 'function') {
+          broadcastAuthSession();
+        }
       }
     });
 

@@ -61,6 +61,7 @@
   let activeAdElement = null;
   let activeCountdownTimer = null;
   let localCooldownUntil = 0; // Timestamp when next ad is permitted after close or view
+  let cachedDashboardSession = null; // In-memory cached session from dashboard bridge
 
   /**
    * Safe wrapper around browser messaging.
@@ -489,6 +490,35 @@
       const { action, payload } = message;
 
       switch (action) {
+        case 'GET_ACTIVE_DASHBOARD_SESSION': {
+          if (cachedDashboardSession && cachedDashboardSession.user) {
+            sendResponse({ success: true, session: cachedDashboardSession });
+            return true;
+          }
+          // Request session from web page window
+          window.postMessage({ type: 'SURFKIT_PAGE_GET_AUTH_SESSION' }, '*');
+          let responded = false;
+          const timeoutId = setTimeout(() => {
+            if (!responded) {
+              responded = true;
+              sendResponse({ success: false, error: 'Dashboard session query timeout' });
+            }
+          }, 600);
+
+          const replyHandler = (e) => {
+            if (e.source !== window || !e.data || e.data.type !== 'SURFKIT_AUTH_SESSION_UPDATE') return;
+            if (!responded) {
+              responded = true;
+              clearTimeout(timeoutId);
+              window.removeEventListener('message', replyHandler);
+              cachedDashboardSession = e.data.session;
+              sendResponse({ success: true, session: e.data.session });
+            }
+          };
+          window.addEventListener('message', replyHandler);
+          return true;
+        }
+
         case 'INJECT_AD_UNIT': {
           renderFloatingAd({ simulated: true });
           sendResponse({ success: true, message: 'Ad slice injected' });
@@ -621,9 +651,23 @@
   // Window bridge for web dashboard communication (surfkit.cloud)
   window.addEventListener('message', async (event) => {
     if (event.source !== window || !event.data || typeof event.data !== 'object') return;
-    const { type, action, payload } = event.data;
+    const { type, action, payload, session } = event.data;
 
-    if (type === 'SURFKIT_PAGE_GET_STATE') {
+    if (type === 'SURFKIT_AUTH_SESSION_UPDATE') {
+      const sess = session || payload;
+      if (sess && (sess.user || sess.access_token)) {
+        cachedDashboardSession = sess;
+        config.hasAuthUser = Boolean(sess.user && sess.user.id);
+        safeSendMessage({
+          action: 'AUTH_SET_SESSION_TOKENS',
+          payload: sess
+        });
+      }
+    } else if (type === 'SURFKIT_AUTH_SESSION_CLEAR' || type === 'SURFKIT_USER_SIGNED_OUT') {
+      cachedDashboardSession = null;
+      config.hasAuthUser = false;
+      safeSendMessage({ action: 'AUTH_SIGN_OUT' });
+    } else if (type === 'SURFKIT_PAGE_GET_STATE') {
       try {
         const response = await safeSendMessage({ action: 'GET_STATE' });
         if (response && response.success && response.data) {
@@ -646,6 +690,11 @@
       } catch (err) {}
     }
   });
+
+  // Request active auth session and announce live state to web page on injection
+  try {
+    window.postMessage({ type: 'SURFKIT_PAGE_GET_AUTH_SESSION' }, '*');
+  } catch (e) {}
 
   // Announce live state to web page on injection
   try {
