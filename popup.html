@@ -302,31 +302,31 @@
     </div>
   </div>
 
-  <!-- Mini Grid: Streak, Daily Tasks & 4-Hour Spin -->
+  <!-- Mini Grid: Active Streak, Completed Activities & 4-Hour Spin -->
   <div class="mini-grid">
-    <!-- Streak -->
+    <!-- Active Streak -->
     <div class="mini-card">
-      <div class="mini-card-label">
+      <div class="mini-card-label" title="Active Streak">
         <span>&#128293;</span>
-        <span>Streak</span>
+        <span>Active Streak</span>
       </div>
       <div class="mini-card-val" id="popup-streak-val">0 Days</div>
       <div class="mini-card-sub">+10% Yield</div>
     </div>
 
-    <!-- Daily Completed Tasks -->
+    <!-- Completed Activities -->
     <div class="mini-card">
-      <div class="mini-card-label">
-        <span>&#9989;</span>
-        <span>Tasks</span>
+      <div class="mini-card-label" title="Completed Activities">
+        <span>&#9889;</span>
+        <span style="font-size: 7.2px; font-weight: 800; letter-spacing: -0.2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">COMPLETED ACTIVITIES</span>
       </div>
       <div class="mini-card-val" id="popup-tasks-val" style="color: #38bdf8;">0</div>
-      <div class="mini-card-sub" id="popup-tasks-sub">Daily Done</div>
+      <div class="mini-card-sub" id="popup-tasks-sub">Activities Done</div>
     </div>
 
     <!-- 4-Hour Spin / Cooldown Widget -->
     <div class="mini-card" id="popup-spin-card" style="cursor: pointer;">
-      <div class="mini-card-label">
+      <div class="mini-card-label" title="4-Hour Pulse Spin">
         <span id="popup-spin-icon">&#127911;</span>
         <span>4h Spin</span>
       </div>
@@ -419,7 +419,8 @@
             usdEl.innerHTML = '&asymp; $' + usdBalance.toFixed(usdDecimals) + ' USD <span style="color: #64748b;">&bull;</span> <span style="color: #00d293; font-weight: 700;">Live Balance</span>';
           }
 
-          if (streakEl) streakEl.textContent = streak + ' Days';
+          const finalStreak = (streak <= 0 && (tasks > 0 || usdBalance > 0)) ? 1 : streak;
+          if (streakEl) streakEl.textContent = finalStreak + ' Days';
           if (tasksEl) tasksEl.textContent = String(tasks);
 
           // Cashout thresholds: FaucetPay Min 1,000 SKIT ($1), PayPal Min 5,000 SKIT ($5)
@@ -606,27 +607,15 @@
               if (Array.isArray(rows) && rows.length > 0) {
                 const prof = rows[0];
                 const bal = Number(prof.available_balance || 0);
-                const streak = Number(prof.streak_days || 0);
-                const spinTs = prof.pulse_dial_last_spin || prof.last_spin_at;
                 const spins = Number(prof.four_hour_spins || prof.pulse_dial_total_spins || 0);
                 const surveys = Number(prof.surveys_completed || 0);
                 const games = Number(prof.games_played || 0);
-                const tasks = Number(prof.completed_activities || (spins + surveys + games) || 0);
+                const tasks = Math.max(Number(prof.completed_activities || 0), spins + surveys + games);
+                const rawStreak = Number(prof.streak_days || 0);
+                const streak = (rawStreak <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawStreak;
+                const spinTs = prof.pulse_dial_last_spin || prof.last_spin_at;
 
                 renderBalance(bal, streak, spinTs, tasks);
-
-                // Check daily_stats for today's tasks
-                const todayStr = new Date().toISOString().substring(0, 10);
-                const dsRes = await fetch(`${SUPA_URL}/rest/v1/daily_stats?user_id=eq.${prof.id}&stat_date=eq.${todayStr}&select=earnings,impressions`, {
-                  headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
-                }).catch(() => null);
-                if (dsRes && dsRes.ok) {
-                  const dsRows = await dsRes.json();
-                  if (Array.isArray(dsRows) && dsRows.length > 0) {
-                    const dailyTasks = Number(dsRows[0].impressions || tasks);
-                    renderBalance(bal, streak, spinTs, dailyTasks);
-                  }
-                }
               }
             }
           }
@@ -639,13 +628,15 @@
           chrome.storage.local.get([
             'balanceUsd', 'tokensEarned', 'activeStreakDays',
             'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin', 'pulse_dial_last_spin', 'lastSpin',
-            'completedActivities', 'completedTasks', 'dailyTasks', 'adsSeenToday'
+            'completedActivities', 'completedTasks'
           ], function(res) {
             if (res && (typeof res.balanceUsd === 'number' || typeof res.tokensEarned === 'number')) {
               const bal = (typeof res.balanceUsd === 'number') ? res.balanceUsd : (res.tokensEarned * 0.001);
               const spinTs = res.surfkit_pulse_dial_last_spin || res.surfkit_pulse_last_spin || res.pulse_dial_last_spin || res.lastSpin;
-              const tasks = Number(res.completedActivities || res.completedTasks || res.dailyTasks || 0);
-              renderBalance(bal, res.activeStreakDays, spinTs, tasks);
+              const tasks = Math.max(Number(res.completedActivities || 0), Number(res.completedTasks || 0));
+              const rawSt = typeof res.activeStreakDays === 'number' ? res.activeStreakDays : (parseInt(res.activeStreakDays, 10) || 0);
+              const streak = (rawSt <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawSt;
+              renderBalance(bal, streak, spinTs, tasks);
             }
           });
         }
@@ -657,9 +648,10 @@
               if (res && res.success && res.data) {
                 const d = res.data;
                 const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
-                const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
+                const tasks = Math.max(Number(d.completedActivities || 0), Number(d.completedTasks || 0));
+                const rawSt = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
+                const st = (rawSt <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawSt;
                 const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin || d.pulse_dial_last_spin || d.lastSpin;
-                const tasks = Number(d.completedActivities || d.completedTasks || 0);
                 renderBalance(bal, st, spin, tasks);
               }
             });
@@ -667,9 +659,10 @@
               if (res && res.success && res.data) {
                 const d = res.data;
                 const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
-                const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
+                const tasks = Math.max(Number(d.completedActivities || 0), Number(d.completedTasks || 0));
+                const rawSt = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
+                const st = (rawSt <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawSt;
                 const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin || d.pulse_dial_last_spin || d.lastSpin;
-                const tasks = Number(d.completedActivities || d.completedTasks || 0);
                 renderBalance(bal, st, spin, tasks);
               }
             });
@@ -706,8 +699,10 @@
               if (typeof p.balanceUsd === 'number' || typeof p.tokensEarned === 'number') {
                 const bal = (typeof p.balanceUsd === 'number') ? p.balanceUsd : (p.tokensEarned * 0.001);
                 const spinTs = p.surfkit_pulse_dial_last_spin || p.surfkit_pulse_last_spin || p.lastSpin;
-                const tasks = Number(p.completedActivities || p.completedTasks || 0);
-                renderBalance(bal, p.activeStreakDays, spinTs, tasks);
+                const tasks = Math.max(Number(p.completedActivities || 0), Number(p.completedTasks || 0));
+                const rawSt = typeof p.activeStreakDays === 'number' ? p.activeStreakDays : (typeof p.streakDays === 'number' ? p.streakDays : 0);
+                const st = (rawSt <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawSt;
+                renderBalance(bal, st, spinTs, tasks);
               }
             }
             fetchLiveState();

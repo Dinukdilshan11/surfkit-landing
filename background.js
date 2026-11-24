@@ -478,11 +478,12 @@ function setupRealtimeForUser(userId) {
       const tokens = Number((bal / 0.001).toFixed(1));
       const dailyImpressions = Number(newProfile.daily_impressions || 0);
       const lifetimeImpressions = Number(newProfile.lifetime_impressions || 0);
-      const streak = Number(newProfile.streak_days || 0);
       const spins = Number(newProfile.four_hour_spins || newProfile.pulse_dial_total_spins || 0);
       const surveys = Number(newProfile.surveys_completed || 0);
       const games = Number(newProfile.games_played || 0);
-      const completedActivities = Math.max(Number(newProfile.completed_activities || 0), spins + surveys + games, lifetimeImpressions);
+      const completedActivities = Math.max(Number(newProfile.completed_activities || 0), spins + surveys + games);
+      const rawStreak = Number(newProfile.streak_days || 0);
+      const streak = (rawStreak <= 0 && (completedActivities > 0 || bal > 0)) ? 1 : rawStreak;
 
       let spinMs = 0;
       const spinTs = newProfile.pulse_dial_last_spin || newProfile.last_spin_at;
@@ -549,8 +550,9 @@ async function syncFromSupabase() {
       const spins = Number(profile.fourHourSpins || profile.pulseDialTotalSpins || 0);
       const surveys = Number(profile.surveysCompleted || 0);
       const games = Number(profile.gamesPlayed || 0);
-      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games, lifetimeAds);
-      const streak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0) || (dailyAds > 0 ? 1 : 0));
+      const completedActivities = Math.max(Number(profile.completedActivities || 0), spins + surveys + games);
+      const rawStreak = profile.streakDays !== undefined ? Number(profile.streakDays) : (Number(currentLocal.activeStreakDays || 0));
+      const streak = (rawStreak <= 0 && (completedActivities > 0 || bal > 0)) ? 1 : rawStreak;
       const lastActive = profile.lastActiveDate || currentLocal.lastActiveDate || null;
 
       // Determine master status: respect user's explicit local action first
