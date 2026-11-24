@@ -414,7 +414,16 @@
           }
 
           // 4-Hour Spin status
-          const lastSpin = parseInt(lastSpinVal || '0', 10);
+          let lastSpin = 0;
+          if (typeof lastSpinVal === 'number') {
+            lastSpin = lastSpinVal;
+          } else if (typeof lastSpinVal === 'string' && lastSpinVal.trim() !== '') {
+            if (/^\d+$/.test(lastSpinVal.trim())) {
+              lastSpin = parseInt(lastSpinVal.trim(), 10);
+            } else {
+              lastSpin = new Date(lastSpinVal).getTime() || 0;
+            }
+          }
           const now = Date.now();
           const spinCooldown = 4 * 60 * 60 * 1000;
           const spinStatusEl = document.getElementById('popup-spin-status');
@@ -445,11 +454,12 @@
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           chrome.storage.local.get([
             'balanceUsd', 'tokensEarned', 'activeStreakDays',
-            'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin'
+            'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin', 'pulse_dial_last_spin', 'lastSpin'
           ], function(res) {
             if (res && (typeof res.balanceUsd === 'number' || typeof res.tokensEarned === 'number')) {
               const bal = typeof res.balanceUsd === 'number' ? res.balanceUsd : (res.tokensEarned * 0.001);
-              renderBalance(bal, res.activeStreakDays, res.surfkit_pulse_dial_last_spin || res.surfkit_pulse_last_spin);
+              const spinTs = res.surfkit_pulse_dial_last_spin || res.surfkit_pulse_last_spin || res.pulse_dial_last_spin || res.lastSpin;
+              renderBalance(bal, res.activeStreakDays, spinTs);
             }
           });
         }
@@ -462,7 +472,7 @@
                 const d = res.data;
                 const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
                 const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
-                const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin;
+                const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin || d.pulse_dial_last_spin || d.lastSpin;
                 renderBalance(bal, st, spin);
               }
             });
@@ -470,7 +480,9 @@
               if (res && res.success && res.data) {
                 const d = res.data;
                 const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
-                renderBalance(bal, d.activeStreakDays, d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin);
+                const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
+                const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin || d.pulse_dial_last_spin || d.lastSpin;
+                renderBalance(bal, st, spin);
               }
             });
           } catch (_) {}
@@ -497,6 +509,14 @@
       if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
         chrome.runtime.onMessage.addListener(function(msg) {
           if (msg && (msg.action === 'STATE_CHANGED' || msg.action === 'SPIN_COMPLETED' || msg.action === 'TASK_COMPLETED')) {
+            if (msg.payload) {
+              const p = msg.payload;
+              if (typeof p.balanceUsd === 'number' || typeof p.tokensEarned === 'number') {
+                const bal = (typeof p.balanceUsd === 'number') ? p.balanceUsd : (p.tokensEarned * 0.001);
+                const spinTs = p.surfkit_pulse_dial_last_spin || p.surfkit_pulse_last_spin || p.lastSpin;
+                renderBalance(bal, p.activeStreakDays, spinTs);
+              }
+            }
             fetchLiveState();
           }
         });

@@ -8,8 +8,12 @@
  * - ZERO mock counters or fake tickers
  */
 
-// Import official Supabase JS v2 bundle and adapter
-importScripts('supabase.min.js', 'supabase-client.js');
+// Import official Supabase JS v2 bundle and adapter (if available locally)
+try {
+  importScripts('supabase.min.js', 'supabase-client.js');
+} catch (e) {
+  // Graceful fallback for standalone extension execution
+}
 
 // Feature flag: ad-network compliance & dashboard-only rewards model
 const ENABLE_EXTERNAL_AD_INJECTION = false;
@@ -333,6 +337,15 @@ async function syncFromSupabase() {
         resolvedMaster = profile.autoSurfEnabled;
       }
 
+      let spinMs = 0;
+      const spinTs = profile.pulse_dial_last_spin || profile.last_spin_at || profile.lastSpinAt;
+      if (spinTs) {
+        spinMs = (typeof spinTs === 'number') ? spinTs : new Date(spinTs).getTime();
+      }
+      if (!spinMs && currentLocal.surfkit_pulse_dial_last_spin) {
+        spinMs = Number(currentLocal.surfkit_pulse_dial_last_spin);
+      }
+
       const cloudState = {
         balanceUsd: bal,
         dailyEarnings: daily,
@@ -342,6 +355,9 @@ async function syncFromSupabase() {
         lastActiveDate: lastActive,
         completedActivities: completedActivities,
         completedTasks: completedActivities,
+        surfkit_pulse_dial_last_spin: spinMs || 0,
+        surfkit_pulse_last_spin: spinMs || 0,
+        pulse_dial_last_spin: spinMs || 0,
         intensity: currentLocal.intensity || profile.adIntensity || 'balanced',
         masterEnabled: resolvedMaster,
         stats: {
@@ -638,6 +654,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           }
           if (Object.keys(updates).length > 0) {
             await chrome.storage.local.set(updates);
+            updateBadge(state.masterEnabled, state.balanceUsd);
             // Tag the broadcast with the activity type so applyExtensionState
             // can distinguish real-activity updates from ad impression relays.
             const _isSpin = action === 'SPIN_COMPLETED';
@@ -672,9 +689,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             rewardUsd: 0,
             tokensAwarded: 0,
             adsSeenToday: state.adsSeenToday || 0
-          });
-          break;
-        }
           });
           break;
         }
