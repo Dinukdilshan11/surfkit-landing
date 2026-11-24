@@ -2,34 +2,26 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Surfkit Extension Popup</title>
+  <title>Surfkit Extension</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    html, body {
-      width: 360px;
-      margin: 0;
-      padding: 14px;
-      background: #070d19;
-      color: #e2e8f0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      font-size: 13px;
-      line-height: 1.4;
-      overflow: hidden;
+    body {
+      width: 320px;
+      background-color: #070d19;
+      color: #f8fafc;
+      padding: 16px;
       user-select: none;
     }
-    /* Header */
     .header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .brand {
       display: flex;
@@ -37,166 +29,162 @@
       gap: 8px;
     }
     .brand-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #00d293 0%, #06b6d4 100%);
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #00d293 0%, #00b47d 100%);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #070d19;
       font-weight: 900;
-      font-size: 14px;
-      box-shadow: 0 0 10px rgba(0, 210, 147, 0.35);
+      font-size: 13px;
+      color: #070d19;
     }
     .brand-name {
-      font-size: 14px;
-      font-weight: 900;
+      font-size: 13px;
+      font-weight: 800;
       letter-spacing: 0.5px;
       color: #ffffff;
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
     }
     .brand-pill {
       font-size: 9px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 1px 5px;
       border-radius: 4px;
       background: rgba(0, 210, 147, 0.15);
       color: #00d293;
       border: 1px solid rgba(0, 210, 147, 0.3);
-      letter-spacing: 0.5px;
     }
     .status-badge {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       color: #00d293;
-      background: rgba(0, 210, 147, 0.1);
+      background: rgba(0, 210, 147, 0.08);
       padding: 3px 8px;
       border-radius: 9999px;
-      border: 1px solid rgba(0, 210, 147, 0.25);
+      border: 1px solid rgba(0, 210, 147, 0.2);
     }
     .status-dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: #00d293;
-      box-shadow: 0 0 6px #00d293;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.9); }
+      background-color: #00d293;
+      box-shadow: 0 0 8px #00d293;
     }
 
     /* Primary Balance Card */
     .balance-card {
-      background: linear-gradient(145deg, #0d172a 0%, #080f1d 100%);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
       border: 1px solid rgba(0, 210, 147, 0.25);
       border-radius: 12px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
       position: relative;
       overflow: hidden;
     }
     .balance-card::before {
       content: '';
       position: absolute;
-      top: -20px;
-      right: -20px;
-      width: 70px;
-      height: 70px;
+      top: -30px;
+      right: -30px;
+      width: 80px;
+      height: 80px;
       background: radial-gradient(circle, rgba(0, 210, 147, 0.15) 0%, transparent 70%);
       pointer-events: none;
     }
     .balance-label {
       font-size: 10px;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: #94a3b8;
-      font-weight: 600;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      margin-bottom: 4px;
+    }
+    .balance-rate-tag {
+      font-size: 9px;
+      color: #64748b;
+      font-family: monospace;
     }
     .balance-main {
-      font-size: 24px;
+      font-size: 26px;
       font-weight: 900;
       color: #ffffff;
-      letter-spacing: -0.5px;
-      margin-top: 3px;
+      line-height: 1.1;
       display: flex;
       align-items: baseline;
-      gap: 5px;
+      gap: 6px;
     }
-    .balance-main .token-unit {
-      font-size: 14px;
-      color: #00d293;
+    .token-unit {
+      font-size: 13px;
       font-weight: 800;
+      color: #00d293;
+      letter-spacing: 0.5px;
     }
     .balance-secondary {
-      font-size: 12px;
-      color: #94a3b8;
+      font-size: 11px;
       font-weight: 600;
-      margin-top: 2px;
+      color: #94a3b8;
+      margin-top: 4px;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .balance-rate-tag {
-      font-size: 9px;
-      font-family: monospace;
-      color: #64748b;
-      background: rgba(255, 255, 255, 0.04);
-      padding: 1px 4px;
-      border-radius: 3px;
-    }
 
-    /* Grid of Two Mini Cards (Streak & Spin) */
+    /* Mini Grid: Streak, Tasks, & 4-Hour Spin */
     .mini-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
     }
     .mini-card {
-      background: #0c1424;
+      background: rgba(15, 23, 42, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 10px;
-      padding: 10px;
+      padding: 8px 6px;
+      text-align: center;
+      transition: all 0.2s ease;
     }
     .mini-card-label {
-      font-size: 10px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
       color: #94a3b8;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 4px;
-      font-weight: 600;
+      margin-bottom: 4px;
     }
     .mini-card-val {
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 800;
-      color: #ffffff;
-      margin-top: 3px;
+      color: #f1f5f9;
+      line-height: 1.2;
     }
     .mini-card-sub {
-      font-size: 10px;
-      color: #00d293;
-      font-weight: 600;
-      margin-top: 1px;
+      font-size: 8.5px;
+      color: #64748b;
+      margin-top: 2px;
     }
 
-    /* Cashout Readiness Card */
+    /* Cashout Readiness */
     .cashout-card {
-      background: #0c1424;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 10px;
       padding: 10px 12px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
     .cashout-header {
       display: flex;
@@ -238,6 +226,9 @@
       font-weight: 700;
       padding: 1px 6px;
       border-radius: 9999px;
+      background: rgba(148, 163, 184, 0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.25);
     }
     .status-ready {
       background: rgba(0, 210, 147, 0.15);
@@ -305,29 +296,42 @@
       <span class="token-unit">SKIT</span>
     </div>
     <div class="balance-secondary">
-      <span id="popup-balance-usd">&asymp; $0.00 USD</span>
+      <span id="popup-balance-usd">&asymp; $0.0000 USD</span>
       <span style="color: #64748b;">&bull;</span>
-      <span style="color: #00d293; font-weight: 700;">Ready to Cashout</span>
+      <span style="color: #00d293; font-weight: 700;">Live Balance</span>
     </div>
   </div>
 
-  <!-- Mini Grid: Streak & 4-Hour Spin -->
+  <!-- Mini Grid: Streak, Daily Tasks & 4-Hour Spin -->
   <div class="mini-grid">
+    <!-- Streak -->
     <div class="mini-card">
       <div class="mini-card-label">
         <span>&#128293;</span>
-        <span>Active Streak</span>
+        <span>Streak</span>
       </div>
-      <div class="mini-card-val" id="popup-streak-val">2 Days</div>
-      <div class="mini-card-sub">+10% Yield Active</div>
+      <div class="mini-card-val" id="popup-streak-val">0 Days</div>
+      <div class="mini-card-sub">+10% Yield</div>
     </div>
+
+    <!-- Daily Completed Tasks -->
     <div class="mini-card">
       <div class="mini-card-label">
-        <span>&#127911;</span>
-        <span>4-Hour Spin</span>
+        <span>&#9989;</span>
+        <span>Tasks</span>
       </div>
-      <div class="mini-card-val" id="popup-spin-status" style="color: #00d293;">Ready!</div>
-      <div class="mini-card-sub" id="popup-spin-sub">Spin on Dashboard</div>
+      <div class="mini-card-val" id="popup-tasks-val" style="color: #38bdf8;">0</div>
+      <div class="mini-card-sub" id="popup-tasks-sub">Daily Done</div>
+    </div>
+
+    <!-- 4-Hour Spin / Cooldown Widget -->
+    <div class="mini-card" id="popup-spin-card" style="cursor: pointer;">
+      <div class="mini-card-label">
+        <span id="popup-spin-icon">&#127911;</span>
+        <span>4h Spin</span>
+      </div>
+      <div class="mini-card-val" id="popup-spin-status" style="color: #00d293; font-weight: 800;">READY</div>
+      <div class="mini-card-sub" id="popup-spin-sub" style="color: #00d293; font-weight: 700;">Spin &rarr;</div>
     </div>
   </div>
 
@@ -344,7 +348,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
         <span class="cashout-threshold">Min 1,000 SKIT ($1)</span>
-        <span class="cashout-status-pill status-ready" id="popup-fp-status">Ready</span>
+        <span class="cashout-status-pill status-ready" id="popup-fp-status">0%</span>
       </div>
     </div>
     <div class="cashout-row">
@@ -354,7 +358,7 @@
       </div>
       <div style="display: flex; align-items: center; gap: 6px;">
         <span class="cashout-threshold">Min 5,000 SKIT ($5)</span>
-        <span class="cashout-status-pill status-ready" id="popup-pp-status">Ready</span>
+        <span class="cashout-status-pill status-ready" id="popup-pp-status">0%</span>
       </div>
     </div>
   </div>
@@ -378,26 +382,45 @@
     (function () {
       'use strict';
 
-      function renderBalance(usdVal, streakVal, lastSpinVal) {
+      const SPIN_COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 Hours
+
+      function formatSkitClean(n) {
+        const val = Number(n || 0);
+        if (isNaN(val)) return '0';
+        if (val % 1 === 0) {
+          return Math.round(val).toLocaleString();
+        }
+        if (Number((val * 10).toFixed(4)) % 1 === 0) {
+          return val.toFixed(1);
+        }
+        return val.toFixed(2);
+      }
+
+      function renderBalance(usdVal, streakVal, lastSpinVal, completedTasksVal) {
         try {
           const usdBalance = typeof usdVal === 'number' ? usdVal : (parseFloat(usdVal) || 0);
           const streak = typeof streakVal === 'number' ? streakVal : (parseInt(streakVal, 10) || 0);
-          const skitVal = Number((usdBalance * 1000).toFixed(1));
+          const tasks = typeof completedTasksVal === 'number' ? completedTasksVal : (parseInt(completedTasksVal, 10) || 0);
+          const skitVal = Number((usdBalance * 1000).toFixed(3));
 
           const skitEl = document.getElementById('popup-balance-skit');
           const usdEl = document.getElementById('popup-balance-usd');
           const streakEl = document.getElementById('popup-streak-val');
+          const tasksEl = document.getElementById('popup-tasks-val');
 
+          // Exact SKIT Display: e.g. 9.5 SKIT (never rounds 7.5 to 8)
           if (skitEl) {
-            skitEl.textContent = (skitVal % 1 !== 0)
-              ? skitVal.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-              : Math.round(skitVal).toLocaleString();
+            skitEl.textContent = formatSkitClean(skitVal);
           }
+
+          // Secondary USD Reference: e.g. ≈ $0.0095 USD
           if (usdEl) {
-            const usdDecimals = (usdBalance < 1 && usdBalance > 0 && (usdBalance * 1000) % 1 !== 0) ? 4 : 2;
+            const usdDecimals = (usdBalance > 0 && usdBalance < 0.01) ? 4 : 2;
             usdEl.innerHTML = '&asymp; $' + usdBalance.toFixed(usdDecimals) + ' USD <span style="color: #64748b;">&bull;</span> <span style="color: #00d293; font-weight: 700;">Live Balance</span>';
           }
+
           if (streakEl) streakEl.textContent = streak + ' Days';
+          if (tasksEl) tasksEl.textContent = String(tasks);
 
           // Cashout thresholds: FaucetPay Min 1,000 SKIT ($1), PayPal Min 5,000 SKIT ($5)
           const fpReady = skitVal >= 1000;
@@ -413,7 +436,7 @@
             ppEl.className = 'cashout-status-pill ' + (ppReady ? 'status-ready' : '');
           }
 
-          // 4-Hour Spin status
+          // 4-Hour Spin / Cooldown Widget
           let lastSpin = 0;
           if (typeof lastSpinVal === 'number') {
             lastSpin = lastSpinVal;
@@ -424,24 +447,48 @@
               lastSpin = new Date(lastSpinVal).getTime() || 0;
             }
           }
+
           const now = Date.now();
-          const spinCooldown = 4 * 60 * 60 * 1000;
+          const spinCardEl = document.getElementById('popup-spin-card');
+          const spinIconEl = document.getElementById('popup-spin-icon');
           const spinStatusEl = document.getElementById('popup-spin-status');
           const spinSubEl = document.getElementById('popup-spin-sub');
 
           if (spinStatusEl) {
-            if (!lastSpin || (now - lastSpin) >= spinCooldown) {
-              spinStatusEl.textContent = 'Ready!';
+            if (!lastSpin || (now - lastSpin) >= SPIN_COOLDOWN_MS) {
+              // READY WIDGET
+              spinStatusEl.textContent = 'READY';
               spinStatusEl.style.color = '#00d293';
-              if (spinSubEl) spinSubEl.textContent = 'Spin on Dashboard';
+              spinStatusEl.style.fontFamily = 'inherit';
+              if (spinIconEl) spinIconEl.innerHTML = '&#127911;';
+              if (spinSubEl) {
+                spinSubEl.textContent = 'Spin \u2192';
+                spinSubEl.style.color = '#00d293';
+              }
+              if (spinCardEl) {
+                spinCardEl.style.borderColor = 'rgba(0, 210, 147, 0.4)';
+                spinCardEl.style.background = 'rgba(0, 210, 147, 0.08)';
+              }
             } else {
-              const diffMs = spinCooldown - (now - lastSpin);
+              // COOLDOWN WIDGET: Live remaining countdown (HH:MM:SS)
+              const diffMs = SPIN_COOLDOWN_MS - (now - lastSpin);
               const hrs = Math.floor(diffMs / (60 * 60 * 1000));
               const mins = Math.floor((diffMs % (60 * 60 * 1000)) / (60 * 1000));
               const secs = Math.floor((diffMs % (60 * 1000)) / 1000);
-              spinStatusEl.textContent = hrs + 'h ' + mins + 'm ' + String(secs).padStart(2, '0') + 's';
-              spinStatusEl.style.color = '#94a3b8';
-              if (spinSubEl) spinSubEl.textContent = 'Cooldown Active';
+              const countdownStr = String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+
+              spinStatusEl.textContent = countdownStr;
+              spinStatusEl.style.color = '#38bdf8';
+              spinStatusEl.style.fontFamily = 'monospace';
+              if (spinIconEl) spinIconEl.innerHTML = '&#9203;';
+              if (spinSubEl) {
+                spinSubEl.textContent = 'Cooldown Active';
+                spinSubEl.style.color = '#94a3b8';
+              }
+              if (spinCardEl) {
+                spinCardEl.style.borderColor = 'rgba(56, 189, 248, 0.25)';
+                spinCardEl.style.background = 'rgba(15, 23, 42, 0.6)';
+              }
             }
           }
         } catch (e) {
@@ -449,17 +496,83 @@
         }
       }
 
+      // Direct REST API sync from Supabase
+      async function fetchDirectFromSupabase() {
+        try {
+          const SUPA_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
+          const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
+
+          let userId = null;
+          let userEmail = null;
+
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'userId', 'userEmail']);
+            if (st.authUser?.id) userId = st.authUser.id;
+            else if (st.surfkit_auth_user?.id) userId = st.surfkit_auth_user.id;
+            if (st.authUser?.email) userEmail = st.authUser.email;
+            else if (st.surfkit_auth_user?.email) userEmail = st.surfkit_auth_user.email;
+          }
+
+          if (!userId) {
+            const rawJwt = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
+            if (rawJwt) {
+              const p = JSON.parse(rawJwt);
+              const u = p.user || (p.currentSession && p.currentSession.user);
+              if (u?.id) userId = u.id;
+              if (u?.email) userEmail = u.email;
+            }
+          }
+
+          if (userId || userEmail) {
+            const filter = userId ? `id=eq.${userId}` : `email=ilike.${encodeURIComponent(userEmail)}`;
+            const res = await fetch(`${SUPA_URL}/rest/v1/profiles?${filter}&select=*`, {
+              headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+            });
+            if (res.ok) {
+              const rows = await res.json();
+              if (Array.isArray(rows) && rows.length > 0) {
+                const prof = rows[0];
+                const bal = Number(prof.available_balance || 0);
+                const streak = Number(prof.streak_days || 0);
+                const spinTs = prof.pulse_dial_last_spin || prof.last_spin_at;
+                const spins = Number(prof.four_hour_spins || prof.pulse_dial_total_spins || 0);
+                const surveys = Number(prof.surveys_completed || 0);
+                const games = Number(prof.games_played || 0);
+                const tasks = Number(prof.completed_activities || (spins + surveys + games) || 0);
+
+                renderBalance(bal, streak, spinTs, tasks);
+
+                // Check daily_stats for today's tasks
+                const todayStr = new Date().toISOString().substring(0, 10);
+                const dsRes = await fetch(`${SUPA_URL}/rest/v1/daily_stats?user_id=eq.${prof.id}&stat_date=eq.${todayStr}&select=earnings,impressions`, {
+                  headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+                }).catch(() => null);
+                if (dsRes && dsRes.ok) {
+                  const dsRows = await dsRes.json();
+                  if (Array.isArray(dsRows) && dsRows.length > 0) {
+                    const dailyTasks = Number(dsRows[0].impressions || tasks);
+                    renderBalance(bal, streak, spinTs, dailyTasks);
+                  }
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
       function fetchLiveState() {
         // 1. Check chrome.storage.local
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           chrome.storage.local.get([
             'balanceUsd', 'tokensEarned', 'activeStreakDays',
-            'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin', 'pulse_dial_last_spin', 'lastSpin'
+            'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin', 'pulse_dial_last_spin', 'lastSpin',
+            'completedActivities', 'completedTasks', 'dailyTasks', 'adsSeenToday'
           ], function(res) {
             if (res && (typeof res.balanceUsd === 'number' || typeof res.tokensEarned === 'number')) {
-              const bal = typeof res.balanceUsd === 'number' ? res.balanceUsd : (res.tokensEarned * 0.001);
+              const bal = (typeof res.balanceUsd === 'number') ? res.balanceUsd : (res.tokensEarned * 0.001);
               const spinTs = res.surfkit_pulse_dial_last_spin || res.surfkit_pulse_last_spin || res.pulse_dial_last_spin || res.lastSpin;
-              renderBalance(bal, res.activeStreakDays, spinTs);
+              const tasks = Number(res.completedActivities || res.completedTasks || res.dailyTasks || 0);
+              renderBalance(bal, res.activeStreakDays, spinTs, tasks);
             }
           });
         }
@@ -473,7 +586,8 @@
                 const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
                 const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
                 const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin || d.pulse_dial_last_spin || d.lastSpin;
-                renderBalance(bal, st, spin);
+                const tasks = Number(d.completedActivities || d.completedTasks || 0);
+                renderBalance(bal, st, spin, tasks);
               }
             });
             chrome.runtime.sendMessage({ action: 'SYNC_WITH_SUPABASE' }, function(res) {
@@ -482,18 +596,23 @@
                 const bal = typeof d.balanceUsd === 'number' ? d.balanceUsd : (typeof d.tokensEarned === 'number' ? d.tokensEarned * 0.001 : 0);
                 const st = typeof d.activeStreakDays === 'number' ? d.activeStreakDays : 0;
                 const spin = d.surfkit_pulse_dial_last_spin || d.surfkit_pulse_last_spin || d.pulse_dial_last_spin || d.lastSpin;
-                renderBalance(bal, st, spin);
+                const tasks = Number(d.completedActivities || d.completedTasks || 0);
+                renderBalance(bal, st, spin, tasks);
               }
             });
           } catch (_) {}
         }
 
-        // 3. Fallback to localStorage keys
+        // 3. Query direct Supabase REST API
+        fetchDirectFromSupabase();
+
+        // 4. Fallback to localStorage keys
         const savedUsd = localStorage.getItem('surfkit_available_balance') || localStorage.getItem('surfkit_balance');
         const savedStreak = localStorage.getItem('surfkit_streak');
         const savedSpin = localStorage.getItem('surfkit_pulse_dial_last_spin') || localStorage.getItem('surfkit_pulse_last_spin');
+        const savedTasks = localStorage.getItem('surfkit_completed_activities') || localStorage.getItem('surfkit_completed_tasks');
         if (savedUsd !== null && !isNaN(parseFloat(savedUsd))) {
-          renderBalance(parseFloat(savedUsd), savedStreak, savedSpin);
+          renderBalance(parseFloat(savedUsd), savedStreak, savedSpin, savedTasks);
         }
       }
 
@@ -514,7 +633,8 @@
               if (typeof p.balanceUsd === 'number' || typeof p.tokensEarned === 'number') {
                 const bal = (typeof p.balanceUsd === 'number') ? p.balanceUsd : (p.tokensEarned * 0.001);
                 const spinTs = p.surfkit_pulse_dial_last_spin || p.surfkit_pulse_last_spin || p.lastSpin;
-                renderBalance(bal, p.activeStreakDays, spinTs);
+                const tasks = Number(p.completedActivities || p.completedTasks || 0);
+                renderBalance(bal, p.activeStreakDays, spinTs, tasks);
               }
             }
             fetchLiveState();
@@ -525,15 +645,30 @@
       window.addEventListener('storage', fetchLiveState);
       window.addEventListener('surfkit_balance_update', fetchLiveState);
 
+      // Spin card click handler: open Dashboard spin widget
+      const spinCard = document.getElementById('popup-spin-card');
+      if (spinCard) {
+        spinCard.addEventListener('click', function(e) {
+          e.preventDefault();
+          if (typeof chrome !== 'undefined' && chrome.tabs) {
+            chrome.tabs.create({ url: 'https://surfkit.cloud/dashboard/#pulse-dial-section' });
+          } else {
+            window.open('https://surfkit.cloud/dashboard/#pulse-dial-section', '_blank');
+          }
+        });
+      }
+
       // Open Dashboard button handler
-      if (typeof chrome !== 'undefined' && chrome.tabs) {
-        const btn = document.getElementById('btn-open-dashboard');
-        if (btn) {
-          btn.addEventListener('click', function (e) {
-            e.preventDefault();
+      const btn = document.getElementById('btn-open-dashboard');
+      if (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (typeof chrome !== 'undefined' && chrome.tabs) {
             chrome.tabs.create({ url: 'https://surfkit.cloud/dashboard/' });
-          });
-        }
+          } else {
+            window.open('https://surfkit.cloud/dashboard/', '_blank');
+          }
+        });
       }
 
       // Initial execution and live polling interval

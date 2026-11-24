@@ -267,6 +267,12 @@ function setupRealtimeForUser(userId) {
       const games = Number(newProfile.games_played || 0);
       const completedActivities = Math.max(Number(newProfile.completed_activities || 0), spins + surveys + games, lifetimeImpressions);
 
+      let spinMs = 0;
+      const spinTs = newProfile.pulse_dial_last_spin || newProfile.last_spin_at;
+      if (spinTs) {
+        spinMs = (typeof spinTs === 'number') ? spinTs : new Date(spinTs).getTime();
+      }
+
       const updates = {
         balanceUsd: bal,
         dailyEarnings: daily,
@@ -276,6 +282,9 @@ function setupRealtimeForUser(userId) {
         lastActiveDate: lastActive,
         completedActivities: completedActivities,
         completedTasks: completedActivities,
+        surfkit_pulse_dial_last_spin: spinMs || 0,
+        surfkit_pulse_last_spin: spinMs || 0,
+        pulse_dial_last_spin: spinMs || 0,
         stats: {
           totalImpressions: completedActivities,
           lifetimeEarnedUsd: Number(newProfile.lifetime_earnings || bal),
