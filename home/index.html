@@ -643,7 +643,7 @@
               </div>
               <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
                 <span class="w-3.5 h-3.5 rounded bg-emerald-400 text-slate-950 flex items-center justify-center text-[10px] font-black">S</span>
-                <span id="pin-badge">8,170 SKIT</span>
+                <span id="pin-badge">3 SKIT</span>
               </div>
             </div>
 
@@ -651,120 +651,119 @@
             <div class="bg-[#0A0F1D] rounded-2xl p-5 border border-slate-800 shadow-inner">
               
               <!-- 1. User Chip & Version Status Pill -->
-              <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center justify-between mb-3.5">
                 <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#161F36] border border-[#233152] text-xs text-slate-300">
                   <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                   </svg>
-                  <span class="font-medium font-mono">Surfkit user</span><span class="text-slate-500 hover:text-slate-300 ml-1 cursor-pointer text-[10px]">&times;</span>
+                  <span class="font-medium font-mono">Surfkit user</span>
                 </div>
                 <div class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-medium">
                   v1.0.0 Active
                 </div>
               </div>
 
-              <!-- 2. Surfkit Header Brand & Interactive Toggle -->
-              <div class="flex items-center justify-between p-4 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3.5">
+              <!-- 2. Surfkit Brand Header -->
+              <div class="flex items-center justify-between p-3.5 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3">
                 <div class="flex items-center gap-3">
-                  <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-400 flex items-center justify-center font-black text-slate-950 text-2xl shadow-lg shadow-emerald-500/20">
+                  <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-400 to-teal-400 flex items-center justify-center font-black text-slate-950 text-xl shadow-lg shadow-emerald-500/20">
                     S
                   </div>
                   <div>
-                    <h3 class="text-xl font-bold text-white tracking-tight">Surfkit</h3>
-                    <div class="flex items-center gap-1.5 text-xs text-emerald-400 font-medium" id="toggle-status-text">
-                      <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <h3 class="text-base font-bold text-white tracking-tight leading-tight">Surfkit</h3>
+                    <div class="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                       <span>Active &amp; Ready</span>
                     </div>
                   </div>
                 </div>
-                <!-- Interactive Toggle Switch -->
-                <button id="extension-toggle-btn" type="button" aria-label="Toggle Extension" class="w-14 h-8 bg-emerald-500 rounded-full p-1 transition-colors duration-200 focus:outline-none flex items-center justify-end cursor-pointer">
-                  <div class="w-6 h-6 bg-white rounded-full shadow-md transform transition-transform" id="toggle-thumb"></div>
-                </button>
+                <span class="px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-mono font-bold text-emerald-400">
+                  Cloud Synced
+                </span>
               </div>
 
               <!-- 3. AVAILABLE BALANCE CARD -->
-              <div class="p-5 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3.5">
-                <div class="text-[11px] font-bold tracking-wider text-slate-400 uppercase mb-1">AVAILABLE BALANCE</div>
-                <div class="flex items-baseline gap-2 mb-1">
-                  <span class="text-4xl sm:text-5xl font-extrabold text-white tracking-tight font-mono transition-colors" id="mockup-balance">67,819</span>
-                  <span class="text-base font-bold text-surf-teal">SKIT</span>
+              <div class="p-4 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3">
+                <div class="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">AVAILABLE BALANCE</div>
+                <div class="flex items-baseline gap-2 mb-1.5">
+                  <span class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-mono" id="mockup-balance">3</span>
+                  <span class="text-sm font-bold text-surf-teal">SKIT</span>
                 </div>
                 <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-800/80">
-                  <span class="text-slate-400 font-mono" id="mockup-balance-usd">≈ $67.819 USD</span>
-                  <span class="text-emerald-400 font-semibold">Ready to Cashout</span>
+                  <span class="text-slate-400 font-mono" id="mockup-balance-usd">&asymp; $0.003 USD</span>
+                  <span class="text-emerald-400 font-semibold text-[11px]">Live Balance</span>
                 </div>
               </div>
 
-              <!-- 4. STATS SUMMARY: SKIT TOKENS & ACTIVE STREAK -->
-              <div class="grid grid-cols-2 gap-3 mb-3.5">
-                <!-- Box 1: SKIT Tokens Balance -->
-                <div class="p-4 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 text-center flex flex-col items-center">
-                  <svg class="w-6 h-6 text-teal-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m-3-9h6m-6 6h6" />
+              <!-- 4. STATS SUMMARY: COMPLETED ACTIVITIES & ACTIVE STREAK -->
+              <div class="grid grid-cols-2 gap-3 mb-3">
+                <!-- Box 1: Completed Activities -->
+                <div class="p-3.5 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 text-center flex flex-col items-center">
+                  <svg class="w-5 h-5 text-cyan-400 mb-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
-                  <div class="text-2xl font-extrabold text-white tracking-tight" id="mockup-skit-count">67,819</div>
-                  <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-1">SKIT TOKENS</div>
+                  <div class="text-2xl font-extrabold text-white tracking-tight" id="mockup-completed-activities">20</div>
+                  <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">COMPLETED ACTIVITIES</div>
                 </div>
 
                 <!-- Box 2: Active Streak -->
-                <div class="p-4 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 text-center flex flex-col items-center">
-                  <svg class="w-6 h-6 text-amber-400 mb-2" fill="currentColor" viewBox="0 0 20 20">
+                <div class="p-3.5 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 text-center flex flex-col items-center">
+                  <svg class="w-5 h-5 text-amber-400 mb-1.5" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.527.82-1.17 2.115-1.576 3.497A9.452 9.452 0 008 8c-.767 0-1.488.163-2.146.463A1 1 0 005.178 9.9c.77 1.54 2.015 2.89 3.493 3.824C9.52 14.257 10.74 15 12 15c2.761 0 5-2.239 5-5 0-2.317-1.576-4.267-3.72-4.83a8.97 8.97 0 00-.885-2.617zM10 12c-1.105 0-2-.895-2-2 0-.374.1-.724.275-1.025.334.616.828 1.127 1.442 1.475.18.102.38.188.59.255A1.996 1.996 0 0110 12z" clip-rule="evenodd" />
                   </svg>
-                  <div class="text-2xl font-extrabold text-white tracking-tight">2 Days</div>
-                  <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-1">ACTIVE STREAK</div>
+                  <div class="text-2xl font-extrabold text-white tracking-tight" id="mockup-active-streak">14 Days</div>
+                  <div class="text-[10px] font-bold text-slate-400 tracking-wider uppercase mt-0.5">ACTIVE STREAK</div>
                 </div>
               </div>
 
-              <!-- 5. Activity Level Segmented Control (Legacy - hidden via ENABLE_EXTERNAL_AD_INJECTION) -->
-              <div id="ext-intensity-control-container" class="p-4 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3.5" style="display: none !important;">
-                <div class="flex items-center justify-between text-xs font-semibold mb-3">
-                  <span class="text-slate-300">Activity Level</span>
-                  <span class="text-emerald-400 font-mono" id="intensity-label">High</span>
+              <!-- 5. CASHOUT READINESS (Minimum Thresholds) -->
+              <div class="p-3.5 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3 space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">CASHOUT READINESS</span>
+                  <span class="text-[10px] font-mono text-emerald-400 font-semibold">Minimum Thresholds</span>
                 </div>
-                <div class="grid grid-cols-3 gap-2">
-                  <button type="button" class="intensity-btn py-2 rounded-xl text-xs font-bold transition-all bg-slate-900/60 text-slate-400 hover:text-white" data-mode="Low">Low</button>
-                  <button type="button" class="intensity-btn py-2 rounded-xl text-xs font-bold transition-all bg-slate-900/60 text-slate-400 hover:text-white" data-mode="Balanced">Balanced</button>
-                  <button type="button" class="intensity-btn active py-2 rounded-xl text-xs font-bold transition-all bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25" data-mode="High">High</button>
-                </div>
-              </div>
-
-                            <!-- 6. Pause Site / Domain Row (Legacy - hidden via ENABLE_EXTERNAL_AD_INJECTION) -->
-              <div id="ext-pause-site-container" class="flex items-center justify-between p-3.5 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3.5" style="display: none !important;">
-                <div class="flex items-center gap-2.5 text-xs font-semibold text-slate-300">
-                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                    <line x1="2" y1="12" x2="22" y2="12" stroke-width="2"/>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke-width="2"/>
-                  </svg>
-                  <span>surfkit.cloud</span>
-                </div>
-                <span class="px-3 py-1 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] font-mono font-bold text-slate-400">Pause Site</span>
-              </div>
-
-              <!-- Rate & Feedback Trigger inside Extension Popup Mockup -->
-              <div class="flex items-center justify-between p-3 rounded-2xl bg-[#0F172A]/80 border border-slate-800/80 mb-3.5">
-                <div class="flex items-center gap-2">
-                  <div class="w-6 h-6 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xs">★</div>
-                  <div>
-                    <div class="text-[11px] font-bold text-white">Rate Surfkit Extension</div>
-                    <div class="text-[9px] text-slate-400 font-mono" id="popup-rating-sync-status">Live Cloud Sync</div>
+                <div>
+                  <div class="flex items-center justify-between text-[11px] mb-1">
+                    <span class="text-slate-200 font-semibold">FaucetPay <span class="text-slate-400 font-normal">($1.00 min)</span></span>
+                    <span class="text-slate-400 font-mono">0.3%</span>
+                  </div>
+                  <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-400" style="width: 1%;"></div>
                   </div>
                 </div>
-                <button type="button" class="open-rating-modal-btn px-2.5 py-1 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold transition-all cursor-pointer">
-                  Rate ★
-                </button>
+                <div>
+                  <div class="flex items-center justify-between text-[11px] mb-1">
+                    <span class="text-slate-200 font-semibold">PayPal <span class="text-slate-400 font-normal">($5.00 min)</span></span>
+                    <span class="text-slate-400 font-mono">0.06%</span>
+                  </div>
+                  <div class="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                    <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-400" style="width: 0.5%;"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 6. 4-Hour Spin Row -->
+              <div class="flex items-center justify-between p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 mb-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">&#127911;</div>
+                  <div>
+                    <div class="text-xs font-bold text-white leading-tight">4-Hour Spin</div>
+                    <div class="text-[10px] text-slate-400 font-mono">Pulse Dial</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-extrabold text-emerald-400 font-mono">READY</span>
+                  <span class="text-[11px] font-bold text-emerald-300">Spin &rarr;</span>
+                </div>
               </div>
 
               <!-- 7. Dashboard Button (links to dashboard or login based on auth) -->
-              <a id="mobile-auth-btn" href="https://surfkit.cloud/dashboard/" class="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-2xl bg-[#161F36] hover:bg-[#1E2B4A] border border-[#233152] text-xs font-bold text-white transition-all group shadow-md">
-                <svg class="w-4 h-4 text-emerald-400 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <a id="mobile-auth-btn" href="https://surfkit.cloud/dashboard/" class="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-400 hover:brightness-110 text-xs font-bold text-slate-950 transition-all group shadow-md">
+                <svg class="w-4 h-4 text-slate-950 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <circle cx="12" cy="12" r="10" stroke-width="2"/>
                   <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="currentColor"/>
                 </svg>
-                <span id="mobile-auth-text">Open Dashboard</span>
+                <span id="mobile-auth-text">Dashboard</span>
               </a>
 
             </div>
@@ -2267,59 +2266,8 @@
         });
       }
 
-      // 2. Real Extension Popup Interactivity
-      // A. Live Balance & SKIT Increment Ticker
-      const balanceEl = document.getElementById('mockup-balance');
-      const tokensEl = document.getElementById('mockup-tokens');
-      const adsCountEl = document.getElementById('mockup-skit-count');
-      const pinBadge = document.getElementById('pin-badge');
-
-      // Feature flag: compliance & dashboard-only rewards
-      const ENABLE_EXTERNAL_AD_INJECTION = false;
-
-      let currentUsd = 67.819;
-      let currentTokens = 67819;
-      let currentAds = 3041;
-      let isExtensionActive = true;
-
-
-      // B. Toggle Switch (Active & Ready vs Paused)
-      const toggleBtn = document.getElementById('extension-toggle-btn');
-      const toggleThumb = document.getElementById('toggle-thumb');
-      const toggleStatusText = document.getElementById('toggle-status-text');
-
-      if (toggleBtn && toggleThumb && toggleStatusText) {
-        toggleBtn.addEventListener('click', () => {
-          isExtensionActive = !isExtensionActive;
-          if (isExtensionActive) {
-            toggleBtn.classList.remove('bg-slate-700', 'justify-start');
-            toggleBtn.classList.add('bg-emerald-500', 'justify-end');
-            toggleStatusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span><span>Active &amp; Ready</span>`;
-            toggleStatusText.className = "flex items-center gap-1.5 text-xs text-emerald-400 font-medium";
-          } else {
-            toggleBtn.classList.remove('bg-emerald-500', 'justify-end');
-            toggleBtn.classList.add('bg-slate-700', 'justify-start');
-            toggleStatusText.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>Paused</span>`;
-            toggleStatusText.className = "flex items-center gap-1.5 text-xs text-slate-400 font-medium";
-          }
-        });
-      }
-
-      // C. Activity Level Segmented Control Buttons
-      const intensityBtns = document.querySelectorAll('.intensity-btn');
-      const intensityLabel = document.getElementById('intensity-label');
-
-      intensityBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          intensityBtns.forEach(b => {
-            b.classList.remove('active', 'bg-emerald-500', 'text-slate-950', 'shadow-lg', 'shadow-emerald-500/25');
-            b.classList.add('bg-slate-900/60', 'text-slate-400');
-          });
-          btn.classList.remove('bg-slate-900/60', 'text-slate-400');
-          btn.classList.add('active', 'bg-emerald-500', 'text-slate-950', 'shadow-lg', 'shadow-emerald-500/25');
-          if (intensityLabel) intensityLabel.textContent = btn.getAttribute('data-mode');
-        });
-      });
+      // 2. Landing Page Extension Popup Preview (static showcase — no live user state)
+      // (Preview displays 3 SKIT / $0.003 USD, 20 Completed Activities, 14 Days Active Streak)
 
       // 3. Interactive Earnings Calculator (Realistic math, flat 10% per friend)
       const hoursSlider = document.getElementById('hours-slider');
