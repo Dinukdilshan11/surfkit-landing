@@ -2561,16 +2561,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="space-y-1.5">
                   <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Inquiry Categories</p>
                   <div class="flex flex-wrap gap-2">
-                    <button type="button" onclick="openSupportModal('Browser Nodes')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
+                    <button type="button" onclick="event.stopPropagation(); openSupportModal('Browser Nodes')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
                       Browser Nodes
                     </button>
-                    <button type="button" onclick="openSupportModal('Daily Earnings')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
+                    <button type="button" onclick="event.stopPropagation(); openSupportModal('Daily Earnings')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
                       Daily Earnings
                     </button>
-                    <button type="button" onclick="openSupportModal('Manual Payout')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
+                    <button type="button" onclick="event.stopPropagation(); openSupportModal('Manual Payout')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
                       Manual Payout
                     </button>
-                    <button type="button" onclick="openSupportModal('Account/Other')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
+                    <button type="button" onclick="event.stopPropagation(); openSupportModal('Account/Other')" class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-surf-surface border border-surf-border text-slate-300 hover:text-white hover:border-surf-teal transition-all">
                       Account / Other
                     </button>
                   </div>
@@ -2579,7 +2579,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
               <div class="pt-4 border-t border-surf-border/60 flex items-center justify-between">
                 <span class="text-xs text-slate-400">Direct In-App Dispatch</span>
-                <button type="button" onclick="openSupportModal('Account/Other')" class="px-5 py-2.5 bg-gradient-to-r from-surf-teal to-cyan-500 hover:from-surf-tealHover hover:to-cyan-400 text-slate-950 font-black text-xs rounded-xl shadow-glow-teal transition-all active:scale-95 flex items-center gap-2">
+                <button type="button" onclick="event.stopPropagation(); openSupportModal('Account/Other')" class="px-5 py-2.5 bg-gradient-to-r from-surf-teal to-cyan-500 hover:from-surf-tealHover hover:to-cyan-400 text-slate-950 font-black text-xs rounded-xl shadow-glow-teal transition-all active:scale-95 flex items-center gap-2">
                   <span>Send Message</span>
                   <span>💬</span>
                 </button>
@@ -2589,11 +2589,11 @@ document.addEventListener('DOMContentLoaded', () => {
         </section>
 
       
-  <!-- Support Two-Way Chat Modal / Drawer -->
-  <div id="supportTicketModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden transition-opacity">
-    <div class="w-full max-w-lg bg-[#0A101D] border border-surf-border rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[82vh] max-h-[680px]">
+  <!-- Support Two-Way Chat In-Page Popup -->
+  <div id="supportTicketModal" onclick="if (event.target === this) closeSupportModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm hidden transition-opacity">
+    <div id="support-chat-card" onclick="event.stopPropagation()" class="w-full max-w-lg bg-[#0A101D] border border-surf-border rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[82vh] max-h-[680px]">
       <!-- Chat Header -->
-      <div class="px-5 py-4 border-b border-surf-border bg-surf-surfaceCard/80 shrink-0 space-y-3">
+      <div class="px-5 py-4 border-b border-surf-border bg-surf-surfaceCard/80 shrink-0">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0">
             <div class="relative w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-400 text-lg font-bold shrink-0">
@@ -2611,14 +2611,6 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
           <button type="button" onclick="closeSupportModal()" aria-label="Close Support Chat" class="w-8 h-8 rounded-lg bg-surf-surface text-slate-400 hover:text-white flex items-center justify-center text-lg transition-colors shrink-0">&times;</button>
-        </div>
-
-        <!-- Active Category Selector Pills -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5" id="ticket-category-group">
-          <button type="button" onclick="selectTicketCategory('Browser Nodes')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all whitespace-nowrap shrink-0" data-cat="Browser Nodes">⚡ Browser Nodes</button>
-          <button type="button" onclick="selectTicketCategory('Daily Earnings')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all whitespace-nowrap shrink-0" data-cat="Daily Earnings">💰 Daily Earnings</button>
-          <button type="button" onclick="selectTicketCategory('Manual Payout')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all whitespace-nowrap shrink-0" data-cat="Manual Payout">💳 Manual Payout</button>
-          <button type="button" onclick="selectTicketCategory('Account/Other')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-teal bg-surf-teal/10 text-surf-teal transition-all whitespace-nowrap shrink-0" data-cat="Account/Other">🛡️ Account / Other</button>
         </div>
         <input type="hidden" id="ticket-category-input" value="Account/Other" />
       </div>
@@ -7078,35 +7070,57 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
+    function buildSupportTopicBubblesHtml() {
+      const activeCat = document.getElementById('ticket-category-input')?.value || 'Account/Other';
+      const topics = [
+        { cat: 'Browser Nodes', icon: '⚡', label: 'Browser Nodes' },
+        { cat: 'Daily Earnings', icon: '💰', label: 'Daily Earnings' },
+        { cat: 'Manual Payout', icon: '💳', label: 'Manual Payout' },
+        { cat: 'Account/Other', icon: '🛡️', label: 'Account/Other' }
+      ];
+      const buttons = topics.map(t => {
+        const isSel = t.cat === activeCat;
+        const cls = isSel
+          ? 'border-surf-teal bg-surf-teal/15 text-surf-teal shadow-sm'
+          : 'border-surf-border bg-[#111A2E] text-slate-300 hover:text-white hover:border-surf-teal/60';
+        return `<button type="button" onclick="event.stopPropagation(); selectTicketCategory('${t.cat}')" class="ticket-cat-btn px-3 py-1.5 rounded-xl text-[11px] font-semibold border ${cls} transition-all flex items-center gap-1.5 cursor-pointer" data-cat="${t.cat}"><span>${t.icon}</span><span>${t.label}</span></button>`;
+      }).join('');
+
+      return `
+        <div class="flex justify-start">
+          <div class="max-w-[90%] bg-[#111A2E] border border-surf-border rounded-2xl rounded-bl-sm px-4 py-3 text-xs text-slate-200 shadow-sm space-y-2.5">
+            <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">24/7 Support Desk</div>
+            <p class="leading-relaxed">Hi! Select a topic below and send your message — our team replies directly in this chat.</p>
+            <div class="flex flex-wrap gap-1.5 pt-0.5" id="ticket-category-group">
+              ${buttons}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
     function renderSupportChatMessages() {
       const container = document.getElementById('support-chat-messages');
       if (!container) return;
 
+      const introBubbles = buildSupportTopicBubblesHtml();
+
       if (!Array.isArray(supportChatMessages) || supportChatMessages.length === 0) {
-        container.innerHTML = `
-          <div class="flex justify-start">
-            <div class="max-w-[85%] bg-[#111A2E] border border-surf-border rounded-2xl rounded-bl-sm px-4 py-3 text-xs text-slate-200 shadow-sm">
-              <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">24/7 Support Desk</div>
-              <p class="leading-relaxed">Welcome to Surfkit Support! Pick a category above and send your message below — our team replies directly in this chat.</p>
-            </div>
-          </div>
-        `;
+        container.innerHTML = introBubbles;
         scrollSupportChatToBottom();
         return;
       }
 
-      container.innerHTML = supportChatMessages.map(m => {
+      const threadHtml = supportChatMessages.map(m => {
         const sender = String(m.sender_type || 'user').toLowerCase();
         const isUser = sender === 'user';
         const timeStr = formatSupportTime(m.created_at);
-        const catTag = m.category ? `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300">${escapeSupportHtml(m.category)}</span>` : '';
         if (isUser) {
           return `
             <div class="flex justify-end">
               <div class="max-w-[82%] bg-gradient-to-br from-emerald-500/25 to-teal-500/20 border border-emerald-500/35 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 shadow-sm">
                 <div class="text-xs leading-relaxed whitespace-pre-wrap break-words">${escapeSupportHtml(m.message)}</div>
-                <div class="flex items-center justify-end gap-2 mt-1.5 text-[10px] text-emerald-200/80">
-                  ${catTag}
+                <div class="flex items-center justify-end mt-1.5 text-[10px] text-emerald-200/80">
                   <span>${escapeSupportHtml(timeStr)}</span>
                 </div>
               </div>
@@ -7116,10 +7130,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `
           <div class="flex justify-start">
             <div class="max-w-[82%] bg-[#111A2E] border border-surf-border text-slate-200 rounded-2xl rounded-bl-sm px-3.5 py-2.5 shadow-sm">
-              <div class="flex items-center gap-2 mb-1">
-                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Support Desk</span>
-                ${catTag}
-              </div>
+              <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Support Desk</div>
               <div class="text-xs leading-relaxed whitespace-pre-wrap break-words">${escapeSupportHtml(m.message)}</div>
               <div class="text-[10px] text-slate-400 mt-1.5 text-right">${escapeSupportHtml(timeStr)}</div>
             </div>
@@ -7127,6 +7138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
       }).join('');
 
+      container.innerHTML = introBubbles + threadHtml;
       scrollSupportChatToBottom();
     }
 
@@ -7229,6 +7241,23 @@ document.addEventListener('DOMContentLoaded', () => {
       modal.classList.add('hidden');
     }
 
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        const modal = document.getElementById('supportTicketModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeSupportModal();
+        }
+      }
+    });
+
+    document.addEventListener('click', function(e) {
+      const modal = document.getElementById('supportTicketModal');
+      const card = document.getElementById('support-chat-card');
+      if (modal && !modal.classList.contains('hidden') && card && !card.contains(e.target)) {
+        closeSupportModal();
+      }
+    });
+
     function selectTicketCategory(category) {
       const catInput = document.getElementById('ticket-category-input');
       if (catInput) catInput.value = category;
@@ -7236,11 +7265,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (badge) badge.textContent = category;
       document.querySelectorAll('.ticket-cat-btn').forEach(btn => {
         if (btn.getAttribute('data-cat') === category) {
-          btn.classList.add('border-surf-teal', 'bg-surf-teal/10', 'text-surf-teal');
-          btn.classList.remove('border-surf-border', 'bg-surf-surface', 'text-slate-300');
+          btn.classList.add('border-surf-teal', 'bg-surf-teal/15', 'text-surf-teal', 'shadow-sm');
+          btn.classList.remove('border-surf-border', 'bg-[#111A2E]', 'text-slate-300');
         } else {
-          btn.classList.remove('border-surf-teal', 'bg-surf-teal/10', 'text-surf-teal');
-          btn.classList.add('border-surf-border', 'bg-surf-surface', 'text-slate-300');
+          btn.classList.remove('border-surf-teal', 'bg-surf-teal/15', 'text-surf-teal', 'shadow-sm');
+          btn.classList.add('border-surf-border', 'bg-[#111A2E]', 'text-slate-300');
         }
       });
     }
@@ -7279,31 +7308,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       try {
-        const basePayload = {
+        const insertPayload = {
           user_email: userEmail,
           message: message,
           sender_type: 'user',
+          is_read: false,
           category: category,
-          subject: category + ' Support Chat',
-          status: 'open'
+          subject: category + ' Support Chat'
         };
         if (userId) {
-          basePayload.user_id = userId;
+          insertPayload.user_id = userId;
         }
 
-        // Include is_read: false when supported by table schema; fallback cleanly if column is absent
-        let res = await supabaseClient
-          .from('support_messages')
-          .insert([{ ...basePayload, is_read: false }])
-          .select('*')
-          .single();
-
-        if (res.error && /is_read/i.test(res.error.message || '')) {
+        // Insert only columns present in public.support_messages; strip any missing optional column if schema cache rejects it
+        const optionalCols = ['is_read', 'category', 'subject', 'user_id'];
+        let res = { data: null, error: null };
+        for (let attempt = 0; attempt <= optionalCols.length; attempt++) {
           res = await supabaseClient
             .from('support_messages')
-            .insert([basePayload])
+            .insert([insertPayload])
             .select('*')
             .single();
+
+          if (!res.error) break;
+          const errMsg = res.error.message || '';
+          const match = errMsg.match(/Could not find the '([^']+)' column/i);
+          if (match && optionalCols.includes(match[1]) && (match[1] in insertPayload)) {
+            delete insertPayload[match[1]];
+            continue;
+          }
+          break;
         }
 
         if (res.error) {
