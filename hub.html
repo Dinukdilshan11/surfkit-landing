@@ -261,15 +261,6 @@
             </svg>
             <span class="sidebar-text truncate">Account & Devices</span>
           </button>
-
-          <!-- Support Inbox / Admin Reply Tab -->
-          <button onclick="switchTab('support-inbox')" id="nav-btn-support-inbox" class="nav-item w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-400 hover:text-slate-100 hover:bg-surf-surface border border-transparent">
-            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-            </svg>
-            <span class="sidebar-text truncate">Support Inbox</span>
-            <span id="support-inbox-badge" class="sidebar-text ml-auto text-[10px] bg-emerald-500/15 text-emerald-400 font-bold px-1.5 py-0.5 rounded border border-emerald-500/30 hidden">0</span>
-          </button>
         </nav>
       </div>
 
@@ -2597,47 +2588,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         </section>
 
-        <!-- ==================== TAB 7: SUPPORT INBOX / ADMIN REPLY ==================== -->
-        <section id="tab-support-inbox" class="tab-content space-y-6">
-          <div class="bg-surf-surfaceCard border border-surf-border rounded-2xl p-6 space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-surf-border/70 pb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-lg">
-                  📥
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <h2 class="text-lg font-bold text-white tracking-tight">Support Inbox &bull; Live Replies</h2>
-                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px] font-bold text-emerald-400">
-                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                      <span>Realtime</span>
-                    </span>
-                  </div>
-                  <p class="text-xs text-slate-400 mt-0.5">Incoming user messages from <code class="text-surf-teal font-mono">public.support_messages</code> — click Reply on any row to respond live.</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2.5">
-                <span id="support-inbox-count" class="px-3 py-1.5 rounded-xl bg-[#090E1C] border border-surf-border text-xs font-mono text-slate-300">0 messages</span>
-                <button type="button" onclick="loadSupportInbox()" class="px-3.5 py-1.5 rounded-xl bg-surf-surface border border-surf-border hover:border-surf-teal text-xs font-semibold text-slate-200 hover:text-white transition-all flex items-center gap-1.5">
-                  <span>🔄</span>
-                  <span>Refresh</span>
-                </button>
-              </div>
-            </div>
-
-            <!-- Inline Error Banner -->
-            <div id="support-inbox-error" class="hidden px-4 py-2.5 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center justify-between gap-2">
-              <span id="support-inbox-error-text">Unable to load support inbox.</span>
-              <button type="button" onclick="document.getElementById('support-inbox-error').classList.add('hidden')" class="text-rose-200 hover:text-white text-sm leading-none">&times;</button>
-            </div>
-
-            <!-- Incoming User Message Rows -->
-            <div id="support-inbox-list" class="space-y-3">
-              <div class="text-center py-10 text-xs text-slate-500 font-mono">Loading incoming support messages...</div>
-            </div>
-          </div>
-        </section>
-
       
   <!-- Support Two-Way Chat In-Page Popup -->
   <div id="supportTicketModal" onclick="if (event.target === this) closeSupportModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm hidden transition-opacity">
@@ -4615,9 +4565,6 @@ document.addEventListener('DOMContentLoaded', () => {
               console.log('Realtime connected to Supabase');
             }
           });
-        if (typeof subscribeSupportInboxRealtime === 'function') {
-          subscribeSupportInboxRealtime();
-        }
       } catch (e) {
         console.warn('Realtime subscription warning:', e);
       }
@@ -5083,8 +5030,7 @@ document.addEventListener('DOMContentLoaded', () => {
         games: 'Mini Games • Arcade Arena',
         cashout: 'Cashout / Payouts',
         referral: 'Referral & Crew',
-        account: 'Account & Devices',
-        'support-inbox': 'Support Inbox • Admin Reply'
+        account: 'Account & Devices'
       };
       if (tabName === 'earnhub') {
         fetchAvailableSurveys();
@@ -5092,10 +5038,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (tabName === 'cashout') {
         selectGateway(state.selectedGateway || 'faucetpay');
-      }
-      if (tabName === 'support-inbox') {
-        if (typeof loadSupportInbox === 'function') loadSupportInbox();
-        if (typeof subscribeSupportInboxRealtime === 'function') subscribeSupportInboxRealtime();
       }
       const breadcrumb = document.getElementById('header-breadcrumb');
       if (breadcrumb) breadcrumb.textContent = breadcrumbNames[tabName] || 'Overview';
@@ -7428,270 +7370,6 @@ document.addEventListener('DOMContentLoaded', () => {
           submitBtn.innerHTML = '<span>Send</span><span>➤</span>';
         }
         if (inputEl) inputEl.focus();
-      }
-    }
-
-    // ==================== SUPPORT INBOX / ADMIN REPLY TAB ====================
-    let supportInboxAllRows = [];
-    let supportInboxChannel = null;
-    const openInboxReplyRowIds = new Set();
-
-    function showSupportInboxError(msg) {
-      const box = document.getElementById('support-inbox-error');
-      const txt = document.getElementById('support-inbox-error-text');
-      if (box && txt) {
-        if (msg) {
-          txt.textContent = msg;
-          box.classList.remove('hidden');
-        } else {
-          box.classList.add('hidden');
-        }
-      }
-    }
-
-    function updateSupportInboxBadges(userRows) {
-      const count = Array.isArray(userRows) ? userRows.length : 0;
-      const countEl = document.getElementById('support-inbox-count');
-      if (countEl) countEl.textContent = `${count} ${count === 1 ? 'message' : 'messages'}`;
-      const badgeEl = document.getElementById('support-inbox-badge');
-      if (badgeEl) {
-        badgeEl.textContent = String(count);
-        if (count > 0) badgeEl.classList.remove('hidden');
-        else badgeEl.classList.add('hidden');
-      }
-    }
-
-    function renderSupportInbox() {
-      const listEl = document.getElementById('support-inbox-list');
-      const userRows = supportInboxAllRows.filter(r => String(r.sender_type || 'user').toLowerCase() === 'user');
-      updateSupportInboxBadges(userRows);
-      if (!listEl) return;
-
-      if (userRows.length === 0) {
-        listEl.innerHTML = `
-          <div class="p-8 rounded-2xl bg-[#090E1C] border border-surf-border text-center space-y-2">
-            <div class="text-2xl">📭</div>
-            <p class="text-sm font-bold text-white">No incoming user messages yet</p>
-            <p class="text-xs text-slate-400">New messages sent to <code class="text-surf-teal font-mono">public.support_messages</code> will appear here live.</p>
-          </div>
-        `;
-        return;
-      }
-
-      listEl.innerHTML = userRows.map(row => {
-        const rowId = String(row.id || '');
-        const email = String(row.user_email || 'unknown@surfkit.cloud');
-        const category = String(row.category || 'Account/Other');
-        const timeStr = formatSupportTime(row.created_at);
-        const isOpen = openInboxReplyRowIds.has(rowId);
-
-        // Gather admin/support replies for this user after (or matching) this message
-        const rowTs = new Date(row.created_at || 0).getTime();
-        const replies = supportInboxAllRows
-          .filter(r => {
-            const st = String(r.sender_type || '').toLowerCase();
-            if (st !== 'admin' && st !== 'support' && st !== 'assistant') return false;
-            const sameEmail = String(r.user_email || '').trim().toLowerCase() === email.trim().toLowerCase();
-            const sameUid = row.user_id && r.user_id && row.user_id === r.user_id;
-            return (sameEmail || sameUid) && new Date(r.created_at || 0).getTime() >= rowTs;
-          })
-          .sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
-
-        const repliesHtml = replies.length > 0 ? `
-          <div class="mt-3 pt-3 border-t border-surf-border/60 space-y-2">
-            ${replies.map(rep => `
-              <div class="pl-3 border-l-2 border-emerald-500/60 bg-emerald-500/5 rounded-r-lg py-1.5 pr-2.5 text-xs">
-                <div class="flex items-center justify-between text-[10px] text-emerald-400 font-bold mb-0.5">
-                  <span>Admin / Support Reply</span>
-                  <span class="font-mono text-slate-400 font-normal">${escapeSupportHtml(formatSupportTime(rep.created_at))}</span>
-                </div>
-                <p class="text-slate-200 whitespace-pre-wrap break-words">${escapeSupportHtml(rep.message)}</p>
-              </div>
-            `).join('')}
-          </div>
-        ` : '';
-
-        return `
-          <div class="p-4 rounded-2xl bg-[#090E1C] border border-surf-border hover:border-surf-borderLight transition-all" data-inbox-row="${escapeSupportHtml(rowId)}">
-            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
-              <div class="min-w-0 flex-1 space-y-1.5">
-                <div class="flex flex-wrap items-center gap-2">
-                  <span class="text-xs font-mono font-bold text-emerald-400">${escapeSupportHtml(email)}</span>
-                  <span class="px-2 py-0.5 rounded-full bg-surf-teal/15 border border-surf-teal/30 text-surf-teal text-[10px] font-bold">${escapeSupportHtml(category)}</span>
-                  <span class="text-[11px] font-mono text-slate-400">${escapeSupportHtml(timeStr)}</span>
-                </div>
-                <p class="text-sm text-white leading-relaxed whitespace-pre-wrap break-words">${escapeSupportHtml(row.message)}</p>
-              </div>
-              <button type="button" onclick="toggleInboxReplyBox('${escapeSupportHtml(rowId)}')" class="px-3.5 py-1.5 rounded-xl ${isOpen ? 'bg-surf-teal text-slate-950 font-black' : 'bg-surf-surface border border-surf-border text-slate-200 hover:border-surf-teal hover:text-white font-bold'} text-xs transition-all shrink-0 flex items-center gap-1.5">
-                <span>↩️</span>
-                <span>${isOpen ? 'Close Reply' : 'Reply'}</span>
-              </button>
-            </div>
-
-            ${repliesHtml}
-
-            <form id="inbox-reply-form-${escapeSupportHtml(rowId)}" onsubmit="sendInboxReply(event, '${escapeSupportHtml(rowId)}')" class="${isOpen ? '' : 'hidden'} mt-3 pt-3 border-t border-surf-border/70 flex flex-col sm:flex-row items-stretch sm:items-end gap-2.5">
-              <div class="flex-1 space-y-1">
-                <div class="text-[10px] font-mono text-slate-400">
-                  Replying to <span class="text-emerald-400 font-semibold">${escapeSupportHtml(email)}</span>
-                </div>
-                <textarea id="inbox-reply-input-${escapeSupportHtml(rowId)}" rows="2" required placeholder="Type your admin reply to ${escapeSupportHtml(email)}..." class="w-full bg-[#070D19] border border-surf-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-surf-teal transition-colors resize-none"></textarea>
-              </div>
-              <button type="submit" id="inbox-reply-btn-${escapeSupportHtml(rowId)}" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-glow-teal transition-all active:scale-95 shrink-0">
-                Send Reply ➤
-              </button>
-            </form>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function toggleInboxReplyBox(rowId) {
-      if (!rowId) return;
-      if (openInboxReplyRowIds.has(rowId)) {
-        openInboxReplyRowIds.delete(rowId);
-      } else {
-        openInboxReplyRowIds.add(rowId);
-      }
-      renderSupportInbox();
-      if (openInboxReplyRowIds.has(rowId)) {
-        const inp = document.getElementById('inbox-reply-input-' + rowId);
-        if (inp) setTimeout(() => inp.focus(), 40);
-      }
-    }
-
-    async function loadSupportInbox() {
-      if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-        showSupportInboxError('Supabase client unavailable.');
-        return;
-      }
-      try {
-        showSupportInboxError('');
-        const { data, error } = await supabaseClient
-          .from('support_messages')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) {
-          console.error('[Support Inbox] Fetch error:', error);
-          showSupportInboxError('Failed to load Support Inbox: ' + (error.message || 'Database error'));
-          return;
-        }
-        supportInboxAllRows = Array.isArray(data) ? data : [];
-        renderSupportInbox();
-      } catch (err) {
-        console.error('[Support Inbox] Unexpected error:', err);
-        showSupportInboxError('Failed to load Support Inbox: ' + (err?.message || 'Network error'));
-      }
-    }
-
-    function subscribeSupportInboxRealtime() {
-      if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
-      try {
-        if (supportInboxChannel) return;
-        supportInboxChannel = supabaseClient
-          .channel('support-inbox-live')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'support_messages' }, (payload) => {
-            if (payload && payload.new) {
-              const exists = supportInboxAllRows.some(r => r.id && r.id === payload.new.id);
-              if (!exists) {
-                supportInboxAllRows.unshift(payload.new);
-                supportInboxAllRows.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
-                renderSupportInbox();
-              }
-            } else {
-              loadSupportInbox();
-            }
-          })
-          .subscribe();
-      } catch (e) {
-        console.warn('[Support Inbox] Realtime subscribe notice:', e);
-      }
-    }
-
-    async function sendInboxReply(event, rowId) {
-      if (event) event.preventDefault();
-      const targetRow = supportInboxAllRows.find(r => String(r.id || '') === String(rowId));
-      if (!targetRow) return;
-
-      const inputEl = document.getElementById('inbox-reply-input-' + rowId);
-      const btnEl = document.getElementById('inbox-reply-btn-' + rowId);
-      const replyText = inputEl?.value.trim() || '';
-      if (!replyText) return;
-
-      if (typeof supabaseClient === 'undefined' || !supabaseClient) {
-        showSupportInboxError('Supabase client unavailable. Cannot send reply.');
-        return;
-      }
-
-      showSupportInboxError('');
-      if (btnEl) {
-        btnEl.disabled = true;
-        btnEl.textContent = 'Sending...';
-      }
-
-      try {
-        const replyPayload = {
-          user_email: targetRow.user_email,
-          message: replyText,
-          sender_type: 'admin',
-          is_read: false,
-          status: 'open',
-          category: targetRow.category || 'Account/Other',
-          subject: 'Support Desk Reply'
-        };
-        if (targetRow.user_id) {
-          replyPayload.user_id = targetRow.user_id;
-        }
-
-        const optionalCols = ['status', 'is_read', 'category', 'subject', 'user_id'];
-        let res = { data: null, error: null };
-        for (let attempt = 0; attempt <= optionalCols.length; attempt++) {
-          res = await supabaseClient
-            .from('support_messages')
-            .insert([replyPayload])
-            .select('*')
-            .single();
-
-          if (!res.error) break;
-          const errMsg = res.error.message || '';
-          const match = errMsg.match(/Could not find the '([^']+)' column/i);
-          if (match && optionalCols.includes(match[1]) && (match[1] in replyPayload)) {
-            delete replyPayload[match[1]];
-            continue;
-          }
-          break;
-        }
-
-        if (res.error) {
-          console.error('[Support Inbox] Reply insert error:', res.error);
-          const errMsg = res.error.message || 'Failed to send reply';
-          showSupportInboxError('Reply failed: ' + errMsg);
-          if (typeof showToast === 'function') showToast('⚠️ ' + errMsg, 'error');
-          return;
-        }
-
-        if (inputEl) inputEl.value = '';
-        if (res.data) {
-          const exists = supportInboxAllRows.some(r => r.id && r.id === res.data.id);
-          if (!exists) {
-            supportInboxAllRows.unshift(res.data);
-          }
-          renderSupportInbox();
-        } else {
-          await loadSupportInbox();
-        }
-        if (typeof showToast === 'function') {
-          showToast('Reply sent to ' + targetRow.user_email, 'success');
-        }
-      } catch (err) {
-        console.error('[Support Inbox] Reply exception:', err);
-        showSupportInboxError('Reply failed: ' + (err?.message || 'Network error'));
-      } finally {
-        if (btnEl) {
-          btnEl.disabled = false;
-          btnEl.textContent = 'Send Reply ➤';
-        }
       }
     }
 
