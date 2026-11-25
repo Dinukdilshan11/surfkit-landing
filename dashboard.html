@@ -4018,10 +4018,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isNaN(ms) && ms > 0) {
               localStorage.setItem('surfkit_pulse_dial_last_spin', String(ms));
               localStorage.setItem('surfkit_pulse_last_spin', String(ms));
-              if (typeof updatePulseDialUI === 'function') {
-                try { updatePulseDialUI(); } catch (e) {}
-              }
             }
+          }
+          if (typeof updatePulseDialUI === 'function') {
+            try { updatePulseDialUI(); } catch (e) {}
           }
           state.user.name = profile.display_name || profile.username || state.user.name;
           state.user.username = profile.username || state.user.username;
@@ -9265,21 +9265,19 @@ document.addEventListener('DOMContentLoaded', () => {
           banner.classList.remove('hidden');
           setTimeout(() => banner.classList.add('hidden'), 6000);
         }
+
+        if (typeof showToast === 'function') {
+          if (skitEarned > 0) {
+            showToast(`⚡ +${skitEarned} SKIT earned from Quantum Pulse Dial! Saved to cloud.`, 'success');
+          } else {
+            showToast(`⚡ Spin completed! Recharging now — try again in 4 hours.`, 'info');
+          }
+        }
       } catch (err) {
         console.error('[Pulse Dial] Spin execution error:', err);
       } finally {
         isPulseDialSpinning = false;
         updatePulseDialUI();
-      }
-    }, duration);
-  };
-
-      if (typeof showToast === 'function') {
-        if (skitEarned > 0) {
-          showToast(`⚡ +${skitEarned} SKIT earned from Quantum Pulse Dial! Saved to cloud.`, 'success');
-        } else {
-          showToast(`⚡ Spin completed! Recharging now — try again in 4 hours.`, 'info');
-        }
       }
     }, duration);
   };
