@@ -158,9 +158,10 @@ const SurfkitSupabase = {
             dailyEarnings: Number(p.daily_earnings || 0),
             dailyImpressions: Number(p.daily_impressions || 0),
             lifetimeImpressions: Number(p.lifetime_impressions || 0),
-            streakDays: Number(p.streak_days || 0),
-            fourHourSpins: Number(p.four_hour_spins || p.pulse_dial_total_spins || 0),
-            pulseDialTotalSpins: Number(p.pulse_dial_total_spins || p.four_hour_spins || 0),
+            streakDays: Math.max(Number(p.streak_days || 0), Number(p.daily_streak || 0), Number(p.current_streak || 0)),
+            dailyStreak: Math.max(Number(p.daily_streak || 0), Number(p.streak_days || 0), Number(p.current_streak || 0)),
+            fourHourSpins: Math.max(Number(p.four_hour_spins || 0), Number(p.pulse_dial_total_spins || 0), Number(p.total_spins || 0), Number(p.pulse_dial_spins || 0)),
+            pulseDialTotalSpins: Math.max(Number(p.pulse_dial_total_spins || 0), Number(p.four_hour_spins || 0), Number(p.total_spins || 0), Number(p.pulse_dial_spins || 0)),
             surveysCompleted: Number(p.surveys_completed || 0),
             gamesPlayed: Number(p.games_played || 0),
             completedActivities: Number(p.completed_activities || 0),
@@ -478,11 +479,20 @@ function setupRealtimeForUser(userId) {
       const tokens = Number((bal / 0.001).toFixed(1));
       const dailyImpressions = Number(newProfile.daily_impressions || 0);
       const lifetimeImpressions = Number(newProfile.lifetime_impressions || 0);
-      const spins = Number(newProfile.four_hour_spins || newProfile.pulse_dial_total_spins || 0);
+      const spins = Math.max(
+        Number(newProfile.four_hour_spins || 0),
+        Number(newProfile.pulse_dial_total_spins || 0),
+        Number(newProfile.total_spins || 0),
+        Number(newProfile.pulse_dial_spins || 0)
+      );
       const surveys = Number(newProfile.surveys_completed || 0);
       const games = Number(newProfile.games_played || 0);
       const completedActivities = Math.max(Number(newProfile.completed_activities || 0), spins + surveys + games);
-      const rawStreak = Number(newProfile.streak_days || 0);
+      const rawStreak = Math.max(
+        Number(newProfile.streak_days || 0),
+        Number(newProfile.daily_streak || 0),
+        Number(newProfile.current_streak || 0)
+      );
       const streak = (rawStreak <= 0 && (completedActivities > 0 || bal > 0)) ? 1 : rawStreak;
 
       let spinMs = 0;
@@ -908,12 +918,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               state.tokensEarned = payload.tokensEarned;
               updates.tokensEarned = payload.tokensEarned;
             }
-            if (payload.lastSpin) {
-              updates.surfkit_pulse_dial_last_spin = payload.lastSpin;
-              updates.surfkit_pulse_last_spin = payload.lastSpin;
+            const spinTs = payload.lastSpin || payload.surfkit_pulse_dial_last_spin || payload.pulseDialLastSpin || payload.pulse_dial_last_spin;
+            if (spinTs) {
+              const ms = (typeof spinTs === 'number') ? spinTs : new Date(spinTs).getTime();
+              updates.surfkit_pulse_dial_last_spin = ms;
+              updates.surfkit_pulse_last_spin = ms;
+              updates.pulse_dial_last_spin = ms;
+              state.surfkit_pulse_dial_last_spin = ms;
+              state.surfkit_pulse_last_spin = ms;
+              state.pulse_dial_last_spin = ms;
             }
-            if (payload.completedActivities !== undefined) {
-              const actCount = Number(payload.completedActivities || 0);
+            if (payload.completedActivities !== undefined || payload.completedTasks !== undefined) {
+              const actCount = Math.max(
+                Number(payload.completedActivities || 0),
+                Number(payload.completedTasks || 0),
+                Number(state.completedActivities || 0)
+              );
               state.completedActivities = actCount;
               state.completedTasks = actCount;
               state.stats = state.stats || {};
@@ -922,6 +942,21 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               updates.completedTasks = actCount;
               updates.stats = state.stats;
             }
+            const rawSt = Math.max(
+              Number(payload.activeStreakDays || 0),
+              Number(payload.streakDays || 0),
+              Number(payload.dailyStreak || 0),
+              Number(state.activeStreakDays || 0)
+            );
+            const actCountForStreak = Number(state.completedActivities || 0);
+            const curBalVal = typeof state.balanceUsd === 'number' ? state.balanceUsd : 0;
+            const finalSt = (rawSt <= 0 && (actCountForStreak > 0 || curBalVal > 0)) ? 1 : rawSt;
+            state.activeStreakDays = finalSt;
+            state.streakDays = finalSt;
+            state.dailyStreak = finalSt;
+            updates.activeStreakDays = finalSt;
+            updates.streakDays = finalSt;
+            updates.dailyStreak = finalSt;
           }
           if (Object.keys(updates).length > 0) {
             await chrome.storage.local.set(updates);

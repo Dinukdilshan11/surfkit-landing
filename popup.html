@@ -607,13 +607,31 @@
               if (Array.isArray(rows) && rows.length > 0) {
                 const prof = rows[0];
                 const bal = Number(prof.available_balance || 0);
-                const spins = Number(prof.four_hour_spins || prof.pulse_dial_total_spins || 0);
+                const spins = Math.max(
+                  Number(prof.four_hour_spins || 0),
+                  Number(prof.pulse_dial_total_spins || 0),
+                  Number(prof.total_spins || 0),
+                  Number(prof.pulse_dial_spins || 0)
+                );
                 const surveys = Number(prof.surveys_completed || 0);
                 const games = Number(prof.games_played || 0);
                 const tasks = Math.max(Number(prof.completed_activities || 0), spins + surveys + games);
-                const rawStreak = Number(prof.streak_days || 0);
+                const rawStreak = Math.max(
+                  Number(prof.streak_days || 0),
+                  Number(prof.daily_streak || 0),
+                  Number(prof.current_streak || 0)
+                );
                 const streak = (rawStreak <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawStreak;
                 const spinTs = prof.pulse_dial_last_spin || prof.last_spin_at;
+
+                if (rawStreak <= 0 && (tasks > 0 || bal > 0) && prof.id) {
+                  const todayStr = new Date().toISOString().split('T')[0];
+                  fetch(`${SUPA_URL}/rest/v1/profiles?id=eq.${prof.id}`, {
+                    method: 'PATCH',
+                    headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ streak_days: 1, daily_streak: 1, current_streak: 1, last_active_date: todayStr })
+                  }).catch(() => {});
+                }
 
                 renderBalance(bal, streak, spinTs, tasks);
               }
@@ -626,7 +644,7 @@
         // 1. Check chrome.storage.local
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
           chrome.storage.local.get([
-            'balanceUsd', 'tokensEarned', 'activeStreakDays',
+            'balanceUsd', 'tokensEarned', 'activeStreakDays', 'streakDays', 'dailyStreak',
             'surfkit_pulse_dial_last_spin', 'surfkit_pulse_last_spin', 'pulse_dial_last_spin', 'lastSpin',
             'completedActivities', 'completedTasks'
           ], function(res) {
@@ -634,7 +652,9 @@
               const bal = (typeof res.balanceUsd === 'number') ? res.balanceUsd : (res.tokensEarned * 0.001);
               const spinTs = res.surfkit_pulse_dial_last_spin || res.surfkit_pulse_last_spin || res.pulse_dial_last_spin || res.lastSpin;
               const tasks = Math.max(Number(res.completedActivities || 0), Number(res.completedTasks || 0));
-              const rawSt = typeof res.activeStreakDays === 'number' ? res.activeStreakDays : (parseInt(res.activeStreakDays, 10) || 0);
+              const rawSt = typeof res.activeStreakDays === 'number' ? res.activeStreakDays :
+                           (typeof res.streakDays === 'number' ? res.streakDays :
+                           (typeof res.dailyStreak === 'number' ? res.dailyStreak : (parseInt(res.activeStreakDays || res.streakDays || res.dailyStreak, 10) || 0)));
               const streak = (rawSt <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawSt;
               renderBalance(bal, streak, spinTs, tasks);
             }
@@ -700,7 +720,11 @@
                 const bal = (typeof p.balanceUsd === 'number') ? p.balanceUsd : (p.tokensEarned * 0.001);
                 const spinTs = p.surfkit_pulse_dial_last_spin || p.surfkit_pulse_last_spin || p.lastSpin;
                 const tasks = Math.max(Number(p.completedActivities || 0), Number(p.completedTasks || 0));
-                const rawSt = typeof p.activeStreakDays === 'number' ? p.activeStreakDays : (typeof p.streakDays === 'number' ? p.streakDays : 0);
+                const rawSt = Math.max(
+                  Number(p.activeStreakDays || 0),
+                  Number(p.streakDays || 0),
+                  Number(p.dailyStreak || 0)
+                );
                 const st = (rawSt <= 0 && (tasks > 0 || bal > 0)) ? 1 : rawSt;
                 renderBalance(bal, st, spinTs, tasks);
               }

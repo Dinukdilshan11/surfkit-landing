@@ -651,7 +651,8 @@ function getCompletedActivitiesCount() {
         const s = (typeof window !== 'undefined' && window.state) ? window.state : null;
         const u = (s && s.user) ? s.user : {};
         const explicitVal = Number(u.completedActivities !== undefined ? u.completedActivities : (u.completedTasks !== undefined ? u.completedTasks : u.lifetimeImpressions));
-        const activitySum = Number(u.surveysCompleted || 0) + Number(u.gamesPlayed || 0) + Number(u.fourHourSpins || 0);
+        const spinsVal = Math.max(Number(u.fourHourSpins || 0), Number(u.pulseDialTotalSpins || 0), Number(u.totalSpins || 0), Number(u.pulseDialSpins || 0));
+        const activitySum = Number(u.surveysCompleted || 0) + Number(u.gamesPlayed || 0) + spinsVal;
         const canonical = (Number.isFinite(explicitVal) && explicitVal > 0) ? Math.max(explicitVal, activitySum) : activitySum;
         return Math.max(0, canonical || 0);
     } catch (e) {
@@ -3904,12 +3905,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (profile) {
           if (profile.id) {
             currentUser.id = profile.id;
+            state.user.id = profile.id;
+            window.currentUser = currentUser;
+            window.currentUserId = profile.id;
           }
           const dbBal = Number(profile.available_balance || 0);
           const dbLocked = Number(profile.locked_balance || 0);
           const dbLifetime = Number(profile.lifetime_earnings || 0);
           const dbDaily = Number(profile.daily_earnings || 0);
-          const dbSpins = Number(profile.four_hour_spins || profile.pulse_dial_total_spins || 0);
+          const dbSpins = Math.max(
+            Number(profile.four_hour_spins || 0),
+            Number(profile.pulse_dial_total_spins || 0),
+            Number(profile.total_spins || 0),
+            Number(profile.pulse_dial_spins || 0)
+          );
 
           // Authoritative reconciliation: never wipe local verified spin earnings if local has a higher verified value
           const finalBal = Math.max(dbBal, Number(state.user.availableBalance || 0));
@@ -3922,9 +3931,65 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.lifetimeEarnings = finalLifetime;
           state.user.dailyEarnings = finalDaily;
           state.user.fourHourSpins = finalSpins;
+          state.user.pulseDialTotalSpins = finalSpins;
+          state.user.totalSpins = finalSpins;
+          state.user.pulseDialSpins = finalSpins;
+          state.user.surveysCompleted = Number(profile.surveys_completed || 0);
+          state.user.gamesPlayed = Number(profile.games_played || 0);
           state.user.lifetimeImpressions = Number(profile.lifetime_impressions || 0);
           state.user.dailyImpressions = Number(profile.daily_impressions || 0);
           state.user.referralBonus = Number(profile.referral_bonus || profile.referral_earnings || 0);
+
+          let userRefCode = profile.referral_code;
+          if (!userRefCode || userRefCode.trim() === '') {
+            userRefCode = 'sk_' + (profile.id ? profile.id.replace(/-/g, '').substring(0, 8) : Array.from({length: 8}, () => Math.floor(Math.random()*16).toString(16)).join(''));
+            if (supabaseClient && currentUser && currentUser.id) {
+              supabaseClient.from('profiles').update({ referral_code: userRefCode }).eq('id', currentUser.id).then(() => {});
+            }
+          }
+          state.user.referralCode = userRefCode;
+
+          const spinsCount = finalSpins;
+          const surveysCount = state.user.surveysCompleted;
+          const gamesCount = state.user.gamesPlayed;
+          const rawCompleted = (profile.completed_activities !== undefined && profile.completed_activities !== null)
+            ? Number(profile.completed_activities)
+            : (spinsCount + surveysCount + gamesCount);
+          state.user.completedActivities = Math.max(rawCompleted, spinsCount + surveysCount + gamesCount);
+          state.user.completedTasks = state.user.completedActivities;
+          state.user.lifetimeImpressions = Math.max(state.user.lifetimeImpressions, state.user.completedActivities);
+
+          // Streak Reconciliation / Auto-recovery on load (0 Days -> 1 Days if user has verified activity)
+          const todayStr = new Date().toISOString().split('T')[0];
+          let dbStreak = Math.max(
+            Number(profile.streak_days || 0),
+            Number(profile.daily_streak || 0),
+            Number(profile.current_streak || 0)
+          );
+          const lastActive = profile.last_active_date ? String(profile.last_active_date).split('T')[0] : null;
+          const hasActivity = state.user.completedActivities > 0 || Number(profile.available_balance || 0) > 0;
+
+          if (dbStreak <= 0 && hasActivity) {
+            dbStreak = 1;
+            state.user.streakDays = 1;
+            state.user.dailyStreak = 1;
+            state.user.currentStreak = 1;
+            state.user.lastActiveDate = todayStr;
+            if (supabaseClient && currentUser && currentUser.id) {
+              supabaseClient.from('profiles').update({
+                streak_days: 1,
+                daily_streak: 1,
+                current_streak: 1,
+                last_active_date: todayStr,
+                updated_at: new Date().toISOString()
+              }).eq('id', currentUser.id).then(() => {});
+            }
+          } else {
+            state.user.streakDays = dbStreak;
+            state.user.dailyStreak = dbStreak;
+            state.user.currentStreak = dbStreak;
+            state.user.lastActiveDate = lastActive;
+          }
 
           // If local has verified spin balance not yet committed to cloud, persist to Supabase immediately
           if (finalBal > dbBal && supabaseClient && currentUser && currentUser.id) {
@@ -3934,50 +3999,15 @@ document.addEventListener('DOMContentLoaded', () => {
               daily_earnings: finalDaily,
               four_hour_spins: finalSpins,
               pulse_dial_total_spins: finalSpins,
+              total_spins: finalSpins,
+              pulse_dial_spins: finalSpins,
+              completed_activities: state.user.completedActivities,
+              streak_days: state.user.streakDays,
+              daily_streak: state.user.streakDays,
+              current_streak: state.user.streakDays,
+              last_active_date: state.user.lastActiveDate || todayStr,
               updated_at: new Date().toISOString()
             }).eq('id', currentUser.id).then(() => {});
-          }
-          let userRefCode = profile.referral_code;
-          if (!userRefCode || userRefCode.trim() === '') {
-            userRefCode = 'sk_' + (profile.id ? profile.id.replace(/-/g, '').substring(0, 8) : Array.from({length: 8}, () => Math.floor(Math.random()*16).toString(16)).join(''));
-            if (supabaseClient && currentUser && currentUser.id) {
-              supabaseClient.from('profiles').update({ referral_code: userRefCode }).eq('id', currentUser.id).then(() => {});
-            }
-          }
-          state.user.referralCode = userRefCode;
-          state.user.surveysCompleted = Number(profile.surveys_completed || 0);
-          state.user.gamesPlayed = Number(profile.games_played || 0);
-          state.user.fourHourSpins = Number(profile.four_hour_spins || profile.pulse_dial_total_spins || 0);
-          const spinsCount = state.user.fourHourSpins;
-          const surveysCount = state.user.surveysCompleted;
-          const gamesCount = state.user.gamesPlayed;
-          const rawCompleted = (profile.completed_activities !== undefined && profile.completed_activities !== null)
-            ? Number(profile.completed_activities)
-            : (spinsCount + surveysCount + gamesCount);
-          state.user.completedActivities = Math.max(rawCompleted, spinsCount + surveysCount + gamesCount);
-          state.user.completedTasks = state.user.completedActivities;
-          state.user.lifetimeImpressions = state.user.completedActivities;
-
-          // Streak Reconciliation / Auto-recovery on load (0 Days -> 1 Days if user has verified activity)
-          const todayStr = new Date().toISOString().split('T')[0];
-          let dbStreak = Number(profile.streak_days || 0);
-          const lastActive = profile.last_active_date ? String(profile.last_active_date).split('T')[0] : null;
-          const hasActivity = state.user.completedActivities > 0 || Number(profile.available_balance || 0) > 0;
-
-          if (dbStreak <= 0 && hasActivity) {
-            dbStreak = 1;
-            state.user.streakDays = 1;
-            state.user.lastActiveDate = todayStr;
-            if (supabaseClient && currentUser && currentUser.id) {
-              supabaseClient.from('profiles').update({
-                streak_days: 1,
-                last_active_date: todayStr,
-                updated_at: new Date().toISOString()
-              }).eq('id', currentUser.id).then(() => {});
-            }
-          } else {
-            state.user.streakDays = dbStreak;
-            state.user.lastActiveDate = lastActive;
           }
 
           const spinTs = profile.pulse_dial_last_spin || profile.last_spin_at;
@@ -8458,12 +8488,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const nowMs = Date.now();
       const nowIso = new Date(nowMs).toISOString();
       const todayKey = nowIso.substring(0, 10); // 'YYYY-MM-DD'
+      const todayDateStr = todayKey;
 
       const _sbc = (typeof supabaseClient !== 'undefined' && supabaseClient)
         ? supabaseClient
         : (window.supabaseClient || null);
 
-      // 1. Resolve User ID
+      // 1. Resolve User ID reliably
       let targetUserId = null;
       if (window.currentUser?.id && String(window.currentUser.id).includes('-')) {
         targetUserId = window.currentUser.id;
@@ -8503,11 +8534,23 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (_) {}
       }
 
-      if (!targetUserId && _sbc && (window.state?.user?.email || window.currentUserEmail)) {
+      if (!targetUserId && _sbc && (window.state?.user?.username || window.state?.user?.email || window.currentUserEmail)) {
         try {
-          const em = (window.state?.user?.email || window.currentUserEmail).trim().toLowerCase();
-          const { data: pEm } = await _sbc.from('profiles').select('id').ilike('email', em).maybeSingle();
-          if (pEm?.id) targetUserId = pEm.id;
+          const un = (window.state?.user?.username || '').trim();
+          const em = (window.state?.user?.email || window.currentUserEmail || '').trim().toLowerCase();
+          let q = _sbc.from('profiles').select('id');
+          if (un && em) {
+            q = q.or(`username.eq.${un},email.ilike.${em}`);
+          } else if (un) {
+            q = q.eq('username', un);
+          } else if (em) {
+            q = q.ilike('email', em);
+          }
+          const { data: pFound } = await q.maybeSingle();
+          if (pFound?.id) {
+            targetUserId = pFound.id;
+            if (window.currentUser) window.currentUser.id = pFound.id;
+          }
         } catch (_) {}
       }
 
@@ -8517,11 +8560,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return { success: false, error: errMsg, unauthenticated: true };
       }
 
-      // 2. Fetch current profile balances from Supabase
+      // 2. Fetch full profile from Supabase with all columns
       let curProf = null;
       try {
         const { data: pData, error: pErr } = await _sbc.from('profiles')
-          .select('id, available_balance, lifetime_earnings, daily_earnings, four_hour_spins, pulse_dial_total_spins, surveys_completed, games_played, referral_bonus, last_spin_at, pulse_dial_last_spin')
+          .select('*')
           .eq('id', targetUserId)
           .maybeSingle();
 
@@ -8529,7 +8572,7 @@ document.addEventListener('DOMContentLoaded', () => {
           curProf = pData;
         } else {
           const { data: pCore } = await _sbc.from('profiles')
-            .select('id, available_balance, lifetime_earnings, daily_earnings')
+            .select('id, available_balance, lifetime_earnings, daily_earnings, four_hour_spins, pulse_dial_total_spins, total_spins, pulse_dial_spins, completed_activities, streak_days, daily_streak, current_streak, last_active_date, surveys_completed, games_played, referral_bonus, last_spin_at, pulse_dial_last_spin')
             .eq('id', targetUserId)
             .maybeSingle();
           curProf = pCore;
@@ -8550,21 +8593,29 @@ document.addEventListener('DOMContentLoaded', () => {
       const newLifetime = parseFloat((curDbLifetime + usdEarned).toFixed(6));
       const newDaily = parseFloat((curDbDaily + usdEarned).toFixed(6));
 
-      const prevSpins = Math.max(Number(curProf.four_hour_spins || 0), Number(curProf.pulse_dial_total_spins || 0));
+      const prevSpins = Math.max(
+        Number(curProf.four_hour_spins || 0),
+        Number(curProf.pulse_dial_total_spins || 0),
+        Number(curProf.total_spins || 0),
+        Number(curProf.pulse_dial_spins || 0)
+      );
       const prevSurveys = Number(curProf.surveys_completed || 0);
       const prevGames = Number(curProf.games_played || 0);
-      const prevCompleted = (curProf.completed_activities !== undefined)
+      const prevCompleted = (curProf.completed_activities !== undefined && curProf.completed_activities !== null)
         ? Number(curProf.completed_activities)
         : (prevSpins + prevSurveys + prevGames);
 
       const newSpins = activityType === 'spin' ? prevSpins + 1 : prevSpins;
       const newSurveys = activityType === 'survey' ? prevSurveys + 1 : prevSurveys;
       const newGames = activityType === 'game' ? prevGames + 1 : prevGames;
-      const newCompleted = prevCompleted + 1;
+      const newCompleted = Math.max(prevCompleted + 1, newSpins + newSurveys + newGames);
 
       // Calculate Daily Streak: 0 -> 1 on first active day, +1 on consecutive days, unchanged if already active today
-      const todayDateStr = new Date().toISOString().split('T')[0];
-      const curStreak = Number(curProf.streak_days || 0);
+      const curStreak = Math.max(
+        Number(curProf.streak_days || 0),
+        Number(curProf.daily_streak || 0),
+        Number(curProf.current_streak || 0)
+      );
       const lastActiveDateStr = curProf.last_active_date ? String(curProf.last_active_date).split('T')[0] : null;
 
       let newStreak = 1;
@@ -8589,13 +8640,18 @@ document.addEventListener('DOMContentLoaded', () => {
         lifetime_earnings: newLifetime,
         daily_earnings: newDaily,
         streak_days: newStreak,
+        daily_streak: newStreak,
+        current_streak: newStreak,
         last_active_date: todayDateStr,
+        completed_activities: newCompleted,
         updated_at: nowIso
       };
 
       if (activityType === 'spin') {
         profileUpdates.four_hour_spins = newSpins;
         profileUpdates.pulse_dial_total_spins = newSpins;
+        profileUpdates.total_spins = newSpins;
+        profileUpdates.pulse_dial_spins = newSpins;
         profileUpdates.pulse_dial_last_spin = nowIso;
         profileUpdates.last_spin_at = nowIso;
       } else if (activityType === 'survey') {
@@ -8607,16 +8663,57 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       let updateErr = null;
-      // Try updating with completed_activities first, fallback to core fields if column does not exist
+      // 1st attempt: update with all columns
       const { error: fullErr } = await _sbc.from('profiles')
-        .update({ ...profileUpdates, completed_activities: newCompleted })
+        .update(profileUpdates)
         .eq('id', targetUserId);
 
       if (fullErr) {
-        const { error: coreErr } = await _sbc.from('profiles')
-          .update(profileUpdates)
+        console.warn('[Reward Persist] Full profile update notice, trying standard schema:', fullErr);
+        // 2nd attempt: standard schema without total_spins / pulse_dial_spins
+        const stdUpdates = {
+          available_balance: newBal,
+          lifetime_earnings: newLifetime,
+          daily_earnings: newDaily,
+          streak_days: newStreak,
+          daily_streak: newStreak,
+          last_active_date: todayDateStr,
+          completed_activities: newCompleted,
+          updated_at: nowIso
+        };
+        if (activityType === 'spin') {
+          stdUpdates.four_hour_spins = newSpins;
+          stdUpdates.pulse_dial_total_spins = newSpins;
+          stdUpdates.pulse_dial_last_spin = nowIso;
+          stdUpdates.last_spin_at = nowIso;
+        } else if (activityType === 'survey') {
+          stdUpdates.surveys_completed = newSurveys;
+        } else if (activityType === 'game') {
+          stdUpdates.games_played = newGames;
+        }
+        const { error: stdErr } = await _sbc.from('profiles')
+          .update(stdUpdates)
           .eq('id', targetUserId);
-        updateErr = coreErr;
+
+        if (stdErr) {
+          console.warn('[Reward Persist] Standard update notice, trying core:', stdErr);
+          // 3rd attempt: minimal core updates
+          const coreUpdates = {
+            available_balance: newBal,
+            lifetime_earnings: newLifetime,
+            daily_earnings: newDaily,
+            streak_days: newStreak,
+            updated_at: nowIso
+          };
+          if (activityType === 'spin') {
+            coreUpdates.four_hour_spins = newSpins;
+            coreUpdates.pulse_dial_last_spin = nowIso;
+          }
+          const { error: coreErr } = await _sbc.from('profiles')
+            .update(coreUpdates)
+            .eq('id', targetUserId);
+          updateErr = coreErr;
+        }
       }
 
       if (updateErr) {
@@ -8698,7 +8795,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (_) {}
 
-      // 7. If spin, also record to pulse_spins audit table
+      // 7. If spin, also record to pulse_spins audit table if available
       if (activityType === 'spin') {
         try {
           await _sbc.from('pulse_spins').insert({
@@ -8780,6 +8877,8 @@ document.addEventListener('DOMContentLoaded', () => {
         dailyEarnings: persistRes.newDailyUsd,
         activeStreakDays: persistRes.newStreak || 1,
         streakDays: persistRes.newStreak || 1,
+        dailyStreak: persistRes.newStreak || 1,
+        currentStreak: persistRes.newStreak || 1,
         completedActivities: persistRes.newCompleted,
         completedTasks: persistRes.newCompleted,
         taskCompleted: true
@@ -8861,24 +8960,51 @@ document.addEventListener('DOMContentLoaded', () => {
   let pulseCooldownInterval = null;
 
   // ── Persistence helpers ───────────────────────────────────────────────
+  function parseSpinTimestamp(val) {
+    if (!val) return 0;
+    if (typeof val === 'number') return isNaN(val) ? 0 : val;
+    if (typeof val === 'string') {
+      const trimmed = val.trim();
+      if (/^\d+$/.test(trimmed)) {
+        const n = parseInt(trimmed, 10);
+        return isNaN(n) ? 0 : n;
+      }
+      const parsed = new Date(trimmed).getTime();
+      return isNaN(parsed) ? 0 : parsed;
+    }
+    return 0;
+  }
+
   function getPulseDialLastSpin() {
-    const fromProfile = (typeof state !== 'undefined' && state.user && (state.user.pulseDialLastSpin || state.user.lastSpinAt))
-      ? new Date(state.user.pulseDialLastSpin || state.user.lastSpinAt).getTime() : 0;
-    const fromLocal = parseInt(localStorage.getItem(LS_KEY_SPIN) || '0', 10);
+    let fromProfile = 0;
+    if (typeof state !== 'undefined' && state.user) {
+      fromProfile = parseSpinTimestamp(state.user.pulseDialLastSpin || state.user.lastSpinAt);
+    }
+    const fromLocal = parseSpinTimestamp(
+      localStorage.getItem(LS_KEY_SPIN) ||
+      localStorage.getItem('surfkit_pulse_dial_last_spin') ||
+      localStorage.getItem('surfkit_pulse_last_spin')
+    );
     return Math.max(fromProfile || 0, fromLocal || 0);
   }
 
   function setPulseDialLastSpin(ts) {
-    localStorage.setItem(LS_KEY_SPIN, String(ts));
+    const ms = parseSpinTimestamp(ts) || Date.now();
+    const iso = new Date(ms).toISOString();
+    localStorage.setItem(LS_KEY_SPIN, String(ms));
+    localStorage.setItem('surfkit_pulse_dial_last_spin', String(ms));
+    localStorage.setItem('surfkit_pulse_last_spin', String(ms));
     if (typeof state !== 'undefined' && state.user) {
-      state.user.pulseDialLastSpin = new Date(ts).toISOString();
+      state.user.pulseDialLastSpin = iso;
+      state.user.lastSpinAt = iso;
     }
   }
 
   function isPulseDialOnCooldown() {
     const last = getPulseDialLastSpin();
-    if (!last) return false;
-    return (Date.now() - last) < PULSE_DIAL_COOLDOWN_MS;
+    if (!last || isNaN(last) || last <= 0) return false;
+    const elapsed = Date.now() - last;
+    return elapsed >= 0 && elapsed < PULSE_DIAL_COOLDOWN_MS;
   }
 
   // ── UI updater ────────────────────────────────────────────────────────
@@ -8949,9 +9075,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ── Spin trigger ──────────────────────────────────────────────────────
-  window.triggerPulseDialSpin = async function() {
+  window.triggerPulseDialSpin = async function(force = false) {
     if (isPulseDialSpinning) return;
-    if (isPulseDialOnCooldown()) {
+    if (!force && isPulseDialOnCooldown()) {
       if (typeof showToast === 'function') {
         const rem = Math.max(0, PULSE_DIAL_COOLDOWN_MS - (Date.now() - getPulseDialLastSpin()));
         const totalSecs = Math.floor(rem / 1000);
@@ -8991,145 +9117,162 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setTimeout(async () => {
-      isPulseDialSpinning = false;
-      const nowMs  = Date.now();
-      const nowIso = new Date(nowMs).toISOString();
+      try {
+        isPulseDialSpinning = false;
+        const nowMs  = Date.now();
+        const nowIso = new Date(nowMs).toISOString();
 
-      // Support 0, 0.5, 1, 2, 3, 5 SKIT (1 SKIT = $0.001 USD)
-      const skitEarned = Number(chosenSkit);
-      const usdEarned  = parseFloat((skitEarned * SKIT_TO_USD).toFixed(6));
-      const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
+        // Support 0, 0.5, 1, 2, 3, 5 SKIT (1 SKIT = $0.001 USD)
+        const skitEarned = Number(chosenSkit);
+        const usdEarned  = parseFloat((skitEarned * SKIT_TO_USD).toFixed(6));
+        const ctx = { geoTier, weightProfile: geoTier >= 3 ? 'conservative' : 'standard', client_ts: nowIso };
 
-      // Persist to Supabase authoritatively (profiles + activity_ledger + daily_stats)
-      let persistRes = null;
-      if (typeof window.persistRewardToSupabase === 'function') {
-        persistRes = await window.persistRewardToSupabase('spin', skitEarned, { client_context: ctx });
-      }
-
-      if (!persistRes || !persistRes.success) {
-        const err = persistRes?.error || 'Database connection error';
-        console.error('[Pulse Dial] Persistence error:', err);
-        if (typeof showToast === 'function') {
-          showToast(`⚠️ Could not save spin reward to cloud (${err}). Balance unchanged.`, 'error');
-        }
-        if (persistRes?.unauthenticated && typeof openAuthModal === 'function') {
-          openAuthModal();
-        }
-        updatePulseDialUI();
-        return;
-      }
-
-      // Authoritative Supabase write confirmed! Apply verified values to state
-      setPulseDialLastSpin(persistRes.lastSpinMs);
-      const currentState = window.state || (typeof state !== 'undefined' ? state : null);
-      if (currentState && currentState.user) {
-        currentState.user.availableBalance = persistRes.newBalanceUsd;
-        currentState.user.lifetimeEarnings = persistRes.newLifetimeUsd;
-        currentState.user.dailyEarnings = persistRes.newDailyUsd;
-        currentState.user.streakDays = persistRes.newStreak || 1;
-        currentState.user.lastActiveDate = persistRes.lastActiveDate;
-        currentState.user.fourHourSpins = persistRes.newSpins;
-        currentState.user.completedActivities = persistRes.newCompleted;
-        currentState.user.completedTasks = persistRes.newCompleted;
-        currentState.user.lifetimeImpressions = persistRes.newCompleted;
-        currentState.user.pulseDialLastSpin = persistRes.lastSpinIso;
-        currentState.user.lastSpinAt = persistRes.lastSpinIso;
-
-        if (window.currentUser) {
-          window.currentUser.availableBalance = persistRes.newBalanceUsd;
+        // Persist to Supabase authoritatively (profiles + activity_ledger + daily_stats)
+        let persistRes = null;
+        if (typeof window.persistRewardToSupabase === 'function') {
+          persistRes = await window.persistRewardToSupabase('spin', skitEarned, { client_context: ctx });
         }
 
-        // Today chart earnings
-        if (currentState.chartData7d && Array.isArray(currentState.chartData7d.earnings) && currentState.chartData7d.earnings.length > 0) {
-          currentState.chartData7d.earnings[currentState.chartData7d.earnings.length - 1] = Math.round(persistRes.newDailyUsd * 1000);
-        }
-        if (currentState.chartData30d && Array.isArray(currentState.chartData30d.earnings) && currentState.chartData30d.earnings.length > 0) {
-          currentState.chartData30d.earnings[currentState.chartData30d.earnings.length - 1] = Math.round(persistRes.newDailyUsd * 1000);
-        }
-
-        // Activity ledger entry
-        if (Array.isArray(currentState.activityLedger)) {
-          currentState.activityLedger.unshift({
-            id: 'pulse_' + nowMs,
-            type: 'Pulse Reward',
-            amount: usdEarned,
-            skitAmount: skitEarned,
-            description: skitEarned > 0 ? `+${skitEarned} SKIT from Quantum Pulse Dial` : '0 SKIT — Spin Completed',
-            timestamp: nowIso
-          });
+        if (!persistRes || !persistRes.success) {
+          const err = persistRes?.error || 'Database connection error';
+          console.error('[Pulse Dial] Persistence error:', err);
+          if (typeof showToast === 'function') {
+            showToast(`⚠️ Could not save spin reward to cloud (${err}). Balance unchanged.`, 'error');
+          }
+          if (persistRes?.unauthenticated && typeof openAuthModal === 'function') {
+            openAuthModal();
+          }
+          updatePulseDialUI();
+          return;
         }
 
-        // LocalStorage keys for instant reload and tab sync
-        localStorage.setItem('surfkit_available_balance', String(persistRes.newBalanceUsd));
-        localStorage.setItem('surfkit_balance', String(persistRes.newBalanceUsd));
-        localStorage.setItem('surfkit_lifetime_earnings', String(persistRes.newLifetimeUsd));
-        localStorage.setItem('surfkit_daily_earnings', String(persistRes.newDailyUsd));
-        localStorage.setItem(LS_KEY_SPIN, String(persistRes.lastSpinMs));
-        localStorage.setItem('surfkit_pulse_dial_last_spin', String(persistRes.lastSpinMs));
-        localStorage.setItem('surfkit_pulse_last_spin', String(persistRes.lastSpinMs));
+        // Authoritative Supabase write confirmed! Apply verified values to state
+        setPulseDialLastSpin(persistRes.lastSpinMs);
+        const currentState = window.state || (typeof state !== 'undefined' ? state : null);
+        if (currentState && currentState.user) {
+          currentState.user.availableBalance = persistRes.newBalanceUsd;
+          currentState.user.lifetimeEarnings = persistRes.newLifetimeUsd;
+          currentState.user.dailyEarnings = persistRes.newDailyUsd;
+          currentState.user.streakDays = persistRes.newStreak || 1;
+          currentState.user.dailyStreak = persistRes.newStreak || 1;
+          currentState.user.currentStreak = persistRes.newStreak || 1;
+          currentState.user.lastActiveDate = persistRes.lastActiveDate;
+          currentState.user.fourHourSpins = persistRes.newSpins;
+          currentState.user.pulseDialTotalSpins = persistRes.newSpins;
+          currentState.user.totalSpins = persistRes.newSpins;
+          currentState.user.pulseDialSpins = persistRes.newSpins;
+          currentState.user.completedActivities = persistRes.newCompleted;
+          currentState.user.completedTasks = persistRes.newCompleted;
+          currentState.user.lifetimeImpressions = persistRes.newCompleted;
+          currentState.user.pulseDialLastSpin = persistRes.lastSpinIso;
+          currentState.user.lastSpinAt = persistRes.lastSpinIso;
 
-        // Save state and re-render app immediately
-        if (typeof window.saveState === 'function') window.saveState();
-        if (typeof window.renderApp === 'function') window.renderApp();
-        if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
-        updatePulseDialUI();
+          if (window.currentUser) {
+            window.currentUser.availableBalance = persistRes.newBalanceUsd;
+          }
 
-        // Window & Storage events
-        window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
-          detail: { availableBalance: persistRes.newBalanceUsd, lifetimeEarnings: persistRes.newLifetimeUsd, skitEarned, source: 'spin' }
-        }));
-        try {
-          window.dispatchEvent(new StorageEvent('storage', {
-            key: 'surfkit_available_balance',
-            newValue: String(persistRes.newBalanceUsd)
-          }));
-        } catch (_) {}
+          // Today chart earnings
+          if (currentState.chartData7d && Array.isArray(currentState.chartData7d.earnings) && currentState.chartData7d.earnings.length > 0) {
+            currentState.chartData7d.earnings[currentState.chartData7d.earnings.length - 1] = Math.round(persistRes.newDailyUsd * 1000);
+          }
+          if (currentState.chartData30d && Array.isArray(currentState.chartData30d.earnings) && currentState.chartData30d.earnings.length > 0) {
+            currentState.chartData30d.earnings[currentState.chartData30d.earnings.length - 1] = Math.round(persistRes.newDailyUsd * 1000);
+          }
 
-        // Extension message sync (Layer 1 + Layer 2 postMessage bridge)
-        const spinPayload = {
-          balanceUsd: persistRes.newBalanceUsd,
-          lifetimeEarnedUsd: persistRes.newLifetimeUsd,
-          dailyEarnings: persistRes.newDailyUsd,
-          tokensEarned: Number((persistRes.newBalanceUsd / 0.001).toFixed(1)),
-          activeStreakDays: persistRes.newStreak || 1,
-          streakDays: persistRes.newStreak || 1,
-          lastSpin: persistRes.lastSpinMs,
-          surfkit_pulse_dial_last_spin: persistRes.lastSpinMs,
-          completedActivities: persistRes.newCompleted,
-          completedTasks: persistRes.newCompleted,
-          spinCompleted: true
-        };
-
-        if (typeof window.dispatchToExtension === 'function') {
-          window.dispatchToExtension('SPIN_COMPLETED', spinPayload).catch(() => {});
-        }
-        try {
-          window.postMessage({ type: 'SURFKIT_PAGE_ACTION', action: 'SPIN_COMPLETED', payload: spinPayload }, '*');
-        } catch (_) {}
-        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
-          try {
-            chrome.runtime.sendMessage({ action: 'SPIN_COMPLETED', payload: spinPayload }, () => {
-              if (chrome.runtime.lastError) {}
+          // Activity ledger entry
+          if (Array.isArray(currentState.activityLedger)) {
+            currentState.activityLedger.unshift({
+              id: 'pulse_' + nowMs,
+              type: 'Pulse Reward',
+              amount: usdEarned,
+              skitAmount: skitEarned,
+              description: skitEarned > 0 ? `+${skitEarned} SKIT from Quantum Pulse Dial` : '0 SKIT — Spin Completed',
+              timestamp: nowIso
             });
-          } catch (_) {}
-        }
-      }
+          }
 
-      // Show result banner
-      const banner   = document.getElementById('pulse-dial-result-banner');
-      const resTitle = document.getElementById('pulse-result-title');
-      const resMsg   = document.getElementById('pulse-result-msg');
-      if (banner && resTitle && resMsg) {
-        if (skitEarned > 0) {
-          resTitle.textContent = `+${skitEarned} SKIT Earned!`;
-          resMsg.textContent   = `≈ $${usdEarned.toFixed(4)} USD credited and saved to Supabase.`;
-        } else {
-          resTitle.textContent = `0 SKIT — Nice Try!`;
-          resMsg.textContent   = `Quantum recharge has started. Spin again in 4 hours!`;
+          // LocalStorage keys for instant reload and tab sync
+          localStorage.setItem('surfkit_available_balance', String(persistRes.newBalanceUsd));
+          localStorage.setItem('surfkit_balance', String(persistRes.newBalanceUsd));
+          localStorage.setItem('surfkit_lifetime_earnings', String(persistRes.newLifetimeUsd));
+          localStorage.setItem('surfkit_daily_earnings', String(persistRes.newDailyUsd));
+          localStorage.setItem(LS_KEY_SPIN, String(persistRes.lastSpinMs));
+          localStorage.setItem('surfkit_pulse_dial_last_spin', String(persistRes.lastSpinMs));
+          localStorage.setItem('surfkit_pulse_last_spin', String(persistRes.lastSpinMs));
+
+          // Save state and re-render app immediately
+          if (typeof window.saveState === 'function') window.saveState();
+          if (typeof window.renderApp === 'function') window.renderApp();
+          if (typeof window.renderActivityMilestones === 'function') window.renderActivityMilestones();
+          updatePulseDialUI();
+
+          // Window & Storage events
+          window.dispatchEvent(new CustomEvent('surfkit_balance_update', {
+            detail: { availableBalance: persistRes.newBalanceUsd, lifetimeEarnings: persistRes.newLifetimeUsd, skitEarned, source: 'spin' }
+          }));
+          try {
+            window.dispatchEvent(new StorageEvent('storage', {
+              key: 'surfkit_available_balance',
+              newValue: String(persistRes.newBalanceUsd)
+            }));
+          } catch (_) {}
+
+          // Extension message sync (Layer 1 + Layer 2 postMessage bridge)
+          const spinPayload = {
+            balanceUsd: persistRes.newBalanceUsd,
+            lifetimeEarnedUsd: persistRes.newLifetimeUsd,
+            dailyEarnings: persistRes.newDailyUsd,
+            tokensEarned: Number((persistRes.newBalanceUsd / 0.001).toFixed(1)),
+            activeStreakDays: persistRes.newStreak || 1,
+            streakDays: persistRes.newStreak || 1,
+            dailyStreak: persistRes.newStreak || 1,
+            currentStreak: persistRes.newStreak || 1,
+            pulseDialLastSpin: persistRes.lastSpinIso,
+            lastSpin: persistRes.lastSpinMs,
+            surfkit_pulse_dial_last_spin: persistRes.lastSpinMs,
+            completedActivities: persistRes.newCompleted,
+            completedTasks: persistRes.newCompleted,
+            spinCompleted: true
+          };
+
+          if (typeof window.dispatchToExtension === 'function') {
+            window.dispatchToExtension('SPIN_COMPLETED', spinPayload).catch(() => {});
+          }
+          try {
+            window.postMessage({ type: 'SURFKIT_PAGE_ACTION', action: 'SPIN_COMPLETED', payload: spinPayload }, '*');
+          } catch (_) {}
+          if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+            try {
+              chrome.runtime.sendMessage({ action: 'SPIN_COMPLETED', payload: spinPayload }, () => {
+                if (chrome.runtime.lastError) {}
+              });
+            } catch (_) {}
+          }
         }
-        banner.classList.remove('hidden');
-        setTimeout(() => banner.classList.add('hidden'), 6000);
+
+        // Show result banner
+        const banner   = document.getElementById('pulse-dial-result-banner');
+        const resTitle = document.getElementById('pulse-result-title');
+        const resMsg   = document.getElementById('pulse-result-msg');
+        if (banner && resTitle && resMsg) {
+          if (skitEarned > 0) {
+            resTitle.textContent = `+${skitEarned} SKIT Earned!`;
+            resMsg.textContent   = `≈ $${usdEarned.toFixed(4)} USD credited and saved to Supabase.`;
+          } else {
+            resTitle.textContent = `0 SKIT — Nice Try!`;
+            resMsg.textContent   = `Quantum recharge has started. Spin again in 4 hours!`;
+          }
+          banner.classList.remove('hidden');
+          setTimeout(() => banner.classList.add('hidden'), 6000);
+        }
+      } catch (err) {
+        console.error('[Pulse Dial] Spin execution error:', err);
+      } finally {
+        isPulseDialSpinning = false;
+        updatePulseDialUI();
       }
+    }, duration);
+  };
 
       if (typeof showToast === 'function') {
         if (skitEarned > 0) {
