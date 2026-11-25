@@ -2589,73 +2589,58 @@ document.addEventListener('DOMContentLoaded', () => {
         </section>
 
       
-  <!-- Support Ticket Modal / Drawer -->
+  <!-- Support Two-Way Chat Modal / Drawer -->
   <div id="supportTicketModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm hidden transition-opacity">
-    <div class="w-full max-w-lg bg-[#0A101D] border border-surf-border rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-      <!-- Header -->
-      <div class="p-5 border-b border-surf-border flex items-center justify-between bg-surf-surfaceCard/60">
-        <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-base font-bold">
-            ✉️
+    <div class="w-full max-w-lg bg-[#0A101D] border border-surf-border rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[82vh] max-h-[680px]">
+      <!-- Chat Header -->
+      <div class="px-5 py-4 border-b border-surf-border bg-surf-surfaceCard/80 shrink-0 space-y-3">
+        <div class="flex items-center justify-between gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="relative w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/35 flex items-center justify-center text-emerald-400 text-lg font-bold shrink-0">
+              <span>💬</span>
+              <span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[#0A101D]"></span>
+            </div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold text-white tracking-tight truncate">24/7 Support Desk</h3>
+                <span id="support-active-cat-badge" class="px-2 py-0.5 rounded-full bg-surf-teal/15 border border-surf-teal/30 text-surf-teal text-[10px] font-bold shrink-0">Account/Other</span>
+              </div>
+              <p class="text-[11px] text-slate-400 truncate">
+                <span class="text-emerald-400 font-semibold">Online</span> &bull; <span id="ticket-sender-email" class="font-mono text-slate-300">Resolving...</span>
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 class="text-base font-bold text-white tracking-tight">Submit Support Message</h3>
-            <p class="text-xs text-slate-400">Direct transmission to Surfkit Engineering & Billing</p>
-          </div>
+          <button type="button" onclick="closeSupportModal()" aria-label="Close Support Chat" class="w-8 h-8 rounded-lg bg-surf-surface text-slate-400 hover:text-white flex items-center justify-center text-lg transition-colors shrink-0">&times;</button>
         </div>
-        <button type="button" onclick="closeSupportModal()" class="w-8 h-8 rounded-lg bg-surf-surface text-slate-400 hover:text-white flex items-center justify-center text-lg transition-colors">&times;</button>
+
+        <!-- Active Category Selector Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-0.5" id="ticket-category-group">
+          <button type="button" onclick="selectTicketCategory('Browser Nodes')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all whitespace-nowrap shrink-0" data-cat="Browser Nodes">⚡ Browser Nodes</button>
+          <button type="button" onclick="selectTicketCategory('Daily Earnings')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all whitespace-nowrap shrink-0" data-cat="Daily Earnings">💰 Daily Earnings</button>
+          <button type="button" onclick="selectTicketCategory('Manual Payout')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all whitespace-nowrap shrink-0" data-cat="Manual Payout">💳 Manual Payout</button>
+          <button type="button" onclick="selectTicketCategory('Account/Other')" class="ticket-cat-btn px-2.5 py-1 rounded-lg text-[11px] font-semibold border border-surf-teal bg-surf-teal/10 text-surf-teal transition-all whitespace-nowrap shrink-0" data-cat="Account/Other">🛡️ Account / Other</button>
+        </div>
+        <input type="hidden" id="ticket-category-input" value="Account/Other" />
       </div>
 
-      <!-- Form Body -->
-      <form id="support-ticket-form" onsubmit="handleSupportTicketSubmit(event)" class="p-5 space-y-4 overflow-y-auto">
-        <!-- Category Selector -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
-          <div class="grid grid-cols-2 gap-2" id="ticket-category-group">
-            <button type="button" onclick="selectTicketCategory('Browser Nodes')" class="ticket-cat-btn px-3 py-2 rounded-xl text-xs font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all text-left flex items-center gap-2" data-cat="Browser Nodes">
-              <span>⚡</span><span>Browser Nodes</span>
-            </button>
-            <button type="button" onclick="selectTicketCategory('Daily Earnings')" class="ticket-cat-btn px-3 py-2 rounded-xl text-xs font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all text-left flex items-center gap-2" data-cat="Daily Earnings">
-              <span>💰</span><span>Daily Earnings</span>
-            </button>
-            <button type="button" onclick="selectTicketCategory('Manual Payout')" class="ticket-cat-btn px-3 py-2 rounded-xl text-xs font-semibold border border-surf-border bg-surf-surface text-slate-300 hover:text-white transition-all text-left flex items-center gap-2" data-cat="Manual Payout">
-              <span>💳</span><span>Manual Payout</span>
-            </button>
-            <button type="button" onclick="selectTicketCategory('Account/Other')" class="ticket-cat-btn px-3 py-2 rounded-xl text-xs font-semibold border border-surf-teal bg-surf-teal/10 text-surf-teal transition-all text-left flex items-center gap-2" data-cat="Account/Other">
-              <span>🛡️</span><span>Account / Other</span>
-            </button>
-          </div>
-          <input type="hidden" id="ticket-category-input" value="Account/Other" />
-        </div>
+      <!-- Inline Error Banner (only shown on real Supabase error) -->
+      <div id="support-chat-error" class="hidden px-4 py-2 bg-rose-500/15 border-b border-rose-500/30 text-rose-300 text-xs font-medium flex items-center justify-between gap-2 shrink-0">
+        <span id="support-chat-error-text">Unable to sync messages.</span>
+        <button type="button" onclick="document.getElementById('support-chat-error').classList.add('hidden')" class="text-rose-200 hover:text-white text-sm leading-none">&times;</button>
+      </div>
 
-        <!-- Subject -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Subject</label>
-          <input type="text" id="ticket-subject-input" required placeholder="Brief summary of your inquiry..." class="w-full bg-[#070D19] border border-surf-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-surf-teal transition-colors" />
-        </div>
+      <!-- Scrollable Chat Thread -->
+      <div id="support-chat-messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#070C17]">
+        <div class="text-center py-8 text-xs text-slate-500 font-mono">Loading conversation...</div>
+      </div>
 
-        <!-- Message Body -->
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Message</label>
-          <textarea id="ticket-message-input" required rows="4" placeholder="Provide any details, node IDs, transaction hashes, or questions..." class="w-full bg-[#070D19] border border-surf-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-surf-teal transition-colors resize-none"></textarea>
-        </div>
-
-        <!-- Sender Email Display -->
-        <div class="p-3 rounded-xl bg-surf-surface/50 border border-surf-border/60 flex items-center justify-between text-xs">
-          <span class="text-slate-400">Authenticated Email:</span>
-          <span id="ticket-sender-email" class="font-mono text-emerald-400 font-semibold">Resolving...</span>
-        </div>
-
-        <!-- Submit Button -->
-        <div class="pt-2 flex items-center justify-end gap-3">
-          <button type="button" onclick="closeSupportModal()" class="px-4 py-2 rounded-xl bg-surf-surface border border-surf-border text-slate-300 hover:text-white text-xs font-semibold transition-colors">
-            Cancel
-          </button>
-          <button type="submit" id="ticket-submit-btn" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-glow-teal transition-all active:scale-95 flex items-center gap-1.5">
-            <span>Send Message</span>
-            <span>🚀</span>
-          </button>
-        </div>
+      <!-- Bottom Message Composer -->
+      <form id="support-ticket-form" onsubmit="sendSupportChatMessage(event)" class="p-3.5 border-t border-surf-border bg-surf-surfaceCard/70 flex items-end gap-2.5 shrink-0">
+        <textarea id="support-chat-input" rows="1" required placeholder="Type a message to Support Desk... (Enter to send)" onkeydown="handleSupportInputKeydown(event)" class="flex-1 bg-[#070D19] border border-surf-border rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-surf-teal transition-colors resize-none max-h-28 leading-relaxed"></textarea>
+        <button type="submit" id="ticket-submit-btn" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs shadow-glow-teal transition-all active:scale-95 flex items-center gap-1.5 shrink-0">
+          <span>Send</span>
+          <span>➤</span>
+        </button>
       </form>
     </div>
   </div>
@@ -7025,15 +7010,217 @@ document.addEventListener('DOMContentLoaded', () => {
       if (rSpins) rSpins.textContent = String(spins);
     }
 
+    let supportChatMessages = [];
+    let supportChatChannel = null;
+    let isSendingSupportMsg = false;
+
+    function escapeSupportHtml(str) {
+      return String(str ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function formatSupportTime(iso) {
+      if (!iso) return '';
+      try {
+        const d = new Date(iso);
+        if (isNaN(d.getTime())) return '';
+        const today = new Date();
+        const sameDay = d.toDateString() === today.toDateString();
+        const timeStr = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (sameDay) return timeStr;
+        return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' · ' + timeStr;
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function resolveSupportIdentity() {
+      const email = (
+        (typeof getActiveUserEmail === 'function' ? getActiveUserEmail() : null) ||
+        window.currentUser?.email ||
+        (typeof currentUser !== 'undefined' && currentUser?.email) ||
+        state?.user?.email ||
+        window.currentUserEmail ||
+        ''
+      ).trim().toLowerCase();
+      const uid = (
+        (window.currentUser?.id && String(window.currentUser.id).includes('-') ? window.currentUser.id : null) ||
+        (typeof currentUser !== 'undefined' && currentUser?.id && String(currentUser.id).includes('-') ? currentUser.id : null) ||
+        (state?.user?.id && String(state.user.id).includes('-') ? state.user.id : null) ||
+        null
+      );
+      return { userEmail: email || 'guest@surfkit.cloud', userId: uid };
+    }
+
+    function showSupportChatError(msg) {
+      const box = document.getElementById('support-chat-error');
+      const txt = document.getElementById('support-chat-error-text');
+      if (box && txt) {
+        if (msg) {
+          txt.textContent = msg;
+          box.classList.remove('hidden');
+        } else {
+          box.classList.add('hidden');
+        }
+      }
+    }
+
+    function scrollSupportChatToBottom() {
+      const container = document.getElementById('support-chat-messages');
+      if (container) {
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight;
+        });
+      }
+    }
+
+    function renderSupportChatMessages() {
+      const container = document.getElementById('support-chat-messages');
+      if (!container) return;
+
+      if (!Array.isArray(supportChatMessages) || supportChatMessages.length === 0) {
+        container.innerHTML = `
+          <div class="flex justify-start">
+            <div class="max-w-[85%] bg-[#111A2E] border border-surf-border rounded-2xl rounded-bl-sm px-4 py-3 text-xs text-slate-200 shadow-sm">
+              <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">24/7 Support Desk</div>
+              <p class="leading-relaxed">Welcome to Surfkit Support! Pick a category above and send your message below — our team replies directly in this chat.</p>
+            </div>
+          </div>
+        `;
+        scrollSupportChatToBottom();
+        return;
+      }
+
+      container.innerHTML = supportChatMessages.map(m => {
+        const sender = String(m.sender_type || 'user').toLowerCase();
+        const isUser = sender === 'user';
+        const timeStr = formatSupportTime(m.created_at);
+        const catTag = m.category ? `<span class="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-slate-300">${escapeSupportHtml(m.category)}</span>` : '';
+        if (isUser) {
+          return `
+            <div class="flex justify-end">
+              <div class="max-w-[82%] bg-gradient-to-br from-emerald-500/25 to-teal-500/20 border border-emerald-500/35 text-white rounded-2xl rounded-br-sm px-3.5 py-2.5 shadow-sm">
+                <div class="text-xs leading-relaxed whitespace-pre-wrap break-words">${escapeSupportHtml(m.message)}</div>
+                <div class="flex items-center justify-end gap-2 mt-1.5 text-[10px] text-emerald-200/80">
+                  ${catTag}
+                  <span>${escapeSupportHtml(timeStr)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="flex justify-start">
+            <div class="max-w-[82%] bg-[#111A2E] border border-surf-border text-slate-200 rounded-2xl rounded-bl-sm px-3.5 py-2.5 shadow-sm">
+              <div class="flex items-center gap-2 mb-1">
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Support Desk</span>
+                ${catTag}
+              </div>
+              <div class="text-xs leading-relaxed whitespace-pre-wrap break-words">${escapeSupportHtml(m.message)}</div>
+              <div class="text-[10px] text-slate-400 mt-1.5 text-right">${escapeSupportHtml(timeStr)}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      scrollSupportChatToBottom();
+    }
+
+    async function loadSupportMessages() {
+      const container = document.getElementById('support-chat-messages');
+      const { userEmail, userId } = resolveSupportIdentity();
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+        showSupportChatError('Supabase client unavailable. Please refresh the page.');
+        return;
+      }
+
+      try {
+        showSupportChatError('');
+        let query = supabaseClient
+          .from('support_messages')
+          .select('*')
+          .order('created_at', { ascending: true });
+
+        if (userId && userEmail && userEmail !== 'guest@surfkit.cloud') {
+          query = query.or(`user_email.ilike.${userEmail},user_id.eq.${userId}`);
+        } else if (userId) {
+          query = query.eq('user_id', userId);
+        } else {
+          query = query.ilike('user_email', userEmail);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+          console.error('[Support Chat] Fetch error:', error);
+          showSupportChatError('Could not load messages: ' + (error.message || 'Database error'));
+          if (container && supportChatMessages.length === 0) {
+            renderSupportChatMessages();
+          }
+          return;
+        }
+        supportChatMessages = Array.isArray(data) ? data : [];
+        renderSupportChatMessages();
+      } catch (err) {
+        console.error('[Support Chat] Unexpected fetch error:', err);
+        showSupportChatError('Could not load messages: ' + (err?.message || 'Network error'));
+      }
+    }
+
+    function subscribeSupportRealtime() {
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+      const { userEmail, userId } = resolveSupportIdentity();
+      try {
+        if (supportChatChannel) {
+          supabaseClient.removeChannel(supportChatChannel);
+          supportChatChannel = null;
+        }
+        supportChatChannel = supabaseClient
+          .channel('support-chat-' + (userId || userEmail.replace(/[^a-z0-9]/gi, '_')))
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'support_messages' }, (payload) => {
+            const row = payload.new || payload.old;
+            if (!row) {
+              loadSupportMessages();
+              return;
+            }
+            const rowEmail = String(row.user_email || '').trim().toLowerCase();
+            const matchesUser = (userId && row.user_id === userId) || (userEmail && rowEmail === userEmail);
+            if (!matchesUser) return;
+
+            if (payload.eventType === 'INSERT' && payload.new) {
+              const exists = supportChatMessages.some(m => m.id && m.id === payload.new.id);
+              if (!exists) {
+                supportChatMessages.push(payload.new);
+                supportChatMessages.sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+                renderSupportChatMessages();
+              }
+            } else {
+              loadSupportMessages();
+            }
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('[Support Chat] Realtime subscribe notice:', e);
+      }
+    }
+
     function openSupportModal(category = 'Account/Other') {
       const modal = document.getElementById('supportTicketModal');
       if (!modal) return;
       selectTicketCategory(category);
+      const { userEmail } = resolveSupportIdentity();
       const emailEl = document.getElementById('ticket-sender-email');
       if (emailEl) {
-        emailEl.textContent = (typeof getActiveUserEmail === 'function' ? getActiveUserEmail() : null) || state.user.email || 'support-guest@surfkit.cloud';
+        emailEl.textContent = userEmail;
       }
       modal.classList.remove('hidden');
+      loadSupportMessages();
+      subscribeSupportRealtime();
+      const inputEl = document.getElementById('support-chat-input');
+      if (inputEl) setTimeout(() => inputEl.focus(), 50);
     }
 
     function closeSupportModal() {
@@ -7045,6 +7232,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function selectTicketCategory(category) {
       const catInput = document.getElementById('ticket-category-input');
       if (catInput) catInput.value = category;
+      const badge = document.getElementById('support-active-cat-badge');
+      if (badge) badge.textContent = category;
       document.querySelectorAll('.ticket-cat-btn').forEach(btn => {
         if (btn.getAttribute('data-cat') === category) {
           btn.classList.add('border-surf-teal', 'bg-surf-teal/10', 'text-surf-teal');
@@ -7056,59 +7245,97 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
 
-    async function handleSupportTicketSubmit(event) {
+    function handleSupportInputKeydown(event) {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        const form = document.getElementById('support-ticket-form');
+        if (form) sendSupportChatMessage(event);
+      }
+    }
+
+    async function sendSupportChatMessage(event) {
       if (event) event.preventDefault();
+      if (isSendingSupportMsg) return;
+
+      const inputEl = document.getElementById('support-chat-input');
       const submitBtn = document.getElementById('ticket-submit-btn');
       const category = document.getElementById('ticket-category-input')?.value || 'Account/Other';
-      const subject = document.getElementById('ticket-subject-input')?.value.trim() || '';
-      const message = document.getElementById('ticket-message-input')?.value.trim() || '';
-      const userEmail = (typeof getActiveUserEmail === 'function' ? getActiveUserEmail() : null) || state.user.email || 'guest@surfkit.cloud';
-      const userId = (typeof currentUser !== 'undefined' && currentUser?.id && currentUser.id.includes('-')) ? currentUser.id : null;
+      const message = inputEl?.value.trim() || '';
+      const { userEmail, userId } = resolveSupportIdentity();
 
-      if (!message) {
-        if (typeof showToast === 'function') showToast('Please enter your support message.');
+      if (!message) return;
+
+      if (typeof supabaseClient === 'undefined' || !supabaseClient) {
+        showSupportChatError('Supabase client unavailable. Cannot send message.');
+        if (typeof showToast === 'function') showToast('Cannot send: Supabase connection unavailable.', 'error');
         return;
       }
 
+      isSendingSupportMsg = true;
+      showSupportChatError('');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<span>Sending...</span>';
       }
 
       try {
-        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-          const payload = {
-            user_email: userEmail,
-            category: category,
-            subject: subject,
-            message: message,
-            sender_type: 'user',
-            status: 'open'
-          };
-          if (userId) {
-            payload.user_id = userId;
-          }
-          const { error } = await supabaseClient.from('support_messages').insert([payload]);
-          if (error) {
-            console.warn('Support ticket insert warning:', error.message);
-          }
+        const basePayload = {
+          user_email: userEmail,
+          message: message,
+          sender_type: 'user',
+          category: category,
+          subject: category + ' Support Chat',
+          status: 'open'
+        };
+        if (userId) {
+          basePayload.user_id = userId;
         }
-        if (typeof showToast === 'function') {
-          showToast('Support ticket dispatched successfully! Our team will reply shortly.');
+
+        // Include is_read: false when supported by table schema; fallback cleanly if column is absent
+        let res = await supabaseClient
+          .from('support_messages')
+          .insert([{ ...basePayload, is_read: false }])
+          .select('*')
+          .single();
+
+        if (res.error && /is_read/i.test(res.error.message || '')) {
+          res = await supabaseClient
+            .from('support_messages')
+            .insert([basePayload])
+            .select('*')
+            .single();
         }
-        closeSupportModal();
-        const form = document.getElementById('support-ticket-form');
-        if (form) form.reset();
-        selectTicketCategory('Account/Other');
+
+        if (res.error) {
+          console.error('[Support Chat] Insert error:', res.error);
+          const errMsg = res.error.message || 'Failed to send message';
+          showSupportChatError('Send failed: ' + errMsg);
+          if (typeof showToast === 'function') showToast('⚠️ ' + errMsg, 'error');
+          return;
+        }
+
+        if (inputEl) inputEl.value = '';
+        if (res.data) {
+          const exists = supportChatMessages.some(m => m.id && m.id === res.data.id);
+          if (!exists) {
+            supportChatMessages.push(res.data);
+            renderSupportChatMessages();
+          }
+        } else {
+          await loadSupportMessages();
+        }
       } catch (e) {
-        console.error('Support ticket submission error:', e);
-        if (typeof showToast === 'function') showToast('Message sent to support queue.');
-        closeSupportModal();
+        console.error('[Support Chat] Send exception:', e);
+        const errMsg = e?.message || 'Unexpected network error';
+        showSupportChatError('Send failed: ' + errMsg);
+        if (typeof showToast === 'function') showToast('⚠️ ' + errMsg, 'error');
       } finally {
+        isSendingSupportMsg = false;
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<span>Send Message</span><span>🚀</span>';
+          submitBtn.innerHTML = '<span>Send</span><span>➤</span>';
         }
+        if (inputEl) inputEl.focus();
       }
     }
 
