@@ -134,7 +134,6 @@
       transform: scale(1.15);
     }
   </style>
-<script id="aclib" type="text/javascript" src="//acscdn.com/script/aclib.js"></script>
 </head>
 <body class="bg-surf-bg text-slate-200 min-h-screen font-sans flex flex-col antialiased selection:bg-surf-teal selection:text-slate-900">
   <!-- ============================================================ -->
@@ -550,37 +549,7 @@
                 <span class="text-[9px] text-slate-600 font-mono">Ad Slot #overview-native-1</span>
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-overview-native-1">
-                <div class="w-full min-h-[90px] overflow-hidden" id="overview-adsterra-host">
-                  <div id="container-f5bb01d4dfffc228774cf443b4c16205"></div>
-                </div>
-                <script>
-                  window.mountOverviewAdsterraSlot = function() {
-                    try {
-                      var scriptSrc = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
-                      var host = document.getElementById('overview-adsterra-host');
-                      if (!host) return;
-                      var container = document.getElementById('container-f5bb01d4dfffc228774cf443b4c16205');
-                      if (!container) {
-                        container = document.createElement('div');
-                        container.id = 'container-f5bb01d4dfffc228774cf443b4c16205';
-                        host.appendChild(container);
-                      }
-                      if (document.querySelector('script[src="' + scriptSrc + '"]')) return;
-                      var s = document.createElement('script');
-                      s.async = true;
-                      s.setAttribute('fetchpriority', 'high');
-                      s.setAttribute('data-cfasync', 'false');
-                      s.src = scriptSrc;
-                      s.onerror = function() {};
-                      host.appendChild(s);
-                    } catch (_) {}
-                  };
-                  if (document.readyState === 'loading') {
-                    document.addEventListener('DOMContentLoaded', window.mountOverviewAdsterraSlot);
-                  } else {
-                    window.mountOverviewAdsterraSlot();
-                  }
-                </script>
+                <div class="w-full min-h-[90px] overflow-hidden" data-adsterra-host="overview-native-1"></div>
               </div>
             </div>
           </div>
@@ -1097,57 +1066,17 @@ document.addEventListener('DOMContentLoaded', () => {
     loadChartDataFromSupabase();
 });
 </script>
-            <!-- Modular Ad Slot: leaderboard-banner-728x90 (banner) -->
-<div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="leaderboard-banner-728x90" data-format="banner">
-  <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
-    <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
-      <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
-    </div>
-    <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-leaderboard-banner-728x90">
-      <div class="w-full max-w-[728px] min-h-[90px] flex items-center justify-center overflow-hidden" id="leaderboard-adsterra-host"></div>
-    </div>
-  </div>
-</div>
-
-<script>
-  (function () {
-    function mountLeaderboardBannerAd() {
-      try {
-        var host = document.getElementById('leaderboard-adsterra-host');
-        if (!host) return;
-
-        var scriptSrc = 'https://bauval.org/22/9b0c979f509a4f4b1ae7ea3115b5bce4';
-        if (host.getAttribute('data-ad-mounted') === 'true') return;
-
-        window.atOptions = {
-          'key': '9b0c979f509a4f4b1ae7ea3115b5bce4',
-          'format': 'iframe',
-          'height': 90,
-          'width': 728,
-          'params': {}
-        };
-
-        var script = document.createElement('script');
-        script.setAttribute('data-cfasync', 'false');
-        script.setAttribute('data-surfkit-ad', 'leaderboard-banner-728x90');
-        script.src = scriptSrc;
-        script.onerror = function () {};
-
-        host.innerHTML = '';
-        host.appendChild(script);
-        host.setAttribute('data-ad-mounted', 'true');
-      } catch (e) {
-        // Safe guard to prevent runtime errors
-      }
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', mountLeaderboardBannerAd, { once: true });
-    } else {
-      mountLeaderboardBannerAd();
-    }
-  })();
-</script>
+            <!-- Modular Ad Slot: leaderboard-native-1 (native) -->
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="leaderboard-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-leaderboard-native-1">
+                <div class="w-full min-h-[90px] overflow-hidden" data-adsterra-secondary="leaderboard-native-1"></div>
+              </div>
+            </div>
+          </div>
 
 <!-- ================= DAILY ELITE LEADERBOARD SECTION ================= -->
 <div class="bg-surf-surfaceCard border border-surf-border/80 rounded-2xl p-6 space-y-5 shadow-lg relative overflow-hidden">
@@ -1528,55 +1457,16 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
 
           <!-- Modular Ad Slot: earnhub-native-1 (native) -->
-<div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="earnhub-native-1" data-format="native">
-  <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
-    <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
-      <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
-    </div>
-    <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-earnhub-native-1">
-      <div class="w-full min-h-[90px] overflow-hidden" id="earnhub-adsterra-host">
-        <script>
-          (function () {
-            function initEarnHubAd() {
-              try {
-                var host = document.getElementById('earnhub-adsterra-host');
-                if (!host) return;
-
-                var cid = 'container-f5bb01d4dfffc228774cf443b4c16205';
-                var src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
-
-                // Overview slot එකේ දැනටමත් මෙම container ID එක තිබේ නම් duplicate ID නොසාදයි
-                if (!document.getElementById(cid)) {
-                  var c = document.createElement('div');
-                  c.id = cid;
-                  host.appendChild(c);
-                }
-
-                // Script එක දැනටමත් load වී නැත්නම් පමණක් append කරයි
-                if (!document.querySelector('script[data-earnhub-ad-script="1"]') && !document.querySelector('script[src="' + src + '"]')) {
-                  var s = document.createElement('script');
-                  s.async = true;
-                  s.setAttribute('fetchpriority', 'high');
-                  s.setAttribute('data-cfasync', 'false');
-                  s.setAttribute('data-earnhub-ad-script', '1');
-                  s.src = src;
-                  s.onerror = function () {};
-                  host.appendChild(s);
-                }
-              } catch (_) {}
-            }
-
-            if (document.readyState === 'loading') {
-              document.addEventListener('DOMContentLoaded', initEarnHubAd, { once: true });
-            } else {
-              initEarnHubAd();
-            }
-          })();
-        </script>
-      </div>
-    </div>
-  </div>
-</div>
+          <div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="earnhub-native-1" data-format="native">
+            <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
+              <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
+                <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
+              </div>
+              <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-earnhub-native-1">
+                <div class="w-full min-h-[90px] overflow-hidden" data-adsterra-host="earnhub-native-1"></div>
+              </div>
+            </div>
+          </div>
 
           <!-- Offerwall Inventory Grid Container -->
           <div class="bg-surf-surfaceCard border border-surf-border/80 rounded-2xl p-6 space-y-5 shadow-lg relative overflow-hidden">
@@ -5037,13 +4927,128 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    // --- TAB SWITCHING LOGIC ---
-    function switchTab(tabName) {
+    // --- SPA ROUTE & TAB NAVIGATION + SAFE AD LOADERS ---
+    const SURFKIT_TAB_ALIASES = {
+      overview: 'overview',
+      earnhub: 'earnhub',
+      'earn-hub': 'earnhub',
+      games: 'games',
+      'mini-games': 'games',
+      cashout: 'cashout',
+      referral: 'referral',
+      referrals: 'referral',
+      account: 'account'
+    };
+
+    const SURFKIT_ROUTE_SLUGS = {
+      overview: 'overview',
+      earnhub: 'earn-hub',
+      games: 'mini-games',
+      cashout: 'cashout',
+      referral: 'referrals',
+      account: 'account'
+    };
+
+    function normalizeTabName(raw) {
+      const key = String(raw || '').trim().toLowerCase().replace(/^\/+|\/+$/g, '');
+      return SURFKIT_TAB_ALIASES[key] || 'overview';
+    }
+
+    function resolveInitialTabFromLocation() {
+      try {
+        const hash = String(window.location.hash || '').replace(/^#\/?/, '').trim().toLowerCase();
+        if (hash && SURFKIT_TAB_ALIASES[hash]) return SURFKIT_TAB_ALIASES[hash];
+        const path = String(window.location.pathname || '').toLowerCase();
+        const match = path.match(/\/dashboard\/([^/?#]+)/);
+        if (match && match[1] && SURFKIT_TAB_ALIASES[match[1]]) {
+          return SURFKIT_TAB_ALIASES[match[1]];
+        }
+      } catch (_) {}
+      return 'overview';
+    }
+
+    // Mounts at most ONE #container-f5bb01d4dfffc228774cf443b4c16205 in the active tab's host
+    function mountActiveAdsterraBanner() {
+      try {
+        const activeTab = document.querySelector('.tab-content.active');
+        const host = activeTab ? activeTab.querySelector('[data-adsterra-host]') : null;
+        if (!host) return;
+
+        const cid = 'container-f5bb01d4dfffc228774cf443b4c16205';
+        const src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+
+        // Remove any duplicate or stale container in inactive tabs
+        document.querySelectorAll('#' + cid).forEach(node => {
+          if (!host.contains(node) && node.parentNode) {
+            node.parentNode.removeChild(node);
+          }
+        });
+
+        let container = host.querySelector('#' + cid);
+        if (!container) {
+          container = document.createElement('div');
+          container.id = cid;
+          host.appendChild(container);
+        }
+
+        if (!document.querySelector('script[src="' + src + '"]')) {
+          const s = document.createElement('script');
+          s.async = true;
+          s.setAttribute('fetchpriority', 'high');
+          s.setAttribute('data-cfasync', 'false');
+          s.src = src;
+          s.onerror = function() {};
+          host.appendChild(s);
+        }
+      } catch (_) {}
+    }
+
+    // Safely load Adcash library & run AutoTag once without duplicate injections
+    function initAdcashAutoTag() {
+      try {
+        if (window.__surfkitAdcashInitialized) return;
+        window.__surfkitAdcashInitialized = true;
+
+        const runTag = function() {
+          try {
+            if (window.__surfkitAdcashTagRan) return;
+            if (window.aclib && typeof window.aclib.runAutoTag === 'function') {
+              window.__surfkitAdcashTagRan = true;
+              window.aclib.runAutoTag({ zoneId: 'ypztmoyzc2' });
+            }
+          } catch (_) {}
+        };
+
+        if (window.aclib && typeof window.aclib.runAutoTag === 'function') {
+          runTag();
+          return;
+        }
+
+        const existing = document.querySelector('script[src*="acscdn.com/script/aclib.js"]');
+        if (existing) {
+          existing.addEventListener('load', runTag);
+          return;
+        }
+
+        const s = document.createElement('script');
+        s.id = 'aclib';
+        s.type = 'text/javascript';
+        s.async = true;
+        s.src = '//acscdn.com/script/aclib.js';
+        s.onload = runTag;
+        s.onerror = function() {};
+        (document.head || document.documentElement).appendChild(s);
+      } catch (_) {}
+    }
+
+    function switchTab(rawTabName, skipUrlUpdate) {
+      const tabName = normalizeTabName(rawTabName);
       document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
       });
       document.querySelectorAll('.nav-item').forEach(btn => {
         btn.className = 'nav-item w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl font-medium text-sm transition-all text-slate-400 hover:text-slate-100 hover:bg-surf-surface border border-transparent';
+        btn.removeAttribute('aria-current');
       });
 
       const targetTab = document.getElementById(`tab-${tabName}`);
@@ -5051,6 +5056,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (targetTab) targetTab.classList.add('active');
       if (targetBtn) {
         targetBtn.className = 'nav-item w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl font-medium text-sm transition-all bg-surf-teal/15 text-surf-teal border border-surf-teal/30';
+        targetBtn.setAttribute('aria-current', 'page');
       }
 
       const breadcrumbNames = {
@@ -5062,14 +5068,34 @@ document.addEventListener('DOMContentLoaded', () => {
         account: 'Account & Devices'
       };
       if (tabName === 'earnhub') {
-        fetchAvailableSurveys();
-        updateOfferwallTrackers();
+        try { if (typeof fetchAvailableSurveys === 'function') fetchAvailableSurveys(); } catch (_) {}
+        try { if (typeof updateOfferwallTrackers === 'function') updateOfferwallTrackers(); } catch (_) {}
       }
       if (tabName === 'cashout') {
-        selectGateway(state.selectedGateway || 'faucetpay');
+        try { if (typeof selectGateway === 'function') selectGateway(state.selectedGateway || 'faucetpay'); } catch (_) {}
       }
       const breadcrumb = document.getElementById('header-breadcrumb');
       if (breadcrumb) breadcrumb.textContent = breadcrumbNames[tabName] || 'Overview';
+
+      // Clean SPA URL path/hash sync without page reloads
+      if (!skipUrlUpdate) {
+        try {
+          const slug = SURFKIT_ROUTE_SLUGS[tabName] || 'overview';
+          const isHttp = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+          const curPath = String(window.location.pathname || '');
+          if (isHttp && /^\/dashboard(\/|$)/i.test(curPath)) {
+            const nextPath = `/dashboard/${slug}`;
+            if (curPath !== nextPath) {
+              window.history.pushState({ tab: tabName }, '', nextPath + (window.location.search || ''));
+            }
+          } else {
+            const nextHash = `#${slug}`;
+            if (window.location.hash !== nextHash) {
+              window.history.replaceState({ tab: tabName }, '', nextHash);
+            }
+          }
+        } catch (_) {}
+      }
 
       // Switch page-specific side ad
       document.querySelectorAll('.side-ad-tab').forEach(el => {
@@ -5082,17 +5108,28 @@ document.addEventListener('DOMContentLoaded', () => {
         targetSideAd.classList.remove('hidden');
       }
 
-      if (tabName === 'overview') {
-        if (trendChartInstance) {
-          setTimeout(() => trendChartInstance.resize(), 100);
-        }
-        try {
-          if (typeof window.mountOverviewAdsterraSlot === 'function') {
-            window.mountOverviewAdsterraSlot();
-          }
-        } catch (_) {}
+      if (tabName === 'overview' && typeof trendChartInstance !== 'undefined' && trendChartInstance) {
+        setTimeout(() => { try { trendChartInstance.resize(); } catch (_) {} }, 100);
       }
+
+      mountActiveAdsterraBanner();
     }
+
+    window.addEventListener('popstate', function() {
+      switchTab(resolveInitialTabFromLocation(), true);
+    });
+    window.addEventListener('hashchange', function() {
+      switchTab(resolveInitialTabFromLocation(), true);
+    });
+    document.addEventListener('DOMContentLoaded', function() {
+      const initialTab = resolveInitialTabFromLocation();
+      if (initialTab !== 'overview') {
+        switchTab(initialTab, true);
+      } else {
+        mountActiveAdsterraBanner();
+      }
+      initAdcashAutoTag();
+    });
 
     // --- SIDEBAR COLLAPSE TOGGLE ---
     let sidebarExpanded = true;
@@ -9849,11 +9886,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initPushUpAdEngine();
   }
 
-</script>
-<script type="text/javascript">
-    aclib.runAutoTag({
-        zoneId: 'ypztmoyzc2',
-    });
 </script>
 
 </body>
