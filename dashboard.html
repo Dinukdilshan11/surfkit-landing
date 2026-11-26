@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -1101,10 +1101,33 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
               <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
                 <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
-                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #leaderboard-native-1</span>
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-leaderboard-native-1">
-                <div class="w-full min-h-[90px] overflow-hidden" data-adsterra-slot="leaderboard-native-1"></div>
+                <div class="w-full min-h-[90px] overflow-hidden" id="leaderboard-adsterra-host"></div>
+                <script>
+                  (function() {
+                    try {
+                      var host = document.getElementById('leaderboard-adsterra-host');
+                      var cid = 'container-f5bb01d4dfffc228774cf443b4c16205';
+                      var src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+                      if (!host) return;
+                      if (!document.getElementById(cid)) {
+                        var c = document.createElement('div');
+                        c.id = cid;
+                        host.appendChild(c);
+                      }
+                      if (!document.querySelector('script[src="' + src + '"]')) {
+                        var s = document.createElement('script');
+                        s.async = true;
+                        s.setAttribute('fetchpriority', 'high');
+                        s.setAttribute('data-cfasync', 'false');
+                        s.src = src;
+                        s.onerror = function() {};
+                        host.appendChild(s);
+                      }
+                    } catch (_) {}
+                  })();
+                </script>
               </div>
             </div>
           </div>
