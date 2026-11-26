@@ -1096,53 +1096,54 @@ document.addEventListener('DOMContentLoaded', () => {
     loadChartDataFromSupabase();
 });
 </script>
-            <!-- Modular Ad Slot: leaderboard-native-1 (native) -->
-<div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="leaderboard-native-1" data-format="native">
+            <!-- Modular Ad Slot: leaderboard-banner-728x90 (banner) -->
+<div class="surfkit-ad-slot-wrapper w-full my-6 transition-all" data-slot-id="leaderboard-banner-728x90" data-format="banner">
   <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
     <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
       <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
     </div>
-    <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-leaderboard-native-1">
-      <div class="w-full min-h-[90px] overflow-hidden" id="leaderboard-adsterra-host"></div>
+    <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-leaderboard-banner-728x90">
+      <div class="w-full max-w-[728px] min-h-[90px] flex items-center justify-center overflow-hidden" id="leaderboard-adsterra-host"></div>
     </div>
   </div>
 </div>
 
 <script>
   (function () {
-    function mountLeaderboardNativeAd() {
+    function mountLeaderboardBannerAd() {
       try {
         var host = document.getElementById('leaderboard-adsterra-host');
         if (!host) return;
 
-        var cid = 'container-f5bb01d4dfffc228774cf443b4c16205';
-        var src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+        var scriptSrc = 'https://bauval.org/22/9b0c979f509a4f4b1ae7ea3115b5bce4';
+        if (host.getAttribute('data-ad-mounted') === 'true') return;
 
-        if (!document.getElementById(cid)) {
-          var container = document.createElement('div');
-          container.id = cid;
-          host.appendChild(container);
-        }
+        window.atOptions = {
+          'key': '9b0c979f509a4f4b1ae7ea3115b5bce4',
+          'format': 'iframe',
+          'height': 90,
+          'width': 728,
+          'params': {}
+        };
 
-        var existingScript = document.querySelector('script[data-surfkit-ad="leaderboard-native-1"]');
-        if (!existingScript) {
-          var script = document.createElement('script');
-          script.async = true;
-          script.setAttribute('data-cfasync', 'false');
-          script.setAttribute('data-surfkit-ad', 'leaderboard-native-1');
-          script.src = src;
-          script.onerror = function () {};
-          host.appendChild(script);
-        }
+        var script = document.createElement('script');
+        script.setAttribute('data-cfasync', 'false');
+        script.setAttribute('data-surfkit-ad', 'leaderboard-banner-728x90');
+        script.src = scriptSrc;
+        script.onerror = function () {};
+
+        host.innerHTML = '';
+        host.appendChild(script);
+        host.setAttribute('data-ad-mounted', 'true');
       } catch (e) {
         // Safe guard to prevent runtime errors
       }
     }
 
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', mountLeaderboardNativeAd, { once: true });
+      document.addEventListener('DOMContentLoaded', mountLeaderboardBannerAd, { once: true });
     } else {
-      mountLeaderboardNativeAd();
+      mountLeaderboardBannerAd();
     }
   })();
 </script>
