@@ -549,12 +549,13 @@
                 <span class="text-[9px] text-slate-600 font-mono">Ad Slot #overview-native-1</span>
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-overview-native-1">
-                <div class="min-h-[90px] w-full overflow-hidden" id="overview-adsterra-host">
+                <div class="w-full min-h-[90px] overflow-hidden" id="overview-adsterra-host">
                   <div id="container-f5bb01d4dfffc228774cf443b4c16205"></div>
                 </div>
                 <script>
                   window.mountOverviewAdsterraSlot = function() {
                     try {
+                      var scriptSrc = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
                       var host = document.getElementById('overview-adsterra-host');
                       if (!host) return;
                       var container = document.getElementById('container-f5bb01d4dfffc228774cf443b4c16205');
@@ -563,20 +564,21 @@
                         container.id = 'container-f5bb01d4dfffc228774cf443b4c16205';
                         host.appendChild(container);
                       }
-                      if (container.childElementCount > 0) return;
-                      var oldScript = host.querySelector('script[data-adsterra-overview="1"]');
-                      if (oldScript && oldScript.parentNode) oldScript.parentNode.removeChild(oldScript);
+                      if (document.querySelector('script[src="' + scriptSrc + '"]')) return;
                       var s = document.createElement('script');
                       s.async = true;
                       s.setAttribute('fetchpriority', 'high');
                       s.setAttribute('data-cfasync', 'false');
-                      s.setAttribute('data-adsterra-overview', '1');
-                      s.src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+                      s.src = scriptSrc;
                       s.onerror = function() {};
                       host.appendChild(s);
                     } catch (_) {}
                   };
-                  window.mountOverviewAdsterraSlot();
+                  if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', window.mountOverviewAdsterraSlot);
+                  } else {
+                    window.mountOverviewAdsterraSlot();
+                  }
                 </script>
               </div>
             </div>
@@ -1102,10 +1104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="text-[9px] text-slate-600 font-mono">Ad Slot #leaderboard-native-1</span>
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-leaderboard-native-1">
-                <div class="min-h-[90px] w-full overflow-hidden">
-                  <script async fetchpriority="high" data-cfasync="false" src="https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205"></script>
-                  <div id="container-f5bb01d4dfffc228774cf443b4c16205"></div>
-                </div>
+                <div class="w-full min-h-[90px] overflow-hidden" data-adsterra-slot="leaderboard-native-1"></div>
               </div>
             </div>
           </div>
