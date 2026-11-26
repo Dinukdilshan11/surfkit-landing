@@ -1518,30 +1518,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="text-[9px] text-slate-600 font-mono">Ad Slot #earnhub-native-1</span>
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-earnhub-native-1">
-                <!-- Mockup Ad: Bitget Web3 Wallet (AdEx / Monetag format) -->
-                <div class="w-full bg-[#080E1C] border border-surf-border/80 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-surf-teal/50 group">
-                  <div class="pointer-events-none absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-surf-teal/10 blur-xl"></div>
-                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-surf-teal/25 to-emerald-500/20 border border-surf-teal/40 flex items-center justify-center text-xl shrink-0 text-surf-teal font-black shadow-md group-hover:scale-105 transition-transform">
-                      🛡️
-                    </div>
-                    <div>
-                      <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-bold text-white tracking-tight">Bitget Web3 Wallet — Multi-Chain DeFi Hub</span>
-                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/35">Verified Quest Partner</span>
-                        <span class="text-[10px] text-slate-500 font-mono">AdEx Network</span>
-                      </div>
-                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
-                        Connect to 100+ public chains, swap tokens with lowest slippage, and access verified DeFi opportunities.
-                      </p>
-                    </div>
-                  </div>
-                  <a href="https://web3.bitget.com/" target="_blank" rel="noopener noreferrer" 
-                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-surf-teal to-emerald-400 hover:from-surf-tealHover hover:to-emerald-300 text-slate-950 font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
-                    <span>Explore Wallet</span>
-                    <span class="text-[10px]">↗</span>
-                  </a>
-                </div>
+                <div class="min-h-[90px] w-full overflow-hidden" id="earnhub-adsterra-host"></div>
+                <script>
+                  (function() {
+                    try {
+                      var host = document.getElementById('earnhub-adsterra-host');
+                      var cid = 'container-f5bb01d4dfffc228774cf443b4c16205';
+                      var src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+                      if (!host) return;
+                      if (!document.getElementById(cid)) {
+                        var c = document.createElement('div');
+                        c.id = cid;
+                        host.appendChild(c);
+                      }
+                      if (!document.querySelector('script[src="' + src + '"]')) {
+                        var s = document.createElement('script');
+                        s.async = true;
+                        s.setAttribute('fetchpriority', 'high');
+                        s.setAttribute('data-cfasync', 'false');
+                        s.src = src;
+                        s.onerror = function() {};
+                        host.appendChild(s);
+                      }
+                    } catch (_) {}
+                  })();
+                </script>
               </div>
             </div>
           </div>
