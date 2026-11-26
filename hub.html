@@ -1518,8 +1518,25 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-earnhub-native-1">
                 <div class="w-full min-h-[90px] overflow-hidden">
-                  <script async fetchpriority="high" data-cfasync="false" src="https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205"></script>
                   <div id="container-f5bb01d4dfffc228774cf443b4c16205"></div>
+                  <script>
+                    (function() {
+                      try {
+                        var src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+                        var host = document.querySelector('#ad-slot-earnhub-native-1 > div');
+                        if (!host) return;
+                        if (!document.querySelector('script[src="' + src + '"]')) {
+                          var s = document.createElement('script');
+                          s.async = true;
+                          s.setAttribute('fetchpriority', 'high');
+                          s.setAttribute('data-cfasync', 'false');
+                          s.src = src;
+                          s.onerror = function() {};
+                          host.appendChild(s);
+                        }
+                      } catch (_) {}
+                    })();
+                  </script>
                 </div>
               </div>
             </div>
