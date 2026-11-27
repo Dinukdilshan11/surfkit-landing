@@ -2977,7 +2977,7 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 
   <!-- MODAL: ACCOUNT SESSION MODAL -->
-  <!-- Account Session Modal (Google OAuth Only) -->
+  <!-- Account Session Modal (3-State Auth: Authenticated / Sign In / Google-Only Sign Up) -->
   <div id="authModal" onclick="if (event.target === this) closeAuthModal()" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div onclick="event.stopPropagation()" class="bg-surf-surfaceCard border border-surf-border rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl relative">
       <div class="flex items-center justify-between border-b border-surf-border pb-3">
@@ -2987,25 +2987,38 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
           <div>
             <h3 class="text-base font-bold text-white">Account Session</h3>
-            <p class="text-[10px] text-slate-400" id="auth-modal-subtitle">Sign in with your Google account</p>
+            <p class="text-[10px] text-slate-400" id="auth-modal-subtitle">Sign in to your Surfkit account</p>
           </div>
         </div>
         <button type="button" onclick="closeAuthModal()" aria-label="Close Account Modal" class="text-slate-400 hover:text-white text-base">✕</button>
       </div>
 
-      <!-- Current Session Status (Read-Only when signed in) -->
-      <div id="auth-active-session-box" class="p-3.5 rounded-xl bg-[#090E1C] border border-surf-border space-y-2.5 hidden">
-        <div class="flex items-center justify-between">
+      <!-- STATE 1: AUTHENTICATED SESSION CARD (Read-Only, hides all login/signup controls) -->
+      <div id="auth-active-session-box" class="p-4 rounded-xl bg-[#090E1C] border border-surf-border space-y-3 hidden">
+        <div class="flex flex-wrap items-center justify-between gap-2">
           <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Active Session</span>
-          <span id="auth-status-chip" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Authenticated</span>
+          <div class="flex items-center gap-1.5">
+            <span id="auth-status-chip" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Authenticated</span>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surf-teal/15 text-surf-teal border border-surf-teal/30">Extension Sync Ready</span>
+          </div>
         </div>
         <div class="flex items-center gap-3">
-          <div id="auth-modal-avatar" class="w-9 h-9 rounded-full bg-surf-surfaceElevated border border-surf-teal text-surf-teal font-bold flex items-center justify-center text-xs">
+          <div id="auth-modal-avatar" class="w-10 h-10 rounded-full bg-surf-surfaceElevated border border-surf-teal text-surf-teal font-bold flex items-center justify-center text-sm shrink-0">
             ?
           </div>
           <div class="min-w-0 flex-1">
             <p id="auth-modal-name" class="text-xs font-bold text-white truncate"></p>
-            <p id="auth-modal-email" class="text-[11px] text-slate-400 font-mono truncate select-all"></p>
+            <p id="auth-modal-email" class="text-[11px] text-slate-300 font-mono truncate select-all"></p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-surf-border/50 text-[11px]">
+          <div class="px-2.5 py-1.5 rounded-lg bg-surf-surface/60 border border-surf-border/50">
+            <span class="block text-[9px] uppercase tracking-wider text-slate-500 font-semibold">SKIT Balance</span>
+            <span id="auth-modal-balance" class="font-bold text-surf-teal font-mono">0 SKIT</span>
+          </div>
+          <div class="px-2.5 py-1.5 rounded-lg bg-surf-surface/60 border border-surf-border/50">
+            <span class="block text-[9px] uppercase tracking-wider text-slate-500 font-semibold">Active Streak</span>
+            <span id="auth-modal-streak" class="font-bold text-amber-300 font-mono">0 Days</span>
           </div>
         </div>
         <div class="text-[10px] font-mono text-slate-500 pt-1.5 border-t border-surf-border/50 truncate">
@@ -3016,22 +3029,83 @@ document.addEventListener('DOMContentLoaded', () => {
       <!-- Inline Auth Error / Notice Banner -->
       <div id="auth-inline-error" class="hidden px-3 py-2 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-[11px] font-medium leading-relaxed"></div>
 
-      <!-- Google OAuth Login View (hidden when signed in) -->
-      <div id="auth-login-view" class="space-y-3 pt-1">
-        <button type="button" id="auth-google-btn" onclick="handleGoogleOAuthSignIn()" class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2.5 cursor-pointer">
-          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
-            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
-            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
-            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
-            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
-          </svg>
-          <span id="auth-google-btn-text">Continue with Google</span>
-        </button>
+      <!-- SIGNED-OUT CONTAINER (Hidden completely when authenticated) -->
+      <div id="auth-signed-out-view" class="space-y-3.5 pt-1">
+        <!-- Sign In / Sign Up Tab Switcher -->
+        <div id="auth-mode-tabs" class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-[#090E1C] border border-surf-border text-xs">
+          <button type="button" id="auth-mode-signin" onclick="setAuthModalMode('signin')" class="py-1.5 rounded-lg font-bold bg-surf-teal/15 text-surf-teal border border-surf-teal/30 transition-all">Sign In</button>
+          <button type="button" id="auth-mode-signup" onclick="setAuthModalMode('signup')" class="py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white border border-transparent transition-all">Sign Up</button>
+        </div>
+
+        <!-- STATE 2: SIGN IN TAB (Existing Users: Google + Email/Password) -->
+        <div id="auth-signin-panel" class="space-y-3 transition-all">
+          <button type="button" id="auth-google-btn" onclick="handleGoogleOAuthSignIn('signin')" class="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+            </svg>
+            <span id="auth-google-btn-text">Continue with Google</span>
+          </button>
+
+          <div class="flex items-center gap-2.5 text-[10px] text-slate-500 uppercase tracking-wider font-mono">
+            <div class="flex-1 h-px bg-surf-border"></div>
+            <span>or sign in with email</span>
+            <div class="flex-1 h-px bg-surf-border"></div>
+          </div>
+
+          <form id="auth-email-form" onsubmit="handleAuthSignInSubmit(event)" class="space-y-3 text-xs" novalidate>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Email Address</label>
+              <input type="email" id="auth-input-email" placeholder="name@domain.com" class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-surf-teal" required>
+            </div>
+            <div>
+              <label class="block text-slate-300 mb-1 font-semibold">Password</label>
+              <input type="password" id="auth-input-password" placeholder="••••••••" class="w-full bg-[#090E1C] border border-surf-border rounded-xl px-3 py-2 text-white font-mono text-xs focus:outline-none focus:border-surf-teal" required>
+            </div>
+            <button type="submit" id="auth-submit-btn" class="w-full py-2.5 rounded-xl bg-surf-teal text-slate-950 font-bold text-xs shadow-glow-teal hover:bg-surf-tealHover transition-colors">
+              Sign In with Email
+            </button>
+          </form>
+        </div>
+
+        <!-- STATE 3: SIGN UP TAB (New Users: Google-Only Onboarding, NO Email/Password) -->
+        <div id="auth-signup-panel" class="hidden space-y-3.5 transition-all">
+          <button type="button" id="auth-google-signup-btn" onclick="handleGoogleOAuthSignIn('signup')" class="w-full py-3 px-4 rounded-xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2.5 cursor-pointer">
+            <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+              <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+              <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+              <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+            </svg>
+            <span id="auth-google-signup-btn-text">Continue with Google</span>
+          </button>
+
+          <div class="rounded-xl bg-[#090E1C] border border-surf-border p-3.5 space-y-2.5 text-[11px]">
+            <div class="flex items-start gap-2.5">
+              <span class="w-5 h-5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shrink-0 text-[10px]">✓</span>
+              <p class="text-slate-300 leading-relaxed"><span class="font-semibold text-white">Verified Google Account</span> — Instant, secure access without fake or temporary emails.</p>
+            </div>
+            <div class="flex items-start gap-2.5">
+              <span class="w-5 h-5 rounded-lg bg-surf-teal/15 border border-surf-teal/30 text-surf-teal flex items-center justify-center shrink-0 text-[10px]">⇄</span>
+              <p class="text-slate-300 leading-relaxed"><span class="font-semibold text-white">Extension &amp; Dashboard Sync</span> — Real-time sync for your SKIT balance, streak &amp; activity.</p>
+            </div>
+          </div>
+
+          <div class="px-3 py-2 rounded-xl bg-surf-surface/60 border border-surf-border/60 text-[10px] text-slate-400 text-center leading-relaxed">
+            Protected by Google OAuth • Active sessions are limited per account to prevent unauthorized sharing.
+          </div>
+
+          <p class="text-[10px] text-slate-500 text-center leading-relaxed">
+            By continuing, you agree to Surfkit's Terms of Service &amp; Privacy Policy.
+          </p>
+        </div>
       </div>
 
-      <!-- Sign Out Row (shown only when signed in) -->
+      <!-- Sign Out Row (shown ONLY when signed in) -->
       <div id="auth-signout-row" class="pt-2 border-t border-surf-border flex items-center justify-end hidden">
-        <button type="button" onclick="handleSignOut()" class="py-2 px-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-colors">
+        <button type="button" onclick="handleSignOut()" class="w-full py-2.5 px-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 hover:bg-rose-500/20 text-xs font-bold transition-colors cursor-pointer">
           Sign Out
         </button>
       </div>
@@ -3225,7 +3299,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.saveState = saveState;
 
-    // --- ACCOUNT SESSION & AUTH ENGINE (Google OAuth Only) ---
+    // --- ACCOUNT SESSION & AUTH ENGINE (3-State Auth: Authenticated / Sign In / Google-Only Sign Up) ---
+    let authModalMode = 'signin';
+    let googleOAuthPopupTimer = null;
+
     function showAuthInlineError(msg, isInfo = false) {
       try {
         const box = document.getElementById('auth-inline-error');
@@ -3243,10 +3320,53 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (_) {}
     }
 
+    function resetGoogleButtons() {
+      try {
+        const btn1 = document.getElementById('auth-google-btn');
+        const txt1 = document.getElementById('auth-google-btn-text');
+        const btn2 = document.getElementById('auth-google-signup-btn');
+        const txt2 = document.getElementById('auth-google-signup-btn-text');
+        if (btn1) btn1.disabled = false;
+        if (txt1) txt1.textContent = 'Continue with Google';
+        if (btn2) btn2.disabled = false;
+        if (txt2) txt2.textContent = 'Continue with Google';
+      } catch (_) {}
+    }
+
+    function setAuthModalMode(mode) {
+      try {
+        authModalMode = mode === 'signup' ? 'signup' : 'signin';
+        showAuthInlineError('');
+        const signInBtn = document.getElementById('auth-mode-signin');
+        const signUpBtn = document.getElementById('auth-mode-signup');
+        const signInPanel = document.getElementById('auth-signin-panel');
+        const signUpPanel = document.getElementById('auth-signup-panel');
+        const subEl = document.getElementById('auth-modal-subtitle');
+
+        const activeCls = 'py-1.5 rounded-lg font-bold bg-surf-teal/15 text-surf-teal border border-surf-teal/30 transition-all';
+        const idleCls = 'py-1.5 rounded-lg font-semibold text-slate-400 hover:text-white border border-transparent transition-all';
+
+        if (signInBtn) signInBtn.className = authModalMode === 'signin' ? activeCls : idleCls;
+        if (signUpBtn) signUpBtn.className = authModalMode === 'signup' ? activeCls : idleCls;
+
+        if (authModalMode === 'signup') {
+          if (signInPanel) signInPanel.classList.add('hidden');
+          if (signUpPanel) signUpPanel.classList.remove('hidden');
+          if (subEl) subEl.textContent = 'Create your Surfkit account with Google';
+        } else {
+          if (signUpPanel) signUpPanel.classList.add('hidden');
+          if (signInPanel) signInPanel.classList.remove('hidden');
+          if (subEl) subEl.textContent = 'Sign in to your Surfkit account';
+        }
+      } catch (_) {}
+    }
+
     async function handleGoogleOAuthSignIn() {
       try {
-        const btn = document.getElementById('auth-google-btn');
-        const btnText = document.getElementById('auth-google-btn-text');
+        const btn1 = document.getElementById('auth-google-btn');
+        const txt1 = document.getElementById('auth-google-btn-text');
+        const btn2 = document.getElementById('auth-google-signup-btn');
+        const txt2 = document.getElementById('auth-google-signup-btn-text');
         showAuthInlineError('');
 
         if (!supabaseClient || !supabaseClient.auth) {
@@ -3254,27 +3374,150 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        if (btn) btn.disabled = true;
-        if (btnText) btnText.textContent = 'Redirecting to Google...';
+        if (btn1) btn1.disabled = true;
+        if (txt1) txt1.textContent = 'Connecting to Google...';
+        if (btn2) btn2.disabled = true;
+        if (txt2) txt2.textContent = 'Connecting to Google...';
 
-        const { error } = await supabaseClient.auth.signInWithOAuth({
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: 'https://surfkit.cloud/dashboard/overview'
+            redirectTo: 'https://surfkit.cloud/dashboard/overview',
+            skipBrowserRedirect: true
           }
         });
+
         if (error) {
           showAuthInlineError(error.message || 'Could not start Google Sign-In. Please try again.');
-          if (btn) btn.disabled = false;
-          if (btnText) btnText.textContent = 'Continue with Google';
+          resetGoogleButtons();
+          return;
         }
+
+        const authUrl = data && data.url ? String(data.url) : '';
+        if (!authUrl) {
+          showAuthInlineError('Could not obtain Google authentication URL. Please try again.');
+          resetGoogleButtons();
+          return;
+        }
+
+        let popup = null;
+        try {
+          const w = 520;
+          const h = 640;
+          const left = Math.max(0, Math.round(((window.screen && window.screen.width) ? window.screen.width - w : 400) / 2));
+          const top = Math.max(0, Math.round(((window.screen && window.screen.height) ? window.screen.height - h : 200) / 2));
+          popup = window.open(authUrl, 'surfkit_google_oauth', `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
+        } catch (_) {
+          popup = null;
+        }
+
+        // Fallback redirect if popup was blocked
+        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+          window.location.assign(authUrl);
+          return;
+        }
+
+        if (googleOAuthPopupTimer) {
+          clearInterval(googleOAuthPopupTimer);
+          googleOAuthPopupTimer = null;
+        }
+        googleOAuthPopupTimer = setInterval(async () => {
+          try {
+            if (!popup || popup.closed) {
+              clearInterval(googleOAuthPopupTimer);
+              googleOAuthPopupTimer = null;
+              resetGoogleButtons();
+              if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
+                const { data: sData } = await supabaseClient.auth.getSession();
+                if (sData && sData.session && sData.session.user) {
+                  currentUser = sData.session.user;
+                  window.currentUser = sData.session.user;
+                  applyAuthModalView(sData.session.user);
+                  closeAuthModal();
+                }
+              }
+            }
+          } catch (_) {
+            clearInterval(googleOAuthPopupTimer);
+            googleOAuthPopupTimer = null;
+            resetGoogleButtons();
+          }
+        }, 500);
       } catch (err) {
         showAuthInlineError(err?.message || 'Unexpected error starting Google Sign-In.');
+        resetGoogleButtons();
+      }
+    }
+
+    async function handleAuthSignInSubmit(e) {
+      if (e && typeof e.preventDefault === 'function') e.preventDefault();
+      try {
+        showAuthInlineError('');
+        const emailInput = document.getElementById('auth-input-email');
+        const passInput = document.getElementById('auth-input-password');
+        const submitBtn = document.getElementById('auth-submit-btn');
+
+        const email = emailInput ? String(emailInput.value || '').trim().toLowerCase() : '';
+        const password = passInput ? String(passInput.value || '') : '';
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+        if (!email || !emailRegex.test(email)) {
+          showAuthInlineError('Please enter a valid email address (e.g. name@domain.com).');
+          if (emailInput) emailInput.focus();
+          return;
+        }
+        if (!password || password.length < 6) {
+          showAuthInlineError('Please enter your password (at least 6 characters).');
+          if (passInput) passInput.focus();
+          return;
+        }
+        if (!supabaseClient || !supabaseClient.auth) {
+          showAuthInlineError('Authentication service unavailable. Please refresh and try again.');
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Signing In...';
+        }
+
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) {
+          showAuthInlineError(error.message || 'Invalid email or password.');
+          return;
+        }
+
+        if (data && data.user) {
+          currentUser = data.user;
+          window.currentUser = data.user;
+          const usernamePart = (data.user.user_metadata && (data.user.user_metadata.display_name || data.user.user_metadata.full_name))
+            || (email.split('@')[0] || 'User');
+          state.user.id = data.user.id;
+          state.user.email = data.user.email || email;
+          state.user.name = usernamePart;
+          state.user.username = usernamePart;
+          window.currentUserEmail = state.user.email.trim().toLowerCase();
+          saveState();
+          applyAuthModalView(data.user);
+          closeAuthModal();
+          try { if (typeof showToast === 'function') showToast(`Signed in as ${state.user.email}`, 'success'); } catch (_) {}
+          try {
+            dispatchToExtension('AUTH_SET_SESSION', { user: currentUser, email: state.user.email });
+          } catch (_) {}
+          try { if (typeof loadDataFromSupabase === 'function') await loadDataFromSupabase(); } catch (_) {}
+          try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
+          try { if (typeof loadChatHistory === 'function') loadChatHistory(); } catch (_) {}
+          try { if (typeof renderNotifications === 'function') renderNotifications(); } catch (_) {}
+        }
+      } catch (err) {
+        showAuthInlineError(err?.message || 'Unexpected error during sign in. Please try again.');
+      } finally {
         try {
-          const btn = document.getElementById('auth-google-btn');
-          const btnText = document.getElementById('auth-google-btn-text');
-          if (btn) btn.disabled = false;
-          if (btnText) btnText.textContent = 'Continue with Google';
+          const submitBtn = document.getElementById('auth-submit-btn');
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign In with Email';
+          }
         } catch (_) {}
       }
     }
@@ -3286,12 +3529,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailEl = document.getElementById('auth-modal-email');
         const uidEl = document.getElementById('auth-modal-uid');
         const avatarEl = document.getElementById('auth-modal-avatar');
+        const balanceEl = document.getElementById('auth-modal-balance');
+        const streakEl = document.getElementById('auth-modal-streak');
         const statusChip = document.getElementById('auth-status-chip');
         const sessionBox = document.getElementById('auth-active-session-box');
-        const loginView = document.getElementById('auth-login-view');
-        const googleBtn = document.getElementById('auth-google-btn');
-        const googleBtnText = document.getElementById('auth-google-btn-text');
+        const signedOutView = document.getElementById('auth-signed-out-view');
         const signoutRow = document.getElementById('auth-signout-row');
+        const emailInput = document.getElementById('auth-input-email');
+        const passInput = document.getElementById('auth-input-password');
 
         const isAuthed = Boolean(sessionUser && sessionUser.email);
 
@@ -3302,32 +3547,38 @@ document.addEventListener('DOMContentLoaded', () => {
             || (state?.user?.name && state.user.name !== 'Guest User' ? state.user.name : '')
             || (activeEmail ? activeEmail.split('@')[0] : 'User');
 
-          if (subEl) subEl.textContent = 'Active Google session';
-          if (loginView) loginView.classList.add('hidden');
-          if (googleBtn) googleBtn.classList.add('hidden');
+          if (subEl) subEl.textContent = 'Active Google & Surfkit session';
+          if (signedOutView) signedOutView.classList.add('hidden');
           if (sessionBox) sessionBox.classList.remove('hidden');
           if (signoutRow) signoutRow.classList.remove('hidden');
           if (nameEl) nameEl.textContent = activeName;
           if (emailEl) emailEl.textContent = activeEmail;
           if (uidEl) uidEl.textContent = sessionUser.id ? sessionUser.id : ('usr_' + activeName);
           if (avatarEl) avatarEl.textContent = activeName.charAt(0).toUpperCase() || 'U';
+          if (balanceEl) {
+            const bal = Number(state?.user?.availableBalance || 0);
+            const skitVal = typeof formatSKIT === 'function' ? formatSKIT(bal) : `${(bal * 1000).toFixed(1)} SKIT`;
+            balanceEl.textContent = skitVal;
+          }
+          if (streakEl) {
+            const days = Number(state?.user?.streakDays || 0);
+            streakEl.textContent = `${days} ${days === 1 ? 'Day' : 'Days'}`;
+          }
           if (statusChip) {
             statusChip.textContent = 'Authenticated';
             statusChip.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
           }
         } else {
-          if (subEl) subEl.textContent = 'Sign in with your Google account';
           if (sessionBox) sessionBox.classList.add('hidden');
           if (signoutRow) signoutRow.classList.add('hidden');
-          if (loginView) loginView.classList.remove('hidden');
-          if (googleBtn) {
-            googleBtn.classList.remove('hidden');
-            googleBtn.disabled = false;
-          }
-          if (googleBtnText) googleBtnText.textContent = 'Continue with Google';
+          if (signedOutView) signedOutView.classList.remove('hidden');
+          resetGoogleButtons();
+          if (emailInput) emailInput.value = '';
+          if (passInput) passInput.value = '';
           if (nameEl) nameEl.textContent = '';
           if (emailEl) emailEl.textContent = '';
           if (uidEl) uidEl.textContent = '';
+          setAuthModalMode(authModalMode || 'signin');
         }
       } catch (_) {}
     }
@@ -3339,7 +3590,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showAuthInlineError('');
 
         let sessionUser = (currentUser && currentUser.email) ? currentUser : null;
-        if (!sessionUser && supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
+        if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
           try {
             const { data } = await supabaseClient.auth.getSession();
             if (data && data.session && data.session.user) {
@@ -3350,6 +3601,7 @@ document.addEventListener('DOMContentLoaded', () => {
           } catch (_) {}
         }
 
+        if (!sessionUser) authModalMode = 'signin';
         applyAuthModalView(sessionUser);
         modal.classList.remove('hidden');
       } catch (_) {}
@@ -3394,6 +3646,7 @@ document.addEventListener('DOMContentLoaded', () => {
       state.payoutHistory = [];
       state.crewMembers = [];
 
+      authModalMode = 'signin';
       applyAuthModalView(null);
 
       try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (e) {}
