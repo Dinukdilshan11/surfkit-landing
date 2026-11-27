@@ -1541,33 +1541,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="rounded-2xl border border-surf-border/60 bg-surf-surfaceCard/30 p-4 transition-all">
               <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-surf-border/30">
                 <span class="text-[9px] uppercase tracking-wider text-slate-500 font-mono font-semibold">Sponsored Space</span>
-                <span class="text-[9px] text-slate-600 font-mono">Ad Slot #games-native-top</span>
               </div>
               <div class="ad-slot-content flex items-center justify-center min-h-[90px]" id="ad-slot-games-native-top">
-                <!-- Mockup Ad: Razer Cortex / Gaming Partner -->
-                <div class="w-full bg-[#080E1C] border border-purple-500/30 rounded-xl p-4 sm:p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden transition-all hover:border-purple-400/50 group">
-                  <div class="pointer-events-none absolute -top-8 -right-8 w-28 h-28 rounded-full bg-purple-500/10 blur-xl"></div>
-                  <div class="flex items-start sm:items-center gap-3.5 relative z-10">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-600/25 to-pink-600/20 border border-purple-500/40 flex items-center justify-center text-xl shrink-0 text-purple-300 font-black shadow-md group-hover:scale-105 transition-transform">
-                      🎮
-                    </div>
-                    <div>
-                      <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-xs font-bold text-white tracking-tight">Razer Cortex &amp; Web3 Game Pass</span>
-                        <span class="px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-purple-500/20 text-purple-300 border border-purple-500/35">Official Gaming Partner</span>
-                        <span class="text-[10px] text-slate-500 font-mono">GameDistribution Network</span>
-                      </div>
-                      <p class="text-[11px] text-slate-400 mt-1 max-w-xl leading-relaxed">
-                        Unlock boosted PC frame rates, exclusive gaming token drops, and free weekly title passes for active web gamers.
-                      </p>
-                    </div>
-                  </div>
-                  <a href="https://www.razer.com/cortex" target="_blank" rel="noopener noreferrer" 
-                     class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white font-bold text-xs shadow-md transition-all active:scale-95 shrink-0 self-start md:self-auto flex items-center gap-1.5">
-                    <span>Claim Game Pass</span>
-                    <span class="text-[10px]">↗</span>
-                  </a>
-                </div>
+                <div class="w-full min-h-[90px] overflow-hidden" data-adsterra-host="games-native-top"></div>
               </div>
             </div>
           </div>
@@ -4970,19 +4946,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Mounts at most ONE #container-f5bb01d4dfffc228774cf443b4c16205 in the active tab's host
     function mountActiveAdsterraBanner() {
       try {
-        const activeTab = document.querySelector('.tab-content.active');
-        const host = activeTab ? activeTab.querySelector('[data-adsterra-host]') : null;
-        if (!host) return;
-
         const cid = 'container-f5bb01d4dfffc228774cf443b4c16205';
         const src = 'https://bauval.org/21/f5bb01d4dfffc228774cf443b4c16205';
+        const activeTab = document.querySelector('.tab-content.active');
+        const host = activeTab ? activeTab.querySelector('[data-adsterra-host]') : null;
 
-        // Remove any duplicate or stale container in inactive tabs
+        // Cleanly unmount/remove any container in inactive tabs first
         document.querySelectorAll('#' + cid).forEach(node => {
-          if (!host.contains(node) && node.parentNode) {
+          if ((!host || !host.contains(node)) && node.parentNode) {
             node.parentNode.removeChild(node);
           }
         });
+
+        if (!host) return;
 
         let container = host.querySelector('#' + cid);
         if (!container) {
