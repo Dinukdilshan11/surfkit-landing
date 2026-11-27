@@ -4927,23 +4927,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const activeTab = document.querySelector('.tab-content.active');
         const host = activeTab ? activeTab.querySelector('[data-adsterra-host]') : null;
 
-        // Cleanly unmount/remove any container in inactive tabs first
-        document.querySelectorAll('#' + cid).forEach(node => {
-          if ((!host || !host.contains(node)) && node.parentNode) {
+        const existingNodes = Array.from(document.querySelectorAll('#' + cid));
+        const populatedNode = existingNodes.find(n => n.childElementCount > 0 || n.innerHTML.trim() !== '');
+
+        if (!host) {
+          existingNodes.forEach(node => {
+            if (node.parentNode) node.parentNode.removeChild(node);
+          });
+          return;
+        }
+
+        let container = populatedNode || host.querySelector('#' + cid);
+        existingNodes.forEach(node => {
+          if (node !== container && node.parentNode) {
             node.parentNode.removeChild(node);
           }
         });
 
-        if (!host) return;
-
-        let container = host.querySelector('#' + cid);
         if (!container) {
           container = document.createElement('div');
           container.id = cid;
+        }
+        if (!host.contains(container)) {
           host.appendChild(container);
         }
 
-        if (!document.querySelector('script[src="' + src + '"]')) {
+        if (container.childElementCount === 0 && container.innerHTML.trim() === '') {
+          document.querySelectorAll('script[src="' + src + '"]').forEach(sc => {
+            if (sc.parentNode) sc.parentNode.removeChild(sc);
+          });
           const s = document.createElement('script');
           s.async = true;
           s.setAttribute('fetchpriority', 'high');
