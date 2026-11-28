@@ -325,6 +325,28 @@
     var DASHBOARD_PATH = '/dashboard/overview';
     var currentMode = 'signin';
     var oauthPopupTimer = null;
+    var isNavigating = false;
+    var userInitiatedSignIn = false;
+
+    function clearOAuthPopupTimer() {
+      try {
+        if (oauthPopupTimer) {
+          clearInterval(oauthPopupTimer);
+          oauthPopupTimer = null;
+        }
+      } catch (_) {}
+    }
+
+    function navigateToDashboard() {
+      if (isNavigating) return;
+      isNavigating = true;
+      clearOAuthPopupTimer();
+      try {
+        window.location.href = DASHBOARD_PATH;
+      } catch (_) {
+        isNavigating = false;
+      }
+    }
 
     // Capture referral code and initial mode (?mode=signup) from URL
     try {
@@ -546,7 +568,7 @@
       } catch (_) {}
       showSuccess('Signed in! Redirecting to your dashboard…');
       setTimeout(function () {
-        try { window.location.href = DASHBOARD_PATH; } catch (_) {}
+        navigateToDashboard();
       }, 350);
     }
 
@@ -557,6 +579,7 @@
         showError('Authentication service is unavailable. Please refresh and try again.');
         return;
       }
+      userInitiatedSignIn = true;
 
       var b1 = document.getElementById('google-signin-btn');
       var t1 = document.getElementById('google-signin-text');
@@ -601,19 +624,18 @@
         }
 
         if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-          window.location.href = authUrl;
+          if (!isNavigating) {
+            isNavigating = true;
+            window.location.href = authUrl;
+          }
           return;
         }
 
-        if (oauthPopupTimer) {
-          clearInterval(oauthPopupTimer);
-          oauthPopupTimer = null;
-        }
+        clearOAuthPopupTimer();
         oauthPopupTimer = setInterval(async function () {
           try {
             if (!popup || popup.closed) {
-              clearInterval(oauthPopupTimer);
-              oauthPopupTimer = null;
+              clearOAuthPopupTimer();
               resetGoogleButtons();
               if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
                 var sRes = await supabaseClient.auth.getSession();
@@ -623,8 +645,7 @@
               }
             }
           } catch (_) {
-            clearInterval(oauthPopupTimer);
-            oauthPopupTimer = null;
+            clearOAuthPopupTimer();
             resetGoogleButtons();
           }
         }, 500);
@@ -642,8 +663,13 @@
         supabaseClient.auth.onAuthStateChange(function (event, session) {
           try {
             if (event === 'SIGNED_IN' && session && session.user) {
-              completeSignInAndRedirect(session);
+              if (userInitiatedSignIn) {
+                completeSignInAndRedirect(session);
+              } else {
+                renderAuthState(session);
+              }
             } else if (event === 'SIGNED_OUT') {
+              userInitiatedSignIn = false;
               renderAuthState(null);
             } else if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
               renderAuthState(session);
@@ -665,7 +691,7 @@
     var gotoDashBtn = document.getElementById('goto-dashboard-btn');
     if (gotoDashBtn) {
       gotoDashBtn.addEventListener('click', function () {
-        window.location.href = DASHBOARD_PATH;
+        navigateToDashboard();
       });
     }
 
@@ -773,31 +799,43 @@
         }
 
         setLoading(signinBtn, true);
+        userInitiatedSignIn = true;
         try {
           var res = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
           if (res && res.error) {
+            userInitiatedSignIn = false;
             showError(res.error.message || 'Invalid email or password.');
             setLoading(signinBtn, false, 'Sign In');
           } else if (res && res.data && res.data.session) {
             completeSignInAndRedirect(res.data.session);
           } else {
+            userInitiatedSignIn = false;
             setLoading(signinBtn, false, 'Sign In');
           }
         } catch (err) {
+          userInitiatedSignIn = false;
           showError((err && err.message) || 'Sign in failed. Please try again.');
           setLoading(signinBtn, false, 'Sign In');
         }
       });
     }
 
-    /* ── Listen for extension sign-in events ── */
+    /* ── Listen for extension sign-in events & cleanup ── */
     window.addEventListener('message', function (e) {
       try {
         if (e && e.data && e.data.type === 'SURFKIT_USER_SIGNED_IN') {
-          window.location.href = DASHBOARD_PATH;
+          if (userInitiatedSignIn) {
+            navigateToDashboard();
+          } else if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
+            supabaseClient.auth.getSession().then(function (res) {
+              if (res && res.data && res.data.session) renderAuthState(res.data.session);
+            }).catch(function () {});
+          }
         }
       } catch (_) {}
     });
+
+    window.addEventListener('beforeunload', clearOAuthPopupTimer);
 
   })();
   </script>

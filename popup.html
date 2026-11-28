@@ -267,6 +267,121 @@
       color: #64748b;
       margin-top: 10px;
     }
+
+    /* 3-State Auth Styles */
+    .auth-card {
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.85) 100%);
+      border: 1px solid rgba(30, 44, 74, 0.95);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .session-card {
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(0, 210, 147, 0.25);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+    }
+    .session-badge {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 9999px;
+      background: rgba(16, 185, 129, 0.14);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .auth-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      padding: 3px;
+      background: #070d19;
+      border: 1px solid #1e2c4a;
+      border-radius: 9px;
+      margin-bottom: 10px;
+    }
+    .auth-tab-btn {
+      padding: 6px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .auth-tab-btn.active {
+      background: rgba(0, 210, 147, 0.14);
+      color: #00d293;
+      border-color: rgba(0, 210, 147, 0.3);
+    }
+    .btn-google-popup {
+      width: 100%;
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-google-popup:hover { background: #f1f5f9; }
+    .btn-google-popup:disabled { opacity: 0.6; cursor: not-allowed; }
+    .popup-input {
+      width: 100%;
+      background: #070d19;
+      border: 1px solid #1e2c4a;
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #f8fafc;
+      font-size: 11px;
+      outline: none;
+      margin-bottom: 8px;
+    }
+    .popup-input:focus { border-color: #00d293; }
+    .btn-auth-submit {
+      width: 100%;
+      background: #00d293;
+      color: #070d19;
+      font-weight: 800;
+      font-size: 12px;
+      padding: 9px 12px;
+      border-radius: 9px;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-auth-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-signout-popup {
+      width: 100%;
+      margin-top: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .popup-auth-err {
+      display: none;
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 7px 9px;
+      font-size: 10.5px;
+      margin-bottom: 8px;
+    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -280,10 +395,88 @@
       </div>
     </div>
     <div class="status-badge">
-      <span class="status-dot"></span>
-      <span>Connected</span>
+      <span class="status-dot" id="popup-status-dot"></span>
+      <span id="popup-status-text">Connected</span>
     </div>
   </div>
+
+  <!-- STATE A: SIGNED-IN READ-ONLY SESSION CARD -->
+  <div id="popup-session-card" class="session-card hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:8px;">
+      <span style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#94a3b8;">Active Session</span>
+      <span class="session-badge">Authenticated • Google Verified</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div id="popup-session-avatar" style="width:28px;height:28px;border-radius:50%;background:#1e293b;border:1px solid #00d293;color:#00d293;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</div>
+      <div style="min-width:0;flex:1;">
+        <div id="popup-session-name" style="font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+        <div id="popup-session-email" style="font-size:10px;color:#94a3b8;font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+      </div>
+    </div>
+    <button type="button" id="popup-signout-btn" class="btn-signout-popup">Sign Out</button>
+  </div>
+
+  <!-- STATE B & C: SIGNED-OUT AUTH VIEW (Hidden when signed in) -->
+  <div id="popup-auth-signed-out" class="auth-card hidden">
+    <div id="popup-auth-error" class="popup-auth-err"></div>
+
+    <div class="auth-tabs">
+      <button type="button" id="popup-tab-signin" class="auth-tab-btn active">Sign In</button>
+      <button type="button" id="popup-tab-signup" class="auth-tab-btn">Sign Up</button>
+    </div>
+
+    <!-- STATE B: SIGN IN TAB (Google + Existing Email/Password) -->
+    <div id="popup-panel-signin">
+      <button type="button" id="popup-google-signin-btn" class="btn-google-popup">
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div style="display:flex;align-items:center;gap:8px;margin:10px 0;">
+        <span style="flex:1;height:1px;background:#1e2c4a;"></span>
+        <span style="font-size:9px;color:#64748b;font-weight:700;letter-spacing:0.4px;">OR CONTINUE WITH EMAIL</span>
+        <span style="flex:1;height:1px;background:#1e2c4a;"></span>
+      </div>
+
+      <form id="popup-email-form" novalidate>
+        <input type="email" id="popup-email-input" class="popup-input" placeholder="Email Address" required>
+        <input type="password" id="popup-pass-input" class="popup-input" placeholder="Password" required>
+        <button type="submit" id="popup-email-submit" class="btn-auth-submit">Sign In with Email</button>
+      </form>
+    </div>
+
+    <!-- STATE C: SIGN UP TAB (Google Only, NO Email/Password) -->
+    <div id="popup-panel-signup" class="hidden">
+      <button type="button" id="popup-google-signup-btn" class="btn-google-popup" style="margin-bottom:10px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+        </svg>
+        <span>Continue with Google</span>
+      </button>
+
+      <div style="background:#070d19;border:1px solid #1e2c4a;border-radius:9px;padding:9px;margin-bottom:8px;font-size:10px;color:#cbd5e1;line-height:1.45;">
+        <div style="margin-bottom:6px;"><strong style="color:#fff;">✓ Verified Google Account</strong> — Instant, secure access with zero fake or temporary emails.</div>
+        <div><strong style="color:#fff;">⇄ Extension &amp; Dashboard Sync</strong> — Real-time sync for your SKIT balance, streak &amp; activity.</div>
+      </div>
+
+      <div style="font-size:9.5px;color:#94a3b8;text-align:center;line-height:1.4;margin-bottom:6px;">
+        Protected by Google OAuth • Active sessions are limited per account to prevent unauthorized sharing.
+      </div>
+      <div style="font-size:9px;color:#64748b;text-align:center;line-height:1.4;">
+        By continuing, you agree to Surfkit's Terms and Privacy Policy.
+      </div>
+    </div>
+  </div>
+
+  <div id="popup-dashboard-view">
 
   <!-- Primary Balance Card (SKIT primary, USD secondary) -->
   <div class="balance-card">
@@ -364,7 +557,7 @@
   </div>
 
   <!-- Main Action Button -->
-  <a href="https://surfkit.cloud/dashboard/" target="_blank" rel="noopener noreferrer" class="btn-dashboard" id="btn-open-dashboard">
+  <a href="https://surfkit.cloud/dashboard/overview" target="_blank" rel="noopener noreferrer" class="btn-dashboard" id="btn-open-dashboard">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
       <rect x="3" y="3" width="7" height="7"></rect>
       <rect x="14" y="3" width="7" height="7"></rect>
@@ -376,6 +569,7 @@
 
   <div class="footer-note">
     Syncs live with your Surfkit account
+  </div>
   </div>
 
   <script>
@@ -755,35 +949,256 @@
       if (btn) {
         btn.addEventListener('click', function (e) {
           e.preventDefault();
-          if (typeof chrome !== 'undefined' && chrome.tabs) {
-            chrome.tabs.create({ url: 'https://surfkit.cloud/dashboard/' });
+          try {
+            if (typeof chrome !== 'undefined' && chrome.tabs && typeof chrome.tabs.create === 'function') {
+              chrome.tabs.create({ url: 'https://surfkit.cloud/dashboard/overview' });
+            } else {
+              window.open('https://surfkit.cloud/dashboard/overview', '_blank');
+            }
+          } catch (_) {}
+        });
+      }
+
+      // --- 3-STATE AUTH CONTROLLER FOR POPUP ---
+      const POPUP_SUPA_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
+      const POPUP_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
+      let popupAuthMode = 'signin';
+
+      function showPopupAuthError(msg) {
+        try {
+          const el = document.getElementById('popup-auth-error');
+          if (!el) return;
+          if (!msg) {
+            el.textContent = '';
+            el.style.display = 'none';
+            return;
+          }
+          el.textContent = msg;
+          el.style.display = 'block';
+        } catch (_) {}
+      }
+
+      function setPopupAuthTab(mode) {
+        try {
+          popupAuthMode = mode === 'signup' ? 'signup' : 'signin';
+          showPopupAuthError('');
+          const tabIn = document.getElementById('popup-tab-signin');
+          const tabUp = document.getElementById('popup-tab-signup');
+          const panelIn = document.getElementById('popup-panel-signin');
+          const panelUp = document.getElementById('popup-panel-signup');
+          if (tabIn) tabIn.classList.toggle('active', popupAuthMode === 'signin');
+          if (tabUp) tabUp.classList.toggle('active', popupAuthMode === 'signup');
+          if (panelIn) panelIn.classList.toggle('hidden', popupAuthMode === 'signup');
+          if (panelUp) panelUp.classList.toggle('hidden', popupAuthMode !== 'signup');
+        } catch (_) {}
+      }
+
+      function renderPopupAuthState(user) {
+        try {
+          const sessionCard = document.getElementById('popup-session-card');
+          const signedOutBox = document.getElementById('popup-auth-signed-out');
+          const dashView = document.getElementById('popup-dashboard-view');
+          const nameEl = document.getElementById('popup-session-name');
+          const emailEl = document.getElementById('popup-session-email');
+          const avatarEl = document.getElementById('popup-session-avatar');
+          const statusText = document.getElementById('popup-status-text');
+          const statusDot = document.getElementById('popup-status-dot');
+
+          const isAuthed = Boolean(user && user.email);
+          if (isAuthed) {
+            const email = String(user.email || '').trim();
+            const metaName = user.user_metadata && (user.user_metadata.display_name || user.user_metadata.full_name);
+            const name = (metaName && String(metaName).trim()) || email.split('@')[0] || 'Surfkit User';
+
+            if (signedOutBox) signedOutBox.classList.add('hidden');
+            if (sessionCard) sessionCard.classList.remove('hidden');
+            if (dashView) dashView.classList.remove('hidden');
+            if (nameEl) nameEl.textContent = name;
+            if (emailEl) emailEl.textContent = email;
+            if (avatarEl) avatarEl.textContent = name.charAt(0).toUpperCase() || 'S';
+            if (statusText) statusText.textContent = 'Connected';
+            if (statusDot) statusDot.style.backgroundColor = '#00d293';
           } else {
-            window.open('https://surfkit.cloud/dashboard/', '_blank');
+            if (sessionCard) sessionCard.classList.add('hidden');
+            if (dashView) dashView.classList.add('hidden');
+            if (signedOutBox) signedOutBox.classList.remove('hidden');
+            if (statusText) statusText.textContent = 'Signed Out';
+            if (statusDot) statusDot.style.backgroundColor = '#f59e0b';
+            setPopupAuthTab(popupAuthMode);
+          }
+        } catch (_) {}
+      }
+
+      function syncPopupAuthSession() {
+        try {
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'supabase_session', 'isExplicitSignOut'], function (st) {
+              try {
+                if (chrome.runtime && chrome.runtime.lastError) return;
+                if (st && st.isExplicitSignOut) {
+                  renderPopupAuthState(null);
+                  return;
+                }
+                const user = (st && st.authUser && st.authUser.email) ? st.authUser
+                  : (st && st.surfkit_auth_user && st.surfkit_auth_user.email) ? st.surfkit_auth_user
+                  : (st && st.supabase_session && st.supabase_session.user && st.supabase_session.user.email) ? st.supabase_session.user
+                  : null;
+                if (user) {
+                  renderPopupAuthState(user);
+                } else {
+                  queryActiveDashboardSession().then(function (sess) {
+                    renderPopupAuthState(sess && sess.user ? sess.user : null);
+                    if (sess) fetchLiveState();
+                  }).catch(function () {
+                    renderPopupAuthState(null);
+                  });
+                }
+              } catch (_) {}
+            });
+            return;
+          }
+
+          const rawJwt = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
+          if (rawJwt) {
+            const p = JSON.parse(rawJwt);
+            const u = p.user || (p.currentSession && p.currentSession.user);
+            if (u && u.email) {
+              renderPopupAuthState(u);
+              return;
+            }
+          }
+          renderPopupAuthState(null);
+        } catch (_) {
+          renderPopupAuthState(null);
+        }
+      }
+
+      function startPopupGoogleOAuth() {
+        try {
+          showPopupAuthError('');
+          const oauthUrl = POPUP_SUPA_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent('https://surfkit.cloud/dashboard/overview');
+          if (typeof chrome !== 'undefined' && chrome.identity && typeof chrome.identity.launchWebAuthFlow === 'function') {
+            chrome.identity.launchWebAuthFlow({ url: oauthUrl, interactive: true }, function () {});
+            return;
+          }
+          if (typeof chrome !== 'undefined' && chrome.tabs && typeof chrome.tabs.create === 'function') {
+            chrome.tabs.create({ url: oauthUrl });
+            return;
+          }
+          const win = window.open(oauthUrl, '_blank', 'width=520,height=640');
+          if (!win) {
+            window.location.href = oauthUrl;
+          }
+        } catch (_) {
+          showPopupAuthError('Unable to open Google Sign-In. Please try again.');
+        }
+      }
+
+      const tabInBtn = document.getElementById('popup-tab-signin');
+      const tabUpBtn = document.getElementById('popup-tab-signup');
+      if (tabInBtn) tabInBtn.addEventListener('click', function () { setPopupAuthTab('signin'); });
+      if (tabUpBtn) tabUpBtn.addEventListener('click', function () { setPopupAuthTab('signup'); });
+
+      const gInBtn = document.getElementById('popup-google-signin-btn');
+      const gUpBtn = document.getElementById('popup-google-signup-btn');
+      if (gInBtn) gInBtn.addEventListener('click', startPopupGoogleOAuth);
+      if (gUpBtn) gUpBtn.addEventListener('click', startPopupGoogleOAuth);
+
+      const emailForm = document.getElementById('popup-email-form');
+      if (emailForm) {
+        emailForm.addEventListener('submit', async function (e) {
+          if (e && typeof e.preventDefault === 'function') e.preventDefault();
+          showPopupAuthError('');
+          const emailEl = document.getElementById('popup-email-input');
+          const passEl = document.getElementById('popup-pass-input');
+          const submitBtn = document.getElementById('popup-email-submit');
+          const email = emailEl ? emailEl.value.trim() : '';
+          const password = passEl ? passEl.value : '';
+
+          if (!email || !password) {
+            showPopupAuthError('Please enter both email and password.');
+            return;
+          }
+
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing In...';
+          }
+          try {
+            const resp = await fetch(POPUP_SUPA_URL + '/auth/v1/token?grant_type=password', {
+              method: 'POST',
+              headers: { 'apikey': POPUP_SUPA_KEY, 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: email, password: password })
+            });
+            const data = await resp.json();
+            if (!resp.ok || !data || !data.user) {
+              showPopupAuthError((data && (data.error_description || data.msg || data.error)) || 'Invalid email or password.');
+              return;
+            }
+            const sess = {
+              access_token: data.access_token,
+              refresh_token: data.refresh_token,
+              expires_at: data.expires_at,
+              user: data.user
+            };
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+              chrome.storage.local.set({
+                authUser: data.user,
+                surfkit_auth_user: data.user,
+                supabaseUserId: data.user.id,
+                supabase_session: sess,
+                isExplicitSignOut: false
+              });
+            }
+            if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.sendMessage === 'function') {
+              try { chrome.runtime.sendMessage({ action: 'AUTH_SET_SESSION_TOKENS', payload: sess }); } catch (_) {}
+            }
+            if (emailEl) emailEl.value = '';
+            if (passEl) passEl.value = '';
+            renderPopupAuthState(data.user);
+            fetchLiveState();
+          } catch (_) {
+            showPopupAuthError('Sign in failed. Please check your connection and try again.');
+          } finally {
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign In with Email';
+            }
           }
         });
       }
 
-      // Immediate handshake on popup open: query open dashboard tab if storage has no valid session
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'supabase_session', 'isExplicitSignOut'], function(st) {
-          const hasSession = st && !st.isExplicitSignOut && (
-            (st.authUser && st.authUser.id) ||
-            (st.surfkit_auth_user && st.surfkit_auth_user.id) ||
-            (st.supabase_session && st.supabase_session.access_token)
-          );
-          if (!hasSession) {
-            queryActiveDashboardSession().then(function(sess) {
-              if (sess) {
-                fetchLiveState();
-              }
-            });
-          }
+      const signOutBtn = document.getElementById('popup-signout-btn');
+      if (signOutBtn) {
+        signOutBtn.addEventListener('click', function () {
+          try {
+            if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.sendMessage === 'function') {
+              try { chrome.runtime.sendMessage({ action: 'AUTH_SIGN_OUT' }); } catch (_) {}
+            }
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+              chrome.storage.local.set({
+                authUser: null,
+                surfkit_auth_user: null,
+                supabaseUserId: null,
+                supabase_session: null,
+                isExplicitSignOut: true
+              });
+            }
+            try { localStorage.removeItem('sb-kpvrewhmnrifsnkgswdt-auth-token'); } catch (_) {}
+            try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (_) {}
+            popupAuthMode = 'signin';
+            renderPopupAuthState(null);
+          } catch (_) {}
         });
       }
 
       // Initial execution and live polling interval
+      syncPopupAuthSession();
       fetchLiveState();
-      setInterval(fetchLiveState, 1000);
+      const pollTimer = setInterval(fetchLiveState, 1000);
+      window.addEventListener('unload', function () {
+        try { clearInterval(pollTimer); } catch (_) {}
+      });
     })();
   </script>
 </body>

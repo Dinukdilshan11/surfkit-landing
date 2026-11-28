@@ -6,7 +6,7 @@
   <title>Surfkit — Redirecting...</title>
   <script>
     (function() {
-      var p = window.location.pathname.replace(/\/$/, '').toLowerCase();
+      var p = (window.location.pathname || '/').replace(/\/+$/, '').toLowerCase() || '/';
       var routeMap = {
         '/home': '/home/',
         '/earn': '/earn/',
@@ -22,11 +22,21 @@
         '/dashboard': '/dashboard/',
         '/login': '/login/'
       };
+      var suffix = (window.location.search || '') + (window.location.hash || '');
+      if (p === '/dashboard' || p.indexOf('/dashboard/') === 0) {
+        try { sessionStorage.setItem('surfkit_spa_route', p); } catch (_) {}
+        window.location.replace('/dashboard/' + suffix);
+        return;
+      }
+      if (p === '/login' || p.indexOf('/login/') === 0) {
+        window.location.replace('/login/' + suffix);
+        return;
+      }
       var target = routeMap[p];
       if (target) {
-        window.location.replace(target + window.location.search + window.location.hash);
+        window.location.replace(target + suffix);
       } else {
-        window.location.replace('/' + window.location.search + window.location.hash);
+        window.location.replace('/' + suffix);
       }
     })();
   </script>

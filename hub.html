@@ -2998,7 +2998,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="flex flex-wrap items-center justify-between gap-2">
           <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Active Session</span>
           <div class="flex items-center gap-1.5">
-            <span id="auth-status-chip" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Authenticated</span>
+            <span id="auth-status-chip" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Authenticated • Google Verified</span>
             <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surf-teal/15 text-surf-teal border border-surf-teal/30">Extension Sync Ready</span>
           </div>
         </div>
@@ -3565,7 +3565,7 @@ document.addEventListener('DOMContentLoaded', () => {
             streakEl.textContent = `${days} ${days === 1 ? 'Day' : 'Days'}`;
           }
           if (statusChip) {
-            statusChip.textContent = 'Authenticated';
+            statusChip.textContent = 'Authenticated • Google Verified';
             statusChip.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
           }
         } else {
@@ -3609,6 +3609,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeAuthModal() {
       try {
+        if (googleOAuthPopupTimer) {
+          clearInterval(googleOAuthPopupTimer);
+          googleOAuthPopupTimer = null;
+        }
         const modal = document.getElementById('authModal');
         if (modal) modal.classList.add('hidden');
         showAuthInlineError('');
@@ -5107,6 +5111,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function resolveInitialTabFromLocation() {
       try {
+        try {
+          const spaRoute = sessionStorage.getItem('surfkit_spa_route');
+          if (spaRoute) {
+            sessionStorage.removeItem('surfkit_spa_route');
+            const spaMatch = String(spaRoute).toLowerCase().match(/\/dashboard\/([^/?#]+)/);
+            if (spaMatch && spaMatch[1] && SURFKIT_TAB_ALIASES[spaMatch[1]]) {
+              return SURFKIT_TAB_ALIASES[spaMatch[1]];
+            }
+          }
+        } catch (_) {}
         const hash = String(window.location.hash || '').replace(/^#\/?/, '').trim().toLowerCase();
         if (hash && SURFKIT_TAB_ALIASES[hash]) return SURFKIT_TAB_ALIASES[hash];
         const path = String(window.location.pathname || '').toLowerCase();
