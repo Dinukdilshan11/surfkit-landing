@@ -66,6 +66,7 @@ const SurfkitSupabase = {
     const user = tokenData.user || (tokenData.id ? tokenData : null);
     const updates = {
       isExplicitSignOut: false,
+      surfkit_session: tokenData,
       supabase_session: tokenData,
       'sb-kpvrewhmnrifsnkgswdt-auth-token': JSON.stringify(tokenData)
     };
@@ -789,7 +790,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           let targetUser = session.user;
           const userEmail = (targetUser && targetUser.email) || session.email;
           const rawId = (targetUser && targetUser.id) || (userEmail ? 'usr_' + userEmail.split('@')[0] : null);
-          const realId = await SurfkitSupabase.resolveUuid(rawId, userEmail);
+          const realId = (rawId && String(rawId).includes('-')) ? rawId : await SurfkitSupabase.resolveUuid(rawId, userEmail);
           if (realId) {
             targetUser = {
               id: realId,

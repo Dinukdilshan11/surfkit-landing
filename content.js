@@ -491,6 +491,28 @@
 
       switch (action) {
         case 'GET_ACTIVE_DASHBOARD_SESSION': {
+          try {
+            if (window.location && (window.location.hostname === 'surfkit.cloud' || window.location.hostname.endsWith('.surfkit.cloud'))) {
+              const rawSupa = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
+              if (rawSupa) {
+                const parsed = JSON.parse(rawSupa);
+                const sess = (parsed && parsed.currentSession) ? parsed.currentSession : parsed;
+                if (sess && sess.access_token && sess.user && sess.user.email) {
+                  const normSess = {
+                    access_token: sess.access_token,
+                    refresh_token: sess.refresh_token || null,
+                    expires_at: sess.expires_at || null,
+                    user: sess.user
+                  };
+                  cachedDashboardSession = normSess;
+                  config.hasAuthUser = Boolean(sess.user && sess.user.id);
+                  sendResponse({ success: true, session: normSess });
+                  return true;
+                }
+              }
+            }
+          } catch (_) {}
+
           if (cachedDashboardSession && cachedDashboardSession.user) {
             sendResponse({ success: true, session: cachedDashboardSession });
             return true;
@@ -501,18 +523,26 @@
           const timeoutId = setTimeout(() => {
             if (!responded) {
               responded = true;
+              try { window.removeEventListener('message', replyHandler); } catch (_) {}
               sendResponse({ success: false, error: 'Dashboard session query timeout' });
             }
-          }, 600);
+          }, 800);
 
           const replyHandler = (e) => {
-            if (e.source !== window || !e.data || e.data.type !== 'SURFKIT_AUTH_SESSION_UPDATE') return;
+            if (e.source !== window || !e.data) return;
+            let incomingSess = null;
+            if (e.data.type === 'SURFKIT_AUTH_SESSION_UPDATE' && e.data.session) {
+              incomingSess = e.data.session;
+            } else if (e.data.type === 'SURFKIT_AUTH_SYNC' && e.data.event === 'SIGNED_IN' && e.data.session) {
+              incomingSess = e.data.session;
+            }
+            if (!incomingSess) return;
             if (!responded) {
               responded = true;
               clearTimeout(timeoutId);
               window.removeEventListener('message', replyHandler);
-              cachedDashboardSession = e.data.session;
-              sendResponse({ success: true, session: e.data.session });
+              cachedDashboardSession = incomingSess;
+              sendResponse({ success: true, session: incomingSess });
             }
           };
           window.addEventListener('message', replyHandler);
@@ -747,39 +777,46 @@
   });
 
   // Sync initial localStorage Supabase auth token on surfkit.cloud page load
-  try {
-    if (window.location && (window.location.hostname === 'surfkit.cloud' || window.location.hostname.endsWith('.surfkit.cloud'))) {
-      const rawSupa = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
-      if (rawSupa) {
-        const parsed = JSON.parse(rawSupa);
-        const sess = (parsed && parsed.currentSession) ? parsed.currentSession : parsed;
-        if (sess && sess.access_token && sess.user && sess.user.email) {
-          const normSess = {
-            access_token: sess.access_token,
-            refresh_token: sess.refresh_token || null,
-            expires_at: sess.expires_at || null,
-            user: sess.user
-          };
-          cachedDashboardSession = normSess;
-          config.hasAuthUser = Boolean(sess.user && sess.user.id);
-          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.set({
-              surfkit_session: normSess,
-              supabase_session: normSess,
-              authUser: sess.user,
-              surfkit_auth_user: sess.user,
-              supabaseUserId: sess.user.id || null,
-              isExplicitSignOut: false
+  function syncInitialLocalStorageSession() {
+    try {
+      if (window.location && (window.location.hostname === 'surfkit.cloud' || window.location.hostname.endsWith('.surfkit.cloud'))) {
+        const rawSupa = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
+        if (rawSupa) {
+          const parsed = JSON.parse(rawSupa);
+          const sess = (parsed && parsed.currentSession) ? parsed.currentSession : parsed;
+          if (sess && sess.access_token && sess.user && sess.user.email) {
+            const normSess = {
+              access_token: sess.access_token,
+              refresh_token: sess.refresh_token || null,
+              expires_at: sess.expires_at || null,
+              user: sess.user
+            };
+            cachedDashboardSession = normSess;
+            config.hasAuthUser = Boolean(sess.user && sess.user.id);
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+              chrome.storage.local.set({
+                surfkit_session: normSess,
+                supabase_session: normSess,
+                authUser: sess.user,
+                surfkit_auth_user: sess.user,
+                supabaseUserId: sess.user.id || null,
+                isExplicitSignOut: false
+              });
+            }
+            safeSendMessage({
+              action: 'AUTH_SET_SESSION_TOKENS',
+              payload: normSess
             });
+            return true;
           }
-          safeSendMessage({
-            action: 'AUTH_SET_SESSION_TOKENS',
-            payload: normSess
-          });
         }
       }
-    }
-  } catch (_) {}
+    } catch (_) {}
+    return false;
+  }
+  if (!syncInitialLocalStorageSession()) {
+    setTimeout(syncInitialLocalStorageSession, 900);
+  }
 
   // Request active auth session and announce live state to web page on injection
   try {

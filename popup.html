@@ -740,6 +740,7 @@
                   authUser: u,
                   surfkit_auth_user: u,
                   supabaseUserId: u.id,
+                  surfkit_session: sess,
                   supabase_session: sess,
                   isExplicitSignOut: false
                 }, resolve);
@@ -1084,7 +1085,27 @@
               try {
                 if (chrome.runtime && chrome.runtime.lastError) return;
                 if (st && st.isExplicitSignOut) {
-                  renderPopupAuthState(null);
+                  // Even if isExplicitSignOut was set earlier, check if an open surfkit.cloud tab just signed in
+                  queryActiveDashboardSession().then(async function (sess) {
+                    if (sess && sess.user) {
+                      if (sess.access_token && supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.setSession === 'function') {
+                        try {
+                          await supabaseClient.auth.setSession({
+                            access_token: sess.access_token,
+                            refresh_token: sess.refresh_token || ''
+                          });
+                        } catch (_) {}
+                      }
+                      try { localStorage.setItem('sb-kpvrewhmnrifsnkgswdt-auth-token', JSON.stringify(sess)); } catch (_) {}
+                      renderPopupAuthState(sess.user);
+                      if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+                      fetchLiveState();
+                    } else {
+                      renderPopupAuthState(null);
+                    }
+                  }).catch(function () {
+                    renderPopupAuthState(null);
+                  });
                   return;
                 }
                 const storedSession = (st && st.surfkit_session && (st.surfkit_session.access_token || st.surfkit_session.user))
@@ -1186,6 +1207,7 @@
                     authUser: user,
                     surfkit_auth_user: user,
                     supabaseUserId: user.id,
+                    surfkit_session: sess,
                     supabase_session: sess,
                     isExplicitSignOut: false
                   });
@@ -1314,6 +1336,7 @@
                 authUser: data.user,
                 surfkit_auth_user: data.user,
                 supabaseUserId: data.user.id,
+                surfkit_session: sess,
                 supabase_session: sess,
                 isExplicitSignOut: false
               });

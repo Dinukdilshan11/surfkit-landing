@@ -490,15 +490,27 @@
       } catch (_) {}
       try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch (_) {}
       try {
+        var sessPayload = {
+          access_token: session.access_token || null,
+          refresh_token: session.refresh_token || null,
+          expires_at: session.expires_at || null,
+          user: session.user
+        };
         window.postMessage({
           type: 'SURFKIT_AUTH_SESSION_UPDATE',
-          session: {
-            access_token: session.access_token,
-            refresh_token: session.refresh_token,
-            expires_at: session.expires_at,
-            user: session.user
-          }
+          session: sessPayload
         }, '*');
+        var targetOrigin = (window.location && window.location.origin && window.location.origin !== 'null') ? window.location.origin : '*';
+        window.postMessage({
+          type: 'SURFKIT_AUTH_SYNC',
+          event: 'SIGNED_IN',
+          session: sessPayload
+        }, targetOrigin);
+        if (typeof BroadcastChannel !== 'undefined') {
+          var ch = new BroadcastChannel('surfkit_auth_sync');
+          ch.postMessage({ type: 'AUTH_SESSION_SYNC', session: sessPayload });
+          ch.close();
+        }
       } catch (_) {}
     }
 
@@ -743,6 +755,15 @@
         try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (_) {}
         try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (_) {}
         try { window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*'); } catch (_) {}
+        try {
+          var targetOrigin = (window.location && window.location.origin && window.location.origin !== 'null') ? window.location.origin : '*';
+          window.postMessage({ type: 'SURFKIT_AUTH_SYNC', event: 'SIGNED_OUT', session: null }, targetOrigin);
+          if (typeof BroadcastChannel !== 'undefined') {
+            var chOut = new BroadcastChannel('surfkit_auth_sync');
+            chOut.postMessage({ type: 'AUTH_SIGN_OUT' });
+            chOut.close();
+          }
+        } catch (_) {}
         currentMode = 'signin';
         renderAuthState(null);
         showSuccess('Signed out successfully.');

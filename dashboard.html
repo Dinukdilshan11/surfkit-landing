@@ -3768,6 +3768,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Always sync session tokens to extension & popup (chrome.storage.local / runtime / BroadcastChannel)
         forwardSessionToExtension(sessionObj);
+        // Re-broadcast after document_idle in case content.js injected after early inline script execution
+        setTimeout(() => {
+          try {
+            if (currentUser && currentUser.id === user.id && typeof broadcastAuthSession === 'function') {
+              broadcastAuthSession();
+            }
+          } catch (_) {}
+        }, 500);
+        setTimeout(() => {
+          try {
+            if (currentUser && currentUser.id === user.id && typeof broadcastAuthSession === 'function') {
+              broadcastAuthSession();
+            }
+          } catch (_) {}
+        }, 1500);
         try {
           if (typeof sendToExtension === 'function') {
             sendToExtension('ATTACH_USER_REWARDS_LISTENER', { user_id: user.id }).catch(() => {});
