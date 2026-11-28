@@ -3129,6 +3129,28 @@ document.addEventListener('DOMContentLoaded', () => {
       : null;
     window.supabaseClient = supabaseClient;
 
+    // ── POPUP-CALLBACK SAFETY GUARD ───────────────────────────────────────────
+    // If the OAuth redirect somehow lands the dashboard inside a popup window
+    // (window.opener exists and is still open), push the main window to the
+    // dashboard URL and immediately close this popup, so the full dashboard
+    // always loads in the user's main tab rather than the small OAuth window.
+    (function checkAndEscapePopupContext() {
+      try {
+        if (window.opener && !window.opener.closed) {
+          // Give Supabase detectSessionInUrl a brief moment to store the token
+          // before we close, so the opener can pick it up via localStorage.
+          setTimeout(function () {
+            try {
+              // Navigate opener to the clean dashboard URL
+              window.opener.location.assign('https://surfkit.cloud/dashboard/overview');
+            } catch (_) {}
+            try { window.close(); } catch (_) {}
+          }, 300);
+        }
+      } catch (_) {}
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
+
     let currentUser = null;
     let realtimeChannel = null;
 
@@ -3448,11 +3470,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (btn2) btn2.disabled = true;
         if (txt2) txt2.textContent = 'Connecting to Google...';
 
+        // --- MAIN-TAB REDIRECT (no popup): Google selects account, redirects back
+        //     to /dashboard/overview where onAuthStateChange picks up the session.
         const { data, error } = await supabaseClient.auth.signInWithOAuth({
           provider: 'google',
           options: {
             redirectTo: 'https://surfkit.cloud/dashboard/overview',
-            skipBrowserRedirect: true
+            skipBrowserRedirect: false   // let Supabase redirect the main tab
           }
         });
 
@@ -3462,70 +3486,15 @@ document.addEventListener('DOMContentLoaded', () => {
           return;
         }
 
-        const authUrl = data && data.url ? String(data.url) : '';
-        if (!authUrl) {
-          showAuthInlineError('Could not obtain Google authentication URL. Please try again.');
-          resetGoogleButtons();
-          return;
-        }
-
-        let popup = null;
+        // signInWithOAuth with skipBrowserRedirect:false navigates the page
+        // automatically — but as a belt-and-suspenders fallback, redirect if
+        // the page somehow did not navigate (should not happen).
         try {
-          const w = 520;
-          const h = 640;
-          const left = Math.max(0, Math.round(((window.screen && window.screen.width) ? window.screen.width - w : 400) / 2));
-          const top = Math.max(0, Math.round(((window.screen && window.screen.height) ? window.screen.height - h : 200) / 2));
-          popup = window.open(authUrl, 'surfkit_google_oauth', `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`);
-        } catch (_) {
-          popup = null;
-        }
-
-        // Fallback redirect if popup was blocked
-        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-          window.location.assign(authUrl);
-          return;
-        }
-
-        if (googleOAuthPopupTimer) {
-          clearInterval(googleOAuthPopupTimer);
-          googleOAuthPopupTimer = null;
-        }
-        googleOAuthPopupTimer = setInterval(async () => {
-          try {
-            if (!popup || popup.closed) {
-              clearInterval(googleOAuthPopupTimer);
-              googleOAuthPopupTimer = null;
-              resetGoogleButtons();
-              if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
-                const { data: sData } = await supabaseClient.auth.getSession();
-                if (sData && sData.session && sData.session.user) {
-                  const allowed = await verifyGoogleSignInIntent(sData.session);
-                  if (!allowed) return;
-                  currentUser = sData.session.user;
-                  window.currentUser = sData.session.user;
-                  if (currentUser.email) {
-                    window.currentUserEmail = currentUser.email.trim().toLowerCase();
-                  }
-                  state.user.id = currentUser.id;
-                  state.user.email = currentUser.email || '';
-                  state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
-                    || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
-                  state.user.username = state.user.name;
-                  saveState();
-                  renderApp();
-                  applyAuthModalView(sData.session.user);
-                  closeAuthModal();
-                  try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
-                  try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
-                }
-              }
-            }
-          } catch (_) {
-            clearInterval(googleOAuthPopupTimer);
-            googleOAuthPopupTimer = null;
-            resetGoogleButtons();
+          const authUrl = data && data.url ? String(data.url) : '';
+          if (authUrl && window.location.href.indexOf('accounts.google.com') === -1) {
+            window.location.assign(authUrl);
           }
-        }, 500);
+        } catch (_) {}
       } catch (err) {
         showAuthInlineError(err?.message || 'Unexpected error starting Google Sign-In.');
         resetGoogleButtons();
@@ -3877,7 +3846,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 try { if (typeof applyAuthModalView === 'function') applyAuthModalView(newSession.user || null); } catch (_) {}
 
                 if (event === 'SIGNED_IN') {
+                  // Close auth modal and strip ?auth=1 from URL now that the user is signed in
                   try { if (typeof closeAuthModal === 'function') closeAuthModal(); } catch (_) {}
+                  try {
+                    const sp = new URLSearchParams(window.location.search);
+                    if (sp.has('auth')) {
+                      sp.delete('auth');
+                      const qs = sp.toString();
+                      const cleanUrl = window.location.pathname + (qs ? '?' + qs : '') + (window.location.hash || '');
+                      window.history.replaceState({}, '', cleanUrl);
+                    }
+                  } catch (_) {}
                   try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
                   try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
                 } else if (event === 'INITIAL_SESSION' && !window.__supabaseInitialDataLoaded__) {
@@ -3886,10 +3865,12 @@ document.addEventListener('DOMContentLoaded', () => {
                   try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
                 }
 
-                // If running inside an OAuth popup window, close cleanly now that session is persisted
+                // Safety: if this page somehow loaded inside any popup after OAuth,
+                // push opener to the clean dashboard and close this window.
                 try {
-                  if (window.opener && window.name === 'surfkit_google_oauth') {
-                    setTimeout(() => { try { window.close(); } catch (_) {} }, 150);
+                  if (window.opener && !window.opener.closed) {
+                    try { window.opener.location.assign('https://surfkit.cloud/dashboard/overview'); } catch (_) {}
+                    setTimeout(function () { try { window.close(); } catch (_) {} }, 200);
                   }
                 } catch (_) {}
 
