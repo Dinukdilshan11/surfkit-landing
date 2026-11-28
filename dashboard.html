@@ -3368,8 +3368,70 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (_) {}
     }
 
-    async function handleGoogleOAuthSignIn() {
+    async function verifyGoogleSignInIntent(sessionObj) {
       try {
+        const intent = localStorage.getItem('surfkit_google_auth_intent');
+        if (intent !== 'signin') {
+          if (intent) localStorage.removeItem('surfkit_google_auth_intent');
+          return true;
+        }
+        const u = sessionObj && sessionObj.user ? sessionObj.user : sessionObj;
+        if (!u || !u.id || !supabaseClient) {
+          localStorage.removeItem('surfkit_google_auth_intent');
+          return true;
+        }
+        let existingProfile = null;
+        try {
+          const { data: pById } = await supabaseClient
+            .from('profiles')
+            .select('id, email')
+            .eq('id', u.id)
+            .maybeSingle();
+          existingProfile = pById || null;
+        } catch (_) {}
+        if (!existingProfile && u.email) {
+          try {
+            const { data: pByEmail } = await supabaseClient
+              .from('profiles')
+              .select('id, email')
+              .ilike('email', String(u.email).trim())
+              .maybeSingle();
+            existingProfile = pByEmail || null;
+          } catch (_) {}
+        }
+        localStorage.removeItem('surfkit_google_auth_intent');
+        if (!existingProfile) {
+          try { if (supabaseClient && supabaseClient.auth) await supabaseClient.auth.signOut(); } catch (_) {}
+          currentUser = null;
+          window.currentUser = null;
+          window.currentUserEmail = null;
+          try { forwardSessionClearToExtension(); } catch (_) {}
+          state.user.id = '';
+          state.user.email = '';
+          state.user.name = 'Guest User';
+          state.user.username = 'guest';
+          saveState();
+          renderApp();
+          authModalMode = 'signin';
+          applyAuthModalView(null);
+          try {
+            const modal = document.getElementById('authModal');
+            if (modal) modal.classList.remove('hidden');
+          } catch (_) {}
+          showAuthInlineError('Please sign up first — no existing Surfkit account was found for this Google account.');
+          return false;
+        }
+        return true;
+      } catch (_) {
+        try { localStorage.removeItem('surfkit_google_auth_intent'); } catch (__) {}
+        return true;
+      }
+    }
+
+    async function handleGoogleOAuthSignIn(mode) {
+      try {
+        const intent = (mode === 'signup' || (mode !== 'signin' && authModalMode === 'signup')) ? 'signup' : 'signin';
+        try { localStorage.setItem('surfkit_google_auth_intent', intent); } catch (_) {}
         const btn1 = document.getElementById('auth-google-btn');
         const txt1 = document.getElementById('auth-google-btn-text');
         const btn2 = document.getElementById('auth-google-signup-btn');
@@ -3437,6 +3499,8 @@ document.addEventListener('DOMContentLoaded', () => {
               if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
                 const { data: sData } = await supabaseClient.auth.getSession();
                 if (sData && sData.session && sData.session.user) {
+                  const allowed = await verifyGoogleSignInIntent(sData.session);
+                  if (!allowed) return;
                   currentUser = sData.session.user;
                   window.currentUser = sData.session.user;
                   if (currentUser.email) {
@@ -3710,20 +3774,28 @@ document.addEventListener('DOMContentLoaded', () => {
           }));
         } catch (_) {}
 
+        const sessionPayload = {
+          access_token: token,
+          refresh_token: rToken,
+          expires_at: expAt,
+          user: {
+            id: u.id,
+            email: u.email.trim().toLowerCase(),
+            user_metadata: u.user_metadata || {},
+            app_metadata: u.app_metadata || {}
+          }
+        };
+
         window.postMessage({
           type: 'SURFKIT_AUTH_SESSION_UPDATE',
-          session: {
-            access_token: token,
-            refresh_token: rToken,
-            expires_at: expAt,
-            user: {
-              id: u.id,
-              email: u.email.trim().toLowerCase(),
-              user_metadata: u.user_metadata || {},
-              app_metadata: u.app_metadata || {}
-            }
-          }
+          session: sessionPayload
         }, '*');
+
+        try {
+          if (typeof sendToExtension === 'function') {
+            sendToExtension('AUTH_SET_SESSION_TOKENS', sessionPayload).catch(() => {});
+          }
+        } catch (_) {}
       } catch (e) {
         console.warn('[Dashboard Bridge] forwardSessionToExtension error:', e);
       }
@@ -3735,6 +3807,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('surfkit_ext_auth_user');
         window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*');
         window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*');
+        if (typeof sendToExtension === 'function') {
+          sendToExtension('AUTH_SIGN_OUT', {}).catch(() => {});
+        }
       } catch (e) {}
     }
     window.forwardSessionClearToExtension = forwardSessionClearToExtension;
@@ -3771,10 +3846,21 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             } catch (_) {}
           });
-          supabaseClient.auth.onAuthStateChange((event, newSession) => {
+          supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
             console.log('[Dashboard Auth] onAuthStateChange:', event, newSession);
             if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
               if (newSession && (newSession.user || newSession.access_token)) {
+                const isOAuthPopup = (() => {
+                  try { return Boolean(window.opener && window.name === 'surfkit_google_oauth'); } catch (_) { return false; }
+                })();
+                if (!isOAuthPopup && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+                  try {
+                    if (localStorage.getItem('surfkit_google_auth_intent') === 'signin') {
+                      const allowed = await verifyGoogleSignInIntent(newSession);
+                      if (!allowed) return;
+                    }
+                  } catch (_) {}
+                }
                 window.__surfkitAuthHydratedAt = Date.now();
                 currentUser = newSession.user;
                 window.currentUser = newSession.user;
@@ -3891,6 +3977,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (authUser) {
+          const isOAuthPopup = (() => {
+            try { return Boolean(window.opener && window.name === 'surfkit_google_oauth'); } catch (_) { return false; }
+          })();
+          if (!isOAuthPopup) {
+            try {
+              if (localStorage.getItem('surfkit_google_auth_intent') === 'signin') {
+                const allowed = await verifyGoogleSignInIntent(activeSession || { user: authUser });
+                if (!allowed) return null;
+              }
+            } catch (_) {}
+          }
           window.__surfkitAuthHydratedAt = Date.now();
           currentUser = authUser;
           window.currentUser = authUser;

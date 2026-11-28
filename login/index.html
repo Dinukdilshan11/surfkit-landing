@@ -567,6 +567,33 @@
 
     async function completeSignInAndRedirect(session) {
       if (!session || !session.user) return;
+      try {
+        var intent = localStorage.getItem('surfkit_google_auth_intent');
+        if (intent === 'signin' && supabaseClient) {
+          var existingProfile = null;
+          try {
+            var r1 = await supabaseClient.from('profiles').select('id').eq('id', session.user.id).maybeSingle();
+            if (r1 && r1.data) existingProfile = r1.data;
+          } catch (_) {}
+          if (!existingProfile && session.user.email) {
+            try {
+              var r2 = await supabaseClient.from('profiles').select('id').ilike('email', String(session.user.email).trim()).maybeSingle();
+              if (r2 && r2.data) existingProfile = r2.data;
+            } catch (_) {}
+          }
+          localStorage.removeItem('surfkit_google_auth_intent');
+          if (!existingProfile) {
+            userInitiatedSignIn = false;
+            try { if (supabaseClient.auth) await supabaseClient.auth.signOut(); } catch (_) {}
+            try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (_) {}
+            renderAuthState(null);
+            showError('Please sign up first — no existing Surfkit account was found for this Google account.');
+            return;
+          }
+        } else if (intent) {
+          localStorage.removeItem('surfkit_google_auth_intent');
+        }
+      } catch (_) {}
       broadcastSessionToExtension(session);
       try {
         var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
@@ -588,6 +615,7 @@
         return;
       }
       userInitiatedSignIn = true;
+      try { localStorage.setItem('surfkit_google_auth_intent', currentMode === 'signup' ? 'signup' : 'signin'); } catch (_) {}
 
       var b1 = document.getElementById('google-signin-btn');
       var t1 = document.getElementById('google-signin-text');
@@ -808,6 +836,7 @@
 
         setLoading(signinBtn, true);
         userInitiatedSignIn = true;
+      try { localStorage.setItem('surfkit_google_auth_intent', currentMode === 'signup' ? 'signup' : 'signin'); } catch (_) {}
         try {
           var res = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
           if (res && res.error) {

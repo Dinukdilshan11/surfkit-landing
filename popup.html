@@ -1053,8 +1053,14 @@
                   renderPopupAuthState(user);
                 } else {
                   queryActiveDashboardSession().then(function (sess) {
-                    renderPopupAuthState(sess && sess.user ? sess.user : null);
-                    if (sess) fetchLiveState();
+                    if (sess && sess.user) {
+                      try { localStorage.setItem('sb-kpvrewhmnrifsnkgswdt-auth-token', JSON.stringify(sess)); } catch (_) {}
+                      renderPopupAuthState(sess.user);
+                      if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+                      fetchLiveState();
+                    } else {
+                      renderPopupAuthState(null);
+                    }
                   }).catch(function () {
                     renderPopupAuthState(null);
                   });
@@ -1145,6 +1151,19 @@
           if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
         }
       });
+
+      try {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+          chrome.storage.onChanged.addListener(function (changes, areaName) {
+            try {
+              if (areaName === 'local' && changes && (changes.authUser || changes.supabase_session || changes.isExplicitSignOut)) {
+                syncPopupAuthSession();
+                if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+              }
+            } catch (_) {}
+          });
+        }
+      } catch (_) {}
 
       const tabInBtn = document.getElementById('popup-tab-signin');
       const tabUpBtn = document.getElementById('popup-tab-signup');
