@@ -5354,6 +5354,16 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         mountActiveAdsterraBanner();
       }
+      try {
+        const curHash = String(window.location.hash || '');
+        const hasOAuthHash = curHash.indexOf('access_token=') !== -1 || curHash.indexOf('error=') !== -1;
+        const isHttp = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+        const curPath = String(window.location.pathname || '');
+        if (isHttp && !hasOAuthHash && /^\/dashboard\/?$/i.test(curPath)) {
+          const slug = SURFKIT_ROUTE_SLUGS[initialTab] || 'overview';
+          window.history.replaceState({ tab: initialTab }, '', `/dashboard/${slug}` + (window.location.search || '') + curHash);
+        }
+      } catch (_) {}
       initAdcashAutoTag();
     });
 
