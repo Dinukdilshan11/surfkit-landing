@@ -764,13 +764,16 @@
           let accessToken = null;
 
           if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'userId', 'userEmail', 'supabase_session', 'isExplicitSignOut']);
+            const st = await chrome.storage.local.get(['surfkit_session', 'authUser', 'surfkit_auth_user', 'userId', 'userEmail', 'supabase_session', 'isExplicitSignOut']);
             if (!st.isExplicitSignOut) {
-              if (st.authUser?.id) userId = st.authUser.id;
+              if (st.surfkit_session?.user?.id) userId = st.surfkit_session.user.id;
+              else if (st.authUser?.id) userId = st.authUser.id;
               else if (st.surfkit_auth_user?.id) userId = st.surfkit_auth_user.id;
-              if (st.authUser?.email) userEmail = st.authUser.email;
+              if (st.surfkit_session?.user?.email) userEmail = st.surfkit_session.user.email;
+              else if (st.authUser?.email) userEmail = st.authUser.email;
               else if (st.surfkit_auth_user?.email) userEmail = st.surfkit_auth_user.email;
-              if (st.supabase_session?.access_token) accessToken = st.supabase_session.access_token;
+              if (st.surfkit_session?.access_token) accessToken = st.surfkit_session.access_token;
+              else if (st.supabase_session?.access_token) accessToken = st.supabase_session.access_token;
             }
           }
 
@@ -968,6 +971,45 @@
       // --- 3-STATE AUTH CONTROLLER FOR POPUP ---
       const POPUP_SUPA_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
       const POPUP_SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
+      const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
+        ? window.supabase.createClient(POPUP_SUPA_URL, POPUP_SUPA_KEY, {
+            auth: {
+              persistSession: true,
+              storageKey: 'sb-kpvrewhmnrifsnkgswdt-auth-token',
+              autoRefreshToken: true
+            }
+          })
+        : {
+            auth: {
+              async setSession(tokens) {
+                try {
+                  if (!tokens || !tokens.access_token) return { data: { session: null, user: null }, error: null };
+                  let resolvedUser = tokens.user || null;
+                  if (!resolvedUser || !resolvedUser.email) {
+                    try {
+                      const res = await fetch(POPUP_SUPA_URL + '/auth/v1/user', {
+                        headers: { 'apikey': POPUP_SUPA_KEY, 'Authorization': 'Bearer ' + tokens.access_token }
+                      });
+                      if (res.ok) resolvedUser = await res.json();
+                    } catch (_) {}
+                  }
+                  const sessionObj = {
+                    access_token: tokens.access_token,
+                    refresh_token: tokens.refresh_token || null,
+                    user: resolvedUser
+                  };
+                  try { localStorage.setItem('sb-kpvrewhmnrifsnkgswdt-auth-token', JSON.stringify(sessionObj)); } catch (_) {}
+                  return { data: { session: sessionObj, user: resolvedUser }, error: null };
+                } catch (err) {
+                  return { data: { session: null, user: null }, error: err };
+                }
+              },
+              async signOut() {
+                try { localStorage.removeItem('sb-kpvrewhmnrifsnkgswdt-auth-token'); } catch (_) {}
+                return { error: null };
+              }
+            }
+          };
       let popupAuthMode = 'signin';
 
       function showPopupAuthError(msg) {
@@ -1038,22 +1080,48 @@
       function syncPopupAuthSession() {
         try {
           if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'supabase_session', 'isExplicitSignOut'], function (st) {
+            chrome.storage.local.get(['surfkit_session', 'authUser', 'surfkit_auth_user', 'supabase_session', 'isExplicitSignOut'], async function (st) {
               try {
                 if (chrome.runtime && chrome.runtime.lastError) return;
                 if (st && st.isExplicitSignOut) {
                   renderPopupAuthState(null);
                   return;
                 }
-                const user = (st && st.authUser && st.authUser.email) ? st.authUser
+                const storedSession = (st && st.surfkit_session && (st.surfkit_session.access_token || st.surfkit_session.user))
+                  ? st.surfkit_session
+                  : ((st && st.supabase_session && (st.supabase_session.access_token || st.supabase_session.user)) ? st.supabase_session : null);
+
+                if (storedSession && storedSession.access_token && supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.setSession === 'function') {
+                  try {
+                    const res = await supabaseClient.auth.setSession({
+                      access_token: storedSession.access_token,
+                      refresh_token: storedSession.refresh_token || ''
+                    });
+                    if (res && res.data && res.data.user && !storedSession.user) {
+                      storedSession.user = res.data.user;
+                    }
+                  } catch (_) {}
+                }
+
+                const user = (storedSession && storedSession.user && storedSession.user.email) ? storedSession.user
+                  : (st && st.authUser && st.authUser.email) ? st.authUser
                   : (st && st.surfkit_auth_user && st.surfkit_auth_user.email) ? st.surfkit_auth_user
-                  : (st && st.supabase_session && st.supabase_session.user && st.supabase_session.user.email) ? st.supabase_session.user
                   : null;
                 if (user) {
                   renderPopupAuthState(user);
+                  if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+                  fetchLiveState();
                 } else {
-                  queryActiveDashboardSession().then(function (sess) {
+                  queryActiveDashboardSession().then(async function (sess) {
                     if (sess && sess.user) {
+                      if (sess.access_token && supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.setSession === 'function') {
+                        try {
+                          await supabaseClient.auth.setSession({
+                            access_token: sess.access_token,
+                            refresh_token: sess.refresh_token || ''
+                          });
+                        } catch (_) {}
+                      }
                       try { localStorage.setItem('sb-kpvrewhmnrifsnkgswdt-auth-token', JSON.stringify(sess)); } catch (_) {}
                       renderPopupAuthState(sess.user);
                       if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
@@ -1156,7 +1224,7 @@
         if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
           chrome.storage.onChanged.addListener(function (changes, areaName) {
             try {
-              if (areaName === 'local' && changes && (changes.authUser || changes.supabase_session || changes.isExplicitSignOut)) {
+              if (areaName === 'local' && changes && (changes.surfkit_session || changes.authUser || changes.supabase_session || changes.isExplicitSignOut)) {
                 syncPopupAuthSession();
                 if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
               }
@@ -1270,19 +1338,33 @@
 
       const signOutBtn = document.getElementById('popup-signout-btn');
       if (signOutBtn) {
-        signOutBtn.addEventListener('click', function () {
+        signOutBtn.addEventListener('click', async function () {
           try {
+            if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.signOut === 'function') {
+              try { await supabaseClient.auth.signOut(); } catch (_) {}
+            }
             if (typeof chrome !== 'undefined' && chrome.runtime && typeof chrome.runtime.sendMessage === 'function') {
               try { chrome.runtime.sendMessage({ action: 'AUTH_SIGN_OUT' }); } catch (_) {}
             }
             if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-              chrome.storage.local.set({
-                authUser: null,
-                surfkit_auth_user: null,
-                supabaseUserId: null,
-                supabase_session: null,
-                isExplicitSignOut: true
-              });
+              try {
+                chrome.storage.local.remove(['surfkit_session', 'supabase_session', 'authUser', 'surfkit_auth_user', 'supabaseUserId']);
+                chrome.storage.local.set({ isExplicitSignOut: true });
+              } catch (_) {}
+            }
+            if (typeof chrome !== 'undefined' && chrome.tabs && typeof chrome.tabs.query === 'function') {
+              try {
+                chrome.tabs.query({ url: 'https://surfkit.cloud/*' }, function (tabs) {
+                  try {
+                    if (chrome.runtime && chrome.runtime.lastError) return;
+                    (tabs || []).forEach(function (tab) {
+                      if (tab && tab.id) {
+                        try { chrome.tabs.sendMessage(tab.id, { action: 'AUTH_SIGN_OUT' }); } catch (_) {}
+                      }
+                    });
+                  } catch (_) {}
+                });
+              } catch (_) {}
             }
             try { localStorage.removeItem('sb-kpvrewhmnrifsnkgswdt-auth-token'); } catch (_) {}
             try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (_) {}

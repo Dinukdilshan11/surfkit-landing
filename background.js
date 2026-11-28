@@ -815,6 +815,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
               expires_at: session.expires_at || null,
               user: targetUser
             };
+            await chrome.storage.local.set({ surfkit_session: tokenData, supabase_session: tokenData });
             await SurfkitSupabase.setSession(tokenData);
             setupRealtimeForUser(targetUser.id);
             const fresh = await syncFromSupabase();
@@ -883,9 +884,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             authUser: null,
             isExplicitSignOut: true
           };
+          await chrome.storage.local.remove(['surfkit_session', 'supabase_session', 'surfkit_auth_user', 'supabaseUserId']);
           await chrome.storage.local.set(resetState);
           updateBadge(state.masterEnabled, 0);
           broadcastToAllTabs({ action: 'STATE_CHANGED', payload: resetState, data: resetState });
+          broadcastToAllTabs({ action: 'AUTH_SIGN_OUT' });
           sendResponse({ success: true });
           break;
         }

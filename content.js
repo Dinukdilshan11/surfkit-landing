@@ -592,6 +592,22 @@
           }
           break;
         }
+
+        case 'AUTH_SIGN_OUT': {
+          cachedDashboardSession = null;
+          config.hasAuthUser = false;
+          config.isOperational = false;
+          clearTimersAndAd();
+          try {
+            if (window.location && (window.location.hostname === 'surfkit.cloud' || window.location.hostname.endsWith('.surfkit.cloud'))) {
+              try { localStorage.removeItem('sb-kpvrewhmnrifsnkgswdt-auth-token'); } catch (_) {}
+              try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (_) {}
+              try { window.postMessage({ type: 'SURFKIT_POPUP_SIGN_OUT' }, window.location.origin || '*'); } catch (_) {}
+            }
+          } catch (_) {}
+          sendResponse({ success: true });
+          break;
+        }
       }
       return true;
     });
@@ -653,6 +669,45 @@
     if (event.source !== window || !event.data || typeof event.data !== 'object') return;
     const { type, action, payload, session } = event.data;
 
+    if (type === 'SURFKIT_AUTH_SYNC') {
+      try {
+        const isTrustedOrigin = event.origin === 'https://surfkit.cloud' || event.origin === window.location.origin;
+        if (!isTrustedOrigin) return;
+
+        if (event.data.event === 'SIGNED_IN' && session && (session.access_token || session.user)) {
+          cachedDashboardSession = session;
+          config.hasAuthUser = Boolean(session.user && session.user.id);
+          try {
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+              chrome.storage.local.set({
+                surfkit_session: session,
+                supabase_session: session,
+                authUser: session.user || null,
+                surfkit_auth_user: session.user || null,
+                supabaseUserId: (session.user && session.user.id) ? session.user.id : null,
+                isExplicitSignOut: false
+              });
+            }
+          } catch (_) {}
+          safeSendMessage({
+            action: 'AUTH_SET_SESSION_TOKENS',
+            payload: session
+          });
+        } else if (event.data.event === 'SIGNED_OUT') {
+          cachedDashboardSession = null;
+          config.hasAuthUser = false;
+          try {
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+              chrome.storage.local.remove(['surfkit_session', 'supabase_session', 'authUser', 'surfkit_auth_user', 'supabaseUserId']);
+              chrome.storage.local.set({ isExplicitSignOut: true });
+            }
+          } catch (_) {}
+          safeSendMessage({ action: 'AUTH_SIGN_OUT' });
+        }
+      } catch (_) {}
+      return;
+    }
+
     if (type === 'SURFKIT_AUTH_SESSION_UPDATE') {
       const sess = session || payload;
       if (sess && (sess.user || sess.access_token)) {
@@ -690,6 +745,41 @@
       } catch (err) {}
     }
   });
+
+  // Sync initial localStorage Supabase auth token on surfkit.cloud page load
+  try {
+    if (window.location && (window.location.hostname === 'surfkit.cloud' || window.location.hostname.endsWith('.surfkit.cloud'))) {
+      const rawSupa = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
+      if (rawSupa) {
+        const parsed = JSON.parse(rawSupa);
+        const sess = (parsed && parsed.currentSession) ? parsed.currentSession : parsed;
+        if (sess && sess.access_token && sess.user && sess.user.email) {
+          const normSess = {
+            access_token: sess.access_token,
+            refresh_token: sess.refresh_token || null,
+            expires_at: sess.expires_at || null,
+            user: sess.user
+          };
+          cachedDashboardSession = normSess;
+          config.hasAuthUser = Boolean(sess.user && sess.user.id);
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({
+              surfkit_session: normSess,
+              supabase_session: normSess,
+              authUser: sess.user,
+              surfkit_auth_user: sess.user,
+              supabaseUserId: sess.user.id || null,
+              isExplicitSignOut: false
+            });
+          }
+          safeSendMessage({
+            action: 'AUTH_SET_SESSION_TOKENS',
+            payload: normSess
+          });
+        }
+      }
+    }
+  } catch (_) {}
 
   // Request active auth session and announce live state to web page on injection
   try {

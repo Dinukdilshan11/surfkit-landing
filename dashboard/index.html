@@ -3885,6 +3885,22 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (_) {}
 
         try {
+          const targetOrigin = (window.location && window.location.origin && window.location.origin !== 'null')
+            ? window.location.origin
+            : '*';
+          window.postMessage({
+            type: 'SURFKIT_AUTH_SYNC',
+            event: 'SIGNED_IN',
+            session: {
+              access_token: token,
+              refresh_token: rToken,
+              expires_at: expAt,
+              user: sessionPayload.user
+            }
+          }, targetOrigin);
+        } catch (_) {}
+
+        try {
           if (surfkitAuthChannel) {
             surfkitAuthChannel.postMessage({
               type: 'AUTH_SESSION_SYNC',
@@ -3920,6 +3936,16 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('surfkit_ext_auth_user');
         try { window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*'); } catch (_) {}
         try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (_) {}
+        try {
+          const targetOrigin = (window.location && window.location.origin && window.location.origin !== 'null')
+            ? window.location.origin
+            : '*';
+          window.postMessage({
+            type: 'SURFKIT_AUTH_SYNC',
+            event: 'SIGNED_OUT',
+            session: null
+          }, targetOrigin);
+        } catch (_) {}
         try {
           if (surfkitAuthChannel) {
             surfkitAuthChannel.postMessage({ type: 'AUTH_SIGN_OUT' });
@@ -3965,6 +3991,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // Persistent listener: re-hydrates currentUser and continuously syncs to extension
         if (!window.__supabaseAuthListenerSet__ && supabaseClient.auth) {
           window.__supabaseAuthListenerSet__ = true;
+          window.addEventListener('message', (ev) => {
+            try {
+              if (ev && ev.source === window && ev.data && ev.data.type === 'SURFKIT_POPUP_SIGN_OUT' && currentUser) {
+                handleSignOut();
+              }
+            } catch (_) {}
+          });
           window.addEventListener('storage', (e) => {
             try {
               if (e && e.key === 'sb-kpvrewhmnrifsnkgswdt-auth-token' && e.newValue) {
