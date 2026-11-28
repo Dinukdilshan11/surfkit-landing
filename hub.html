@@ -8289,6 +8289,20 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         }
       }
+
+      // If navigated from landing page Sign In (?auth=1), open the 3-state Account Session modal
+      try {
+        const authParams = new URLSearchParams(window.location.search);
+        if (authParams.get('auth') === '1') {
+          if (typeof openAuthModal === 'function') {
+            await openAuthModal();
+          }
+          authParams.delete('auth');
+          const cleanQs = authParams.toString();
+          const cleanUrl = window.location.pathname + (cleanQs ? '?' + cleanQs : '') + (window.location.hash || '');
+          window.history.replaceState({}, '', cleanUrl);
+        }
+      } catch (_) {}
     });
   
 

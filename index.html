@@ -478,12 +478,9 @@
 
         <!-- Right CTA & Chrome Badge -->
         <div class="hidden sm:flex items-center gap-3">
-          <a id="nav-auth-btn" href="/login" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
+          <a id="nav-auth-btn" href="/dashboard/overview?auth=1" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-400 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
             <i id="nav-auth-icon" class="ri-login-box-line text-base text-emerald-400"></i>
             <span id="nav-auth-text">Sign In</span>
-          </a>
-          <a id="nav-signup-btn" href="/login?mode=signup" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-slate-200 bg-white/5 border border-white/10 hover:border-emerald-500/40 hover:bg-emerald-500/10 hover:text-white transition-all duration-200">
-            <span>Create Account</span>
           </a>
           <a href="https://chrome.google.com/webstore" target="_blank" rel="noopener noreferrer" 
              class="btn-glow inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-950 bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300">
@@ -2614,22 +2611,19 @@
   (function () {
     'use strict';
 
-    function getDesktopBtn()      { return document.getElementById('nav-auth-btn'); }
-    function getDesktopIcon()     { return document.getElementById('nav-auth-icon'); }
-    function getDesktopText()     { return document.getElementById('nav-auth-text'); }
-    function getDesktopSignupBtn(){ return document.getElementById('nav-signup-btn'); }
-    function getMobileBtn()       { return document.getElementById('mobile-auth-btn'); }
-    function getMobileText()      { return document.getElementById('mobile-auth-text'); }
+    function getDesktopBtn()  { return document.getElementById('nav-auth-btn'); }
+    function getDesktopIcon() { return document.getElementById('nav-auth-icon'); }
+    function getDesktopText() { return document.getElementById('nav-auth-text'); }
+    function getMobileBtn()   { return document.getElementById('mobile-auth-btn'); }
+    function getMobileText()  { return document.getElementById('mobile-auth-text'); }
 
     function applySignedIn() {
       try {
         var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
-        var sBtn = getDesktopSignupBtn();
         var mBtn = getMobileBtn(),   mTxt = getMobileText();
         if (btn)  btn.href  = '/dashboard/overview';
         if (icon) icon.className = 'ri-dashboard-3-line text-base text-emerald-400';
         if (text) text.textContent = 'Dashboard';
-        if (sBtn) sBtn.style.display = 'none';
         if (mBtn) mBtn.href = '/dashboard/overview';
         if (mTxt) mTxt.textContent = 'Dashboard';
       } catch (_) {}
@@ -2638,16 +2632,11 @@
     function applySignedOut() {
       try {
         var btn  = getDesktopBtn(),  icon = getDesktopIcon(), text = getDesktopText();
-        var sBtn = getDesktopSignupBtn();
         var mBtn = getMobileBtn(),   mTxt = getMobileText();
-        if (btn)  btn.href  = '/login';
+        if (btn)  btn.href  = '/dashboard/overview?auth=1';
         if (icon) icon.className = 'ri-login-box-line text-base text-emerald-400';
         if (text) text.textContent = 'Sign In';
-        if (sBtn) {
-          sBtn.href = '/login?mode=signup';
-          sBtn.style.display = '';
-        }
-        if (mBtn) mBtn.href = '/login';
+        if (mBtn) mBtn.href = '/dashboard/overview?auth=1';
         if (mTxt) mTxt.textContent = 'Sign In';
       } catch (_) {}
     }
