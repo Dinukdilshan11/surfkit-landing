@@ -1165,6 +1165,35 @@
         }
       } catch (_) {}
 
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const popupAuthChannel = new BroadcastChannel('surfkit_auth_sync');
+          popupAuthChannel.onmessage = function (ev) {
+            try {
+              const msg = ev && ev.data ? ev.data : null;
+              if (!msg) return;
+              if (msg.type === 'AUTH_SESSION_SYNC' && msg.session && msg.session.user) {
+                try { localStorage.setItem('sb-kpvrewhmnrifsnkgswdt-auth-token', JSON.stringify(msg.session)); } catch (_) {}
+                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local && typeof chrome.storage.local.set === 'function') {
+                  chrome.storage.local.set({
+                    authUser: msg.session.user,
+                    surfkit_auth_user: msg.session.user,
+                    supabaseUserId: msg.session.user.id || '',
+                    supabase_session: msg.session,
+                    isExplicitSignOut: false
+                  });
+                }
+                renderPopupAuthState(msg.session.user);
+                if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+              } else if (msg.type === 'AUTH_SIGN_OUT') {
+                try { localStorage.removeItem('sb-kpvrewhmnrifsnkgswdt-auth-token'); } catch (_) {}
+                renderPopupAuthState(null);
+              }
+            } catch (_) {}
+          };
+        }
+      } catch (_) {}
+
       const tabInBtn = document.getElementById('popup-tab-signin');
       const tabUpBtn = document.getElementById('popup-tab-signup');
       if (tabInBtn) tabInBtn.addEventListener('click', function () { setPopupAuthTab('signin'); });

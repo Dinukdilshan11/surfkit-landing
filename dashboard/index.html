@@ -3152,7 +3152,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // ─────────────────────────────────────────────────────────────────────────
 
     let currentUser = null;
+    let activeDataUserId = null;
+    let __authDataFetchPromise = null;
+    let __authDataFetchUserId = null;
     let realtimeChannel = null;
+    const surfkitAuthChannel = (typeof BroadcastChannel !== 'undefined')
+      ? (() => { try { return new BroadcastChannel('surfkit_auth_sync'); } catch (_) { return null; } })()
+      : null;
 
 
     function formatFriendlyDate(dateStr) {
@@ -3540,26 +3546,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (data && data.user) {
-          currentUser = data.user;
-          window.currentUser = data.user;
-          const usernamePart = (data.user.user_metadata && (data.user.user_metadata.display_name || data.user.user_metadata.full_name))
-            || (email.split('@')[0] || 'User');
-          state.user.id = data.user.id;
-          state.user.email = data.user.email || email;
-          state.user.name = usernamePart;
-          state.user.username = usernamePart;
-          window.currentUserEmail = state.user.email.trim().toLowerCase();
-          saveState();
-          applyAuthModalView(data.user);
-          closeAuthModal();
-          try { if (typeof showToast === 'function') showToast(`Signed in as ${state.user.email}`, 'success'); } catch (_) {}
-          try {
-            dispatchToExtension('AUTH_SET_SESSION', { user: currentUser, email: state.user.email });
-          } catch (_) {}
-          try { if (typeof loadDataFromSupabase === 'function') await loadDataFromSupabase(); } catch (_) {}
-          try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
-          try { if (typeof loadChatHistory === 'function') loadChatHistory(); } catch (_) {}
-          try { if (typeof renderNotifications === 'function') renderNotifications(); } catch (_) {}
+          const authSession = data.session || { user: data.user };
+          await handleAuthenticatedSession(authSession, {
+            closeModal: true,
+            cleanAuthParam: true,
+            forceFetch: true
+          });
+          try { if (typeof showToast === 'function') showToast(`Signed in as ${state.user.email || email}`, 'success'); } catch (_) {}
         }
       } catch (err) {
         showAuthInlineError(err?.message || 'Unexpected error during sign in. Please try again.');
@@ -3671,43 +3664,153 @@ document.addEventListener('DOMContentLoaded', () => {
       } catch (_) {}
     }
 
+    function resetUserScopedStateForAccountSwitch(nextUserId) {
+      try {
+        const isSwitchingUser = Boolean(
+          !nextUserId ||
+          (activeDataUserId && activeDataUserId !== nextUserId) ||
+          (state && state.user && state.user.id && state.user.id !== nextUserId)
+        );
+        if (!isSwitchingUser) return false;
+
+        activeDataUserId = null;
+        __authDataFetchPromise = null;
+        __authDataFetchUserId = null;
+
+        state.notifications = [];
+        state.devices = [];
+        state.activityLedger = [];
+        state.payoutHistory = [];
+        state.crewMembers = [];
+        state.user = {
+          id: nextUserId || '',
+          name: nextUserId ? (state?.user?.name || 'Surfkit User') : 'Guest User',
+          email: nextUserId ? (state?.user?.email || '') : '',
+          avatar: null,
+          availableBalance: 0.00,
+          lockedBalance: 0.00,
+          lifetimeEarnings: 0.00,
+          dailyEarnings: 0.00,
+          lifetimeImpressions: 0,
+          dailyImpressions: 0,
+          referralBonus: 0.00,
+          referralCode: '',
+          streakDays: 0,
+          dailyStreak: 0,
+          currentStreak: 0,
+          surveysCompleted: 0,
+          gamesPlayed: 0,
+          fourHourSpins: 0,
+          pulseDialTotalSpins: 0,
+          totalSpins: 0,
+          pulseDialSpins: 0,
+          completedActivities: 0,
+          completedTasks: 0,
+          lastActiveDate: null,
+          apiKey: '',
+          username: nextUserId ? (state?.user?.username || 'user') : 'guest',
+          adIntensity: 2,
+          countryCode: (state && state.user && state.user.countryCode) ? state.user.countryCode : 'LK',
+          countryName: (state && state.user && state.user.countryName) ? state.user.countryName : 'Sri Lanka',
+          geoTier: (state && state.user && state.user.geoTier) ? state.user.geoTier : 3,
+          currentTier: (state && state.user && state.user.geoTier) ? state.user.geoTier : 3,
+          ratePer1k: (state && state.user && state.user.ratePer1k) ? state.user.ratePer1k : 0.30
+        };
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function handleAuthenticatedSession(sessionOrUser, options = {}) {
+      try {
+        if (!sessionOrUser) return null;
+        const user = sessionOrUser.user || sessionOrUser;
+        if (!user || !user.id) return null;
+
+        const sessionObj = sessionOrUser.user ? sessionOrUser : { user };
+        resetUserScopedStateForAccountSwitch(user.id);
+
+        window.__surfkitAuthHydratedAt = Date.now();
+        currentUser = user;
+        window.currentUser = user;
+        window.currentUserId = user.id;
+        if (user.email) {
+          window.currentUserEmail = String(user.email).trim().toLowerCase();
+        }
+
+        const resolvedName = (user.user_metadata && (user.user_metadata.display_name || user.user_metadata.full_name))
+          || (user.email ? user.email.split('@')[0] : (state?.user?.name && state.user.name !== 'Guest User' ? state.user.name : 'Surfkit User'));
+
+        state.user.id = user.id;
+        state.user.email = user.email || state.user.email || '';
+        state.user.name = resolvedName;
+        state.user.username = resolvedName;
+
+        saveState();
+        try { if (typeof renderApp === 'function') renderApp(); } catch (_) {}
+        try { if (typeof applyAuthModalView === 'function') applyAuthModalView(user); } catch (_) {}
+
+        if (options.closeModal) {
+          try { if (typeof closeAuthModal === 'function') closeAuthModal(); } catch (_) {}
+        }
+        if (options.cleanAuthParam) {
+          try {
+            const sp = new URLSearchParams(window.location.search);
+            if (sp.has('auth')) {
+              sp.delete('auth');
+              const qs = sp.toString();
+              const cleanUrl = window.location.pathname + (qs ? '?' + qs : '') + (window.location.hash || '');
+              window.history.replaceState({}, '', cleanUrl);
+            }
+          } catch (_) {}
+        }
+
+        // Always sync session tokens to extension & popup (chrome.storage.local / runtime / BroadcastChannel)
+        forwardSessionToExtension(sessionObj);
+        try {
+          if (typeof sendToExtension === 'function') {
+            sendToExtension('ATTACH_USER_REWARDS_LISTENER', { user_id: user.id }).catch(() => {});
+          }
+        } catch (_) {}
+
+        if (!options.skipDataFetch) {
+          try {
+            if (typeof checkAndAttributePendingReferral === 'function') {
+              checkAndAttributePendingReferral(user.id);
+            }
+          } catch (_) {}
+          if (typeof loadDataFromSupabase === 'function') {
+            try { await loadDataFromSupabase({ force: Boolean(options.forceFetch) }); } catch (_) {}
+          }
+          try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
+          try { if (typeof loadChatHistory === 'function') loadChatHistory(); } catch (_) {}
+          try { if (typeof renderNotifications === 'function') renderNotifications(); } catch (_) {}
+        }
+
+        return user;
+      } catch (err) {
+        console.warn('[Dashboard Auth] handleAuthenticatedSession error:', err);
+        return null;
+      }
+    }
+    window.handleAuthenticatedSession = handleAuthenticatedSession;
+
     async function handleSignOut() {
-      // Bidirectional SSO: Dispatch sign out to Chrome Extension
-      try { dispatchToExtension('AUTH_SIGN_OUT'); } catch (e) {}
+      // Bidirectional SSO: Dispatch sign out to Chrome Extension & BroadcastChannel
+      try { forwardSessionClearToExtension(); } catch (e) {}
       if (supabaseClient && supabaseClient.auth) {
         try { await supabaseClient.auth.signOut(); } catch (e) {}
       }
       currentUser = null;
       window.currentUser = null;
+      window.currentUserId = null;
       window.currentUserEmail = null;
-      state.notifications = [];
-      state.user = {
-        name: 'Guest User',
-        email: '',
-        avatar: null,
-        availableBalance: 0.00,
-        lifetimeEarnings: 0.00,
-        lifetimeImpressions: 0,
-        referralBonus: 0.00,
-        streakDays: 0,
-        surveysCompleted: 0,
-        gamesPlayed: 0,
-        fourHourSpins: 0,
-        apiKey: '',
-        username: 'guest',
-        adIntensity: 2
-      };
-      state.devices = [];
-      state.activityLedger = [];
-      state.payoutHistory = [];
-      state.crewMembers = [];
+      resetUserScopedStateForAccountSwitch(null);
 
       authModalMode = 'signin';
       applyAuthModalView(null);
 
-      try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (e) {}
-      try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (e) {}
-      try { window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*'); } catch (e) {}
       saveState();
       closeAuthModal();
       try { if (typeof showToast === 'function') showToast('Signed out of account', 'info'); } catch (_) {}
@@ -3719,7 +3822,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function refreshLiveSync() {
       showToast('Syncing account data...', 'info');
-      await loadDataFromSupabase();
+      await loadDataFromSupabase({ force: true });
       showToast('Sync complete', 'success');
     }
 
@@ -3730,15 +3833,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const u = session.user || currentUser;
         if (!u || !u.email) return;
 
-        const token = session.access_token || null;
-        const rToken = session.refresh_token || null;
-        const expAt = session.expires_at || null;
+        let token = session.access_token || null;
+        let rToken = session.refresh_token || null;
+        let expAt = session.expires_at || null;
+
+        // If caller only passed { user }, recover tokens from Supabase storage if present
+        if (!token) {
+          try {
+            const rawTok = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
+            if (rawTok) {
+              const parsed = JSON.parse(rawTok);
+              const s = parsed && (parsed.currentSession || parsed);
+              if (s && s.access_token) {
+                token = s.access_token;
+                rToken = rToken || s.refresh_token || null;
+                expAt = expAt || s.expires_at || null;
+              }
+            }
+          } catch (_) {}
+        }
+
+        const normEmail = u.email.trim().toLowerCase();
+        const displayName = (u.user_metadata && (u.user_metadata.display_name || u.user_metadata.full_name)) || normEmail.split('@')[0];
 
         try {
           localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
             id: u.id,
-            email: u.email.trim().toLowerCase(),
-            name: (u.user_metadata && (u.user_metadata.display_name || u.user_metadata.full_name)) || u.email.split('@')[0],
+            email: normEmail,
+            name: displayName,
             timestamp: Date.now()
           }));
         } catch (_) {}
@@ -3749,16 +3871,38 @@ document.addEventListener('DOMContentLoaded', () => {
           expires_at: expAt,
           user: {
             id: u.id,
-            email: u.email.trim().toLowerCase(),
+            email: normEmail,
             user_metadata: u.user_metadata || {},
             app_metadata: u.app_metadata || {}
           }
         };
 
-        window.postMessage({
-          type: 'SURFKIT_AUTH_SESSION_UPDATE',
-          session: sessionPayload
-        }, '*');
+        try {
+          window.postMessage({
+            type: 'SURFKIT_AUTH_SESSION_UPDATE',
+            session: sessionPayload
+          }, '*');
+        } catch (_) {}
+
+        try {
+          if (surfkitAuthChannel) {
+            surfkitAuthChannel.postMessage({
+              type: 'AUTH_SESSION_SYNC',
+              session: sessionPayload
+            });
+          }
+        } catch (_) {}
+
+        try {
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local && typeof chrome.storage.local.set === 'function') {
+            chrome.storage.local.set({
+              authUser: { id: u.id, email: normEmail, name: displayName },
+              surfkit_auth_user: { id: u.id, email: normEmail, name: displayName },
+              supabase_session: sessionPayload,
+              isExplicitSignOut: false
+            });
+          }
+        } catch (_) {}
 
         try {
           if (typeof sendToExtension === 'function') {
@@ -3774,8 +3918,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function forwardSessionClearToExtension() {
       try {
         localStorage.removeItem('surfkit_ext_auth_user');
-        window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*');
-        window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*');
+        try { window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*'); } catch (_) {}
+        try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (_) {}
+        try {
+          if (surfkitAuthChannel) {
+            surfkitAuthChannel.postMessage({ type: 'AUTH_SIGN_OUT' });
+          }
+        } catch (_) {}
+        try {
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local && typeof chrome.storage.local.set === 'function') {
+            chrome.storage.local.set({
+              authUser: null,
+              surfkit_auth_user: null,
+              supabase_session: null,
+              isExplicitSignOut: true
+            });
+          }
+        } catch (_) {}
         if (typeof sendToExtension === 'function') {
           sendToExtension('AUTH_SIGN_OUT', {}).catch(() => {});
         }
@@ -3815,6 +3974,33 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             } catch (_) {}
           });
+          if (surfkitAuthChannel) {
+            try {
+              surfkitAuthChannel.onmessage = async (ev) => {
+                try {
+                  const msg = ev && ev.data ? ev.data : null;
+                  if (!msg) return;
+                  if (msg.type === 'AUTH_SESSION_SYNC' && msg.session && msg.session.user) {
+                    if (msg.session.access_token && msg.session.refresh_token && supabaseClient.auth && typeof supabaseClient.auth.setSession === 'function') {
+                      try {
+                        await supabaseClient.auth.setSession({
+                          access_token: msg.session.access_token,
+                          refresh_token: msg.session.refresh_token
+                        });
+                      } catch (_) {}
+                    }
+                    await handleAuthenticatedSession(msg.session, {
+                      closeModal: true,
+                      cleanAuthParam: true,
+                      forceFetch: activeDataUserId !== msg.session.user.id
+                    });
+                  } else if (msg.type === 'AUTH_SIGN_OUT' && currentUser) {
+                    await handleSignOut();
+                  }
+                } catch (_) {}
+              };
+            } catch (_) {}
+          }
           supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
             console.log('[Dashboard Auth] onAuthStateChange:', event, newSession);
             if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
@@ -3830,39 +4016,28 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                   } catch (_) {}
                 }
-                window.__surfkitAuthHydratedAt = Date.now();
-                currentUser = newSession.user;
-                window.currentUser = newSession.user;
-                if (currentUser && currentUser.email) {
-                  window.currentUserEmail = currentUser.email.trim().toLowerCase();
-                }
-                state.user.id = currentUser.id;
-                state.user.email = currentUser.email || '';
-                state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
-                  || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
-                state.user.username = state.user.name;
-                saveState();
-                renderApp();
-                try { if (typeof applyAuthModalView === 'function') applyAuthModalView(newSession.user || null); } catch (_) {}
 
                 if (event === 'SIGNED_IN') {
-                  // Close auth modal and strip ?auth=1 from URL now that the user is signed in
-                  try { if (typeof closeAuthModal === 'function') closeAuthModal(); } catch (_) {}
-                  try {
-                    const sp = new URLSearchParams(window.location.search);
-                    if (sp.has('auth')) {
-                      sp.delete('auth');
-                      const qs = sp.toString();
-                      const cleanUrl = window.location.pathname + (qs ? '?' + qs : '') + (window.location.hash || '');
-                      window.history.replaceState({}, '', cleanUrl);
-                    }
-                  } catch (_) {}
-                  try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
-                  try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
-                } else if (event === 'INITIAL_SESSION' && !window.__supabaseInitialDataLoaded__) {
+                  await handleAuthenticatedSession(newSession, {
+                    closeModal: true,
+                    cleanAuthParam: true,
+                    forceFetch: true
+                  });
+                } else if (event === 'INITIAL_SESSION') {
+                  const needsFetch = !window.__supabaseInitialDataLoaded__ || (newSession.user && activeDataUserId !== newSession.user.id);
                   window.__supabaseInitialDataLoaded__ = true;
-                  try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
-                  try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
+                  await handleAuthenticatedSession(newSession, {
+                    closeModal: false,
+                    cleanAuthParam: false,
+                    skipDataFetch: !needsFetch
+                  });
+                } else {
+                  // TOKEN_REFRESHED: keep tokens & popup/extension synced; only fetch if account wasn't hydrated yet
+                  await handleAuthenticatedSession(newSession, {
+                    closeModal: false,
+                    cleanAuthParam: false,
+                    skipDataFetch: Boolean(newSession.user && activeDataUserId === newSession.user.id)
+                  });
                 }
 
                 // Safety: if this page somehow loaded inside any popup after OAuth,
@@ -3873,51 +4048,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(function () { try { window.close(); } catch (_) {} }, 200);
                   }
                 } catch (_) {}
-
-                // Continuous Session Sync: forward to content script -> background -> extension
-                forwardSessionToExtension(newSession);
               }
             } else if (event === 'SIGNED_OUT') {
               currentUser = null;
               window.currentUser = null;
+              window.currentUserId = null;
               window.currentUserEmail = null;
+              resetUserScopedStateForAccountSwitch(null);
               try { if (typeof applyAuthModalView === 'function') applyAuthModalView(null); } catch (_) {}
-              state.notifications = [];
-              state.user = {
-                id: '',
-                name: 'Guest User',
-                email: '',
-                avatar: null,
-                availableBalance: 0.00,
-                lockedBalance: 0.00,
-                lifetimeEarnings: 0.00,
-                lifetimeImpressions: 0,
-                referralBonus: 0.00,
-                referralCode: '',
-                streakDays: 0,
-                surveysCompleted: 0,
-                gamesPlayed: 0,
-                fourHourSpins: 0,
-                lastActiveDate: null,
-                apiKey: '',
-                username: 'guest',
-                adIntensity: 2,
-                countryCode: state.user.countryCode || 'LK',
-                countryName: state.user.countryName || 'Sri Lanka',
-                geoTier: state.user.geoTier || 3,
-                currentTier: state.user.geoTier || 3,
-                ratePer1k: state.user.ratePer1k || 0.30
-              };
-              state.devices = [];
-              state.activityLedger = [];
-              state.payoutHistory = [];
-              state.crewMembers = [];
               saveState();
               renderApp();
-              loadChatHistory();
-              renderNotifications();
+              try { if (typeof loadChatHistory === 'function') loadChatHistory(); } catch (_) {}
+              try { if (typeof renderNotifications === 'function') renderNotifications(); } catch (_) {}
 
-              // Clear session from extension
+              // Clear session from extension & BroadcastChannel
               forwardSessionClearToExtension();
             }
           });
@@ -3969,24 +4113,11 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             } catch (_) {}
           }
-          window.__surfkitAuthHydratedAt = Date.now();
-          currentUser = authUser;
-          window.currentUser = authUser;
-          if (currentUser.email) {
-            window.currentUserEmail = currentUser.email.trim().toLowerCase();
-          }
-          state.user.id = currentUser.id;
-          state.user.email = currentUser.email || '';
-          state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
-            || (currentUser.email ? currentUser.email.split('@')[0] : 'Surfkit User');
-          state.user.username = state.user.name;
-
-          saveState();
-          renderApp();
-          try { if (typeof applyAuthModalView === 'function') applyAuthModalView(authUser); } catch (_) {}
-
-          // Forward session on initial page load
-          forwardSessionToExtension(activeSession || { user: authUser });
+          await handleAuthenticatedSession(activeSession || { user: authUser }, {
+            closeModal: false,
+            cleanAuthParam: false,
+            skipDataFetch: true
+          });
 
           return currentUser;
         }
@@ -4049,9 +4180,17 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
 
-    async function loadDataFromSupabase() {
-      if (!supabaseClient || !currentUser) return;
+    async function loadDataFromSupabase(options = {}) {
+      if (!supabaseClient || !currentUser || !currentUser.id) return;
+      const targetUserId = currentUser.id;
+      if (__authDataFetchPromise && __authDataFetchUserId === targetUserId && !options.force) {
+        return __authDataFetchPromise;
+      }
+      resetUserScopedStateForAccountSwitch(targetUserId);
       window.currentUser = currentUser;
+      window.currentUserId = targetUserId;
+
+      const runFetch = (async () => {
       try {
         // Sync active client device session to Supabase
         await syncCurrentDeviceSession();
@@ -4237,9 +4376,13 @@ document.addEventListener('DOMContentLoaded', () => {
             ad_intensity: 2
           }).select().single();
           if (newProf) {
-            state.user.name = newProf.display_name;
-            state.user.username = newProf.username;
+            state.user.name = newProf.display_name || state.user.name;
+            state.user.username = newProf.username || state.user.username;
+            state.user.referralCode = newProf.referral_code || state.user.referralCode;
           }
+          saveState();
+          renderApp();
+          try { if (typeof applyAuthModalView === 'function' && currentUser) applyAuthModalView(currentUser); } catch (_) {}
         }
 
         // 2. Devices (Dynamic Supabase query - Deduplicated, Active device only)
@@ -4724,9 +4867,19 @@ document.addEventListener('DOMContentLoaded', () => {
           trendChartInstance.data.datasets[1].data = [...dataToUse.impressions];
           trendChartInstance.update('none'); // instant live update
         }
+        activeDataUserId = targetUserId;
       } catch (err) {
         console.error('Data sync error:', err);
+      } finally {
+        if (__authDataFetchUserId === targetUserId) {
+          __authDataFetchPromise = null;
+          __authDataFetchUserId = null;
+        }
       }
+      })();
+      __authDataFetchUserId = targetUserId;
+      __authDataFetchPromise = runFetch;
+      return runFetch;
     }
 
     function setupRealtimeSubscriptions() {
