@@ -315,7 +315,14 @@
     var supabaseClient = null;
     try {
       supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
-        ? window.supabase.createClient(SUPA_URL, SUPA_KEY)
+        ? window.supabase.createClient(SUPA_URL, SUPA_KEY, {
+            auth: {
+              persistSession: true,
+              detectSessionInUrl: true,
+              storageKey: 'sb-kpvrewhmnrifsnkgswdt-auth-token',
+              autoRefreshToken: true
+            }
+          })
         : null;
     } catch (_) {
       supabaseClient = null;

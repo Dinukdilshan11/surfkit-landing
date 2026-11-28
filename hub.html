@@ -3118,7 +3118,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const SUPABASE_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
     const supabaseClient = (window.supabase && typeof window.supabase.createClient === 'function')
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          auth: {
+            persistSession: true,
+            detectSessionInUrl: true,
+            storageKey: 'sb-kpvrewhmnrifsnkgswdt-auth-token',
+            autoRefreshToken: true
+          }
+        })
       : null;
     window.supabaseClient = supabaseClient;
 
@@ -3432,8 +3439,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (sData && sData.session && sData.session.user) {
                   currentUser = sData.session.user;
                   window.currentUser = sData.session.user;
+                  if (currentUser.email) {
+                    window.currentUserEmail = currentUser.email.trim().toLowerCase();
+                  }
+                  state.user.id = currentUser.id;
+                  state.user.email = currentUser.email || '';
+                  state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
+                    || (currentUser.email ? currentUser.email.split('@')[0] : state.user.name);
+                  state.user.username = state.user.name;
+                  saveState();
+                  renderApp();
                   applyAuthModalView(sData.session.user);
                   closeAuthModal();
+                  try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
+                  try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
                 }
               }
             }
@@ -3765,7 +3784,18 @@ document.addEventListener('DOMContentLoaded', () => {
                   try { if (typeof closeAuthModal === 'function') closeAuthModal(); } catch (_) {}
                   try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
                   try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
+                } else if (event === 'INITIAL_SESSION' && !window.__supabaseInitialDataLoaded__) {
+                  window.__supabaseInitialDataLoaded__ = true;
+                  try { if (typeof loadDataFromSupabase === 'function') loadDataFromSupabase(); } catch (_) {}
+                  try { if (typeof setupRealtimeSubscriptions === 'function') setupRealtimeSubscriptions(); } catch (_) {}
                 }
+
+                // If running inside an OAuth popup window, close cleanly now that session is persisted
+                try {
+                  if (window.opener && window.name === 'surfkit_google_oauth') {
+                    setTimeout(() => { try { window.close(); } catch (_) {} }, 150);
+                  }
+                } catch (_) {}
 
                 // Continuous Session Sync: forward to content script -> background -> extension
                 forwardSessionToExtension(newSession);
@@ -4581,6 +4611,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveState();
         renderApp();
+        try { if (typeof applyAuthModalView === 'function' && currentUser) applyAuthModalView(currentUser); } catch (_) {}
         if (typeof updatePulseDialUI === 'function') {
           try { updatePulseDialUI(); } catch (e) {}
         }
@@ -6273,6 +6304,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveState();
         renderApp();
+        try { if (typeof applyAuthModalView === 'function' && currentUser) applyAuthModalView(currentUser); } catch (_) {}
         if (typeof updatePulseDialUI === 'function') {
           try { updatePulseDialUI(); } catch (e) {}
         }
@@ -8043,6 +8075,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.crewMembers = [];
         saveState();
         renderApp();
+        try { if (typeof applyAuthModalView === 'function' && currentUser) applyAuthModalView(currentUser); } catch (_) {}
         if (typeof updatePulseDialUI === 'function') {
           try { updatePulseDialUI(); } catch (e) {}
         }
