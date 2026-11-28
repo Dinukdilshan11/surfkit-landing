@@ -482,6 +482,7 @@
       try {
         var u = session.user;
         localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
+          id: u.id || '',
           email: (u.email || '').trim().toLowerCase(),
           name: (u.user_metadata && (u.user_metadata.display_name || u.user_metadata.full_name)) || (u.email ? u.email.split('@')[0] : 'User'),
           timestamp: Date.now()

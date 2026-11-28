@@ -761,24 +761,28 @@
 
           let userId = null;
           let userEmail = null;
+          let accessToken = null;
 
           if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'userId', 'userEmail', 'isExplicitSignOut']);
+            const st = await chrome.storage.local.get(['authUser', 'surfkit_auth_user', 'userId', 'userEmail', 'supabase_session', 'isExplicitSignOut']);
             if (!st.isExplicitSignOut) {
               if (st.authUser?.id) userId = st.authUser.id;
               else if (st.surfkit_auth_user?.id) userId = st.surfkit_auth_user.id;
               if (st.authUser?.email) userEmail = st.authUser.email;
               else if (st.surfkit_auth_user?.email) userEmail = st.surfkit_auth_user.email;
+              if (st.supabase_session?.access_token) accessToken = st.supabase_session.access_token;
             }
           }
 
-          if (!userId) {
+          if (!userId || !accessToken) {
             const rawJwt = localStorage.getItem('sb-kpvrewhmnrifsnkgswdt-auth-token');
             if (rawJwt) {
               const p = JSON.parse(rawJwt);
               const u = p.user || (p.currentSession && p.currentSession.user);
-              if (u?.id) userId = u.id;
-              if (u?.email) userEmail = u.email;
+              const tok = p.access_token || (p.currentSession && p.currentSession.access_token);
+              if (!userId && u?.id) userId = u.id;
+              if (!userEmail && u?.email) userEmail = u.email;
+              if (!accessToken && tok) accessToken = tok;
             }
           }
 
@@ -788,13 +792,15 @@
             if (queriedSess && queriedSess.user) {
               userId = queriedSess.user.id;
               userEmail = queriedSess.user.email;
+              if (queriedSess.access_token) accessToken = queriedSess.access_token;
             }
           }
 
           if (userId || userEmail) {
+            const authHeader = `Bearer ${accessToken || SUPA_KEY}`;
             const filter = userId ? `id=eq.${userId}` : `email=ilike.${encodeURIComponent(userEmail)}`;
             const res = await fetch(`${SUPA_URL}/rest/v1/profiles?${filter}&select=*`, {
-              headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+              headers: { 'apikey': SUPA_KEY, 'Authorization': authHeader }
             });
             if (res.ok) {
               const rows = await res.json();
@@ -822,7 +828,7 @@
                   const todayStr = new Date().toISOString().split('T')[0];
                   fetch(`${SUPA_URL}/rest/v1/profiles?id=eq.${prof.id}`, {
                     method: 'PATCH',
-                    headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}`, 'Content-Type': 'application/json' },
+                    headers: { 'apikey': SUPA_KEY, 'Authorization': authHeader, 'Content-Type': 'application/json' },
                     body: JSON.stringify({ streak_days: 1, daily_streak: 1, current_streak: 1, last_active_date: todayStr })
                   }).catch(() => {});
                 }
@@ -1078,7 +1084,46 @@
           showPopupAuthError('');
           const oauthUrl = POPUP_SUPA_URL + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent('https://surfkit.cloud/dashboard/overview');
           if (typeof chrome !== 'undefined' && chrome.identity && typeof chrome.identity.launchWebAuthFlow === 'function') {
-            chrome.identity.launchWebAuthFlow({ url: oauthUrl, interactive: true }, function () {});
+            chrome.identity.launchWebAuthFlow({ url: oauthUrl, interactive: true }, async function (redirectUrl) {
+              try {
+                if (chrome.runtime && chrome.runtime.lastError) return;
+                if (!redirectUrl) return;
+                const hashIdx = redirectUrl.indexOf('#');
+                if (hashIdx === -1) return;
+                const params = new URLSearchParams(redirectUrl.slice(hashIdx + 1));
+                const accessToken = params.get('access_token');
+                const refreshToken = params.get('refresh_token');
+                const expiresIn = Number(params.get('expires_in') || 3600);
+                if (!accessToken) return;
+                const uRes = await fetch(POPUP_SUPA_URL + '/auth/v1/user', {
+                  headers: { 'apikey': POPUP_SUPA_KEY, 'Authorization': 'Bearer ' + accessToken }
+                });
+                if (!uRes.ok) return;
+                const user = await uRes.json();
+                if (!user || !user.id) return;
+                const sess = {
+                  access_token: accessToken,
+                  refresh_token: refreshToken,
+                  expires_at: Math.floor(Date.now() / 1000) + expiresIn,
+                  user: user
+                };
+                if (chrome.storage && chrome.storage.local) {
+                  chrome.storage.local.set({
+                    authUser: user,
+                    surfkit_auth_user: user,
+                    supabaseUserId: user.id,
+                    supabase_session: sess,
+                    isExplicitSignOut: false
+                  });
+                }
+                if (chrome.runtime && typeof chrome.runtime.sendMessage === 'function') {
+                  try { chrome.runtime.sendMessage({ action: 'AUTH_SET_SESSION_TOKENS', payload: sess }); } catch (_) {}
+                }
+                try { localStorage.setItem('sb-kpvrewhmnrifsnkgswdt-auth-token', JSON.stringify(sess)); } catch (_) {}
+                renderPopupAuthState(user);
+                if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+              } catch (_) {}
+            });
             return;
           }
           if (typeof chrome !== 'undefined' && chrome.tabs && typeof chrome.tabs.create === 'function') {
@@ -1093,6 +1138,13 @@
           showPopupAuthError('Unable to open Google Sign-In. Please try again.');
         }
       }
+
+      window.addEventListener('storage', function (e) {
+        if (e && e.key === 'sb-kpvrewhmnrifsnkgswdt-auth-token') {
+          syncPopupAuthSession();
+          if (typeof fetchDirectFromSupabase === 'function') fetchDirectFromSupabase();
+        }
+      });
 
       const tabInBtn = document.getElementById('popup-tab-signin');
       const tabUpBtn = document.getElementById('popup-tab-signup');

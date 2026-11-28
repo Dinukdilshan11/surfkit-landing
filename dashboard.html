@@ -3762,10 +3762,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // Persistent listener: re-hydrates currentUser and continuously syncs to extension
         if (!window.__supabaseAuthListenerSet__ && supabaseClient.auth) {
           window.__supabaseAuthListenerSet__ = true;
+          window.addEventListener('storage', (e) => {
+            try {
+              if (e && e.key === 'sb-kpvrewhmnrifsnkgswdt-auth-token' && e.newValue) {
+                initSupabaseAuth().then((u) => {
+                  if (u && typeof loadDataFromSupabase === 'function') loadDataFromSupabase();
+                }).catch(() => {});
+              }
+            } catch (_) {}
+          });
           supabaseClient.auth.onAuthStateChange((event, newSession) => {
             console.log('[Dashboard Auth] onAuthStateChange:', event, newSession);
             if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
               if (newSession && (newSession.user || newSession.access_token)) {
+                window.__surfkitAuthHydratedAt = Date.now();
                 currentUser = newSession.user;
                 window.currentUser = newSession.user;
                 if (currentUser && currentUser.email) {
@@ -3881,6 +3891,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (authUser) {
+          window.__surfkitAuthHydratedAt = Date.now();
           currentUser = authUser;
           window.currentUser = authUser;
           if (currentUser.email) {
@@ -3891,6 +3902,10 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.name = (currentUser.user_metadata && (currentUser.user_metadata.display_name || currentUser.user_metadata.full_name))
             || (currentUser.email ? currentUser.email.split('@')[0] : 'Surfkit User');
           state.user.username = state.user.name;
+
+          saveState();
+          renderApp();
+          try { if (typeof applyAuthModalView === 'function') applyAuthModalView(authUser); } catch (_) {}
 
           // Forward session on initial page load
           forwardSessionToExtension(activeSession || { user: authUser });
@@ -4123,6 +4138,9 @@ document.addEventListener('DOMContentLoaded', () => {
             state.user.ratePer1k = Number(profile.rate_per_1k || (state.user.geoTier === 1 ? 2.50 : state.user.geoTier === 2 ? 1.00 : state.user.geoTier === 3 ? 0.30 : 0.15));
             renderGeoTierCard();
           }
+          saveState();
+          renderApp();
+          try { if (typeof applyAuthModalView === 'function' && currentUser) applyAuthModalView(currentUser); } catch (_) {}
         } else {
           const defaultUsername = 'surf_' + (currentUser.email ? currentUser.email.split('@')[0] : Math.random().toString(36).substring(2, 7));
           const { data: newProf } = await supabaseClient.from('profiles').insert({
@@ -8048,7 +8066,7 @@ document.addEventListener('DOMContentLoaded', () => {
           state.user.name = currentUser.email.split('@')[0];
           state.user.username = state.user.name;
         }
-      } else if (extState.isExplicitSignOut && !extState.authUser && currentUser && extBalance === 0) {
+      } else if (extState.isExplicitSignOut && !extState.authUser && currentUser && extBalance === 0 && (!window.__surfkitAuthHydratedAt || (Date.now() - window.__surfkitAuthHydratedAt > 15000))) {
         // ONLY sign out if the extension explicitly has NO user and 0 balance
         currentUser = null;
         window.currentUserEmail = null;
