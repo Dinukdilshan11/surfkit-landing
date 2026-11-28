@@ -68,6 +68,41 @@
     .btn-primary:active { transform: scale(0.98); }
     .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
 
+    .btn-google {
+      width: 100%;
+      background: #ffffff;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 14px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.2s, transform 0.1s;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    }
+    .btn-google:hover { background: #f1f5f9; }
+    .btn-google:active { transform: scale(0.98); }
+    .btn-google:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      border: 1px solid #1E2C4A;
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .btn-secondary:hover { border-color: #00D2B4; color: #ffffff; background: rgba(0,210,180,0.06); }
+
     .error-box {
       background: rgba(239,68,68,.1);
       border: 1px solid rgba(239,68,68,.3);
@@ -100,7 +135,7 @@
 
     .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
     .divider span { flex: 1; height: 1px; background: #1E2C4A; }
-    .divider p { color: #475569; font-size: 12px; white-space: nowrap; }
+    .divider p { color: #64748b; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
 
     .spinner {
       width: 18px; height: 18px;
@@ -142,66 +177,128 @@
     </div>
 
     <!-- Heading -->
-    <h1 style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;">Welcome back</h1>
-    <p style="font-size:14px;color:#94a3b8;margin:0 0 24px;">Sign in to your Surfkit account to access your dashboard and earnings.</p>
+    <h1 id="auth-heading" style="font-size:22px;font-weight:800;color:#fff;margin:0 0 6px;">Welcome back</h1>
+    <p id="auth-subtitle" style="font-size:14px;color:#94a3b8;margin:0 0 24px;">Sign in to your Surfkit account to access your dashboard and earnings.</p>
 
     <!-- Error / Success messages -->
     <div id="error-box"   class="error-box"   style="margin-bottom:16px;"></div>
     <div id="success-box" class="success-box" style="margin-bottom:16px;"></div>
 
-    <!-- Sign-In Form -->
-    <form id="signin-form" autocomplete="on" novalidate>
-      <div style="margin-bottom:14px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Email Address</label>
-        <input id="email-input" type="email" autocomplete="email" class="input-field" placeholder="you@example.com" required>
-      </div>
-
-      <div style="margin-bottom:20px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-          <label style="font-size:12px;font-weight:600;color:#94a3b8;letter-spacing:.05em;text-transform:uppercase;">Password</label>
-          <button type="button" id="forgot-btn" style="font-size:12px;color:#00D2B4;background:none;border:none;cursor:pointer;padding:0;">Forgot password?</button>
+    <!-- STATE 1: AUTHENTICATED SESSION CARD (Shown only when session?.user exists) -->
+    <div id="active-session-view" style="display:none;">
+      <div style="background:#0A0F1D;border:1px solid #1E2C4A;border-radius:14px;padding:18px;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
+          <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#64748b;">Active Session</span>
+          <span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:9999px;background:rgba(16,185,129,0.14);color:#34d399;border:1px solid rgba(16,185,129,0.3);">Authenticated • Google Verified</span>
         </div>
-        <div style="position:relative;">
-          <input id="pass-input" type="password" autocomplete="current-password" class="input-field" placeholder="••••••••" required style="padding-right:44px;">
-          <button type="button" id="toggle-pass" tabindex="-1" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;" title="Show/hide password">
-            <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-            </svg>
-          </button>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div id="session-avatar" style="width:42px;height:42px;border-radius:9999px;background:#16223D;border:1px solid #00D2B4;color:#00D2B4;font-weight:800;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">?</div>
+          <div style="min-width:0;flex:1;">
+            <p id="session-name" style="font-size:14px;font-weight:700;color:#fff;margin:0 0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></p>
+            <p id="session-email" style="font-size:12px;color:#94a3b8;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></p>
+          </div>
         </div>
       </div>
 
-      <button type="submit" id="signin-btn" class="btn-primary">Sign In</button>
-    </form>
-
-    <div class="divider">
-      <span></span>
-      <p>New to Surfkit?</p>
-      <span></span>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button type="button" id="goto-dashboard-btn" class="btn-primary">Go to Dashboard</button>
+        <button type="button" id="session-signout-btn" class="btn-secondary" style="color:#fca5a5;border-color:rgba(239,68,68,0.35);">Sign Out</button>
+      </div>
     </div>
 
-    <!-- Sign-Up trigger -->
-    <button type="button" id="signup-toggle-btn" style="width:100%;background:transparent;border:1px solid #1E2C4A;color:#e2e8f0;font-size:14px;font-weight:600;padding:12px;border-radius:12px;cursor:pointer;transition:border-color .2s,color .2s;">
-      Create Account
-    </button>
+    <!-- STATE 2: SIGNED-OUT SIGN IN VIEW (Default for existing users) -->
+    <div id="signin-view">
+      <button type="button" id="google-signin-btn" class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0;">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+        </svg>
+        <span id="google-signin-text">Continue with Google</span>
+      </button>
 
-    <!-- Sign-Up Form (hidden by default) -->
-    <form id="signup-form" autocomplete="on" novalidate style="display:none;margin-top:20px;">
-      <div style="margin-bottom:14px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Email Address</label>
-        <input id="su-email" type="email" autocomplete="email" class="input-field" placeholder="you@example.com" required>
+      <div class="divider">
+        <span></span>
+        <p>OR CONTINUE WITH EMAIL</p>
+        <span></span>
       </div>
-      <div style="margin-bottom:20px;">
-        <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Password</label>
-        <input id="su-pass" type="password" autocomplete="new-password" class="input-field" placeholder="Min 6 characters" required>
+
+      <!-- Sign-In Form (Existing Users) -->
+      <form id="signin-form" autocomplete="on" novalidate>
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:600;color:#94a3b8;margin-bottom:6px;letter-spacing:.05em;text-transform:uppercase;">Email Address</label>
+          <input id="email-input" type="email" autocomplete="email" class="input-field" placeholder="you@example.com" required>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+            <label style="font-size:12px;font-weight:600;color:#94a3b8;letter-spacing:.05em;text-transform:uppercase;">Password</label>
+            <button type="button" id="forgot-btn" style="font-size:12px;color:#00D2B4;background:none;border:none;cursor:pointer;padding:0;">Forgot password?</button>
+          </div>
+          <div style="position:relative;">
+            <input id="pass-input" type="password" autocomplete="current-password" class="input-field" placeholder="••••••••" required style="padding-right:44px;">
+            <button type="button" id="toggle-pass" tabindex="-1" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:#64748b;" title="Show/hide password">
+              <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="signin-btn" class="btn-primary">Sign In</button>
+      </form>
+
+      <div class="divider">
+        <span></span>
+        <p style="text-transform:none;letter-spacing:normal;font-size:12px;font-weight:500;">New to Surfkit?</p>
+        <span></span>
       </div>
-      <button type="submit" id="signup-btn" class="btn-primary" style="background:#1E2C4A;color:#e2e8f0;">Create Account &amp; Sign In</button>
-      <p style="font-size:11px;color:#475569;margin-top:12px;text-align:center;">By creating an account you agree to our <a href="/terms" style="color:#00D2B4;">Terms</a> and <a href="/privacy" style="color:#00D2B4;">Privacy Policy</a>.</p>
-    </form>
+
+      <button type="button" id="signup-toggle-btn" class="btn-secondary">
+        Create Account
+      </button>
+    </div>
+
+    <!-- STATE 3: SIGNED-OUT CREATE ACCOUNT / SIGN UP VIEW (Google Only, NO Email/Password inputs) -->
+    <div id="signup-view" style="display:none;">
+      <button type="button" id="google-signup-btn" class="btn-google" style="margin-bottom:16px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" style="flex-shrink:0;">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+          <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+        </svg>
+        <span id="google-signup-text">Continue with Google</span>
+      </button>
+
+      <div style="background:#0A0F1D;border:1px solid #1E2C4A;border-radius:14px;padding:14px;margin-bottom:14px;display:flex;flex-direction:column;gap:12px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="width:22px;height:22px;border-radius:7px;background:rgba(16,185,129,0.14);border:1px solid rgba(16,185,129,0.3);color:#34d399;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">✓</span>
+          <p style="font-size:12px;color:#cbd5e1;line-height:1.5;margin:0;"><strong style="color:#fff;">Verified Google Account</strong> — Instant, secure access with zero fake or temporary emails.</p>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="width:22px;height:22px;border-radius:7px;background:rgba(0,210,180,0.14);border:1px solid rgba(0,210,180,0.3);color:#00D2B4;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;">⇄</span>
+          <p style="font-size:12px;color:#cbd5e1;line-height:1.5;margin:0;"><strong style="color:#fff;">Extension &amp; Dashboard Sync</strong> — Real-time sync for your SKIT balance, streak &amp; activity.</p>
+        </div>
+      </div>
+
+      <div style="background:rgba(10,15,29,0.65);border:1px solid #1E2C4A;border-radius:10px;padding:10px 12px;font-size:11px;color:#94a3b8;text-align:center;line-height:1.5;margin-bottom:14px;">
+        Protected by Google OAuth • Active sessions are limited per account to prevent unauthorized sharing.
+      </div>
+
+      <p style="font-size:11px;color:#64748b;margin:0 0 18px;text-align:center;line-height:1.5;">
+        By continuing, you agree to our <a href="/terms" style="color:#00D2B4;text-decoration:none;">Terms</a> and <a href="/privacy" style="color:#00D2B4;text-decoration:none;">Privacy Policy</a>.
+      </p>
+
+      <button type="button" id="back-to-signin-btn" class="btn-secondary">
+        Back to Sign In
+      </button>
+    </div>
 
     <!-- Back to home -->
     <div style="margin-top:24px;text-align:center;">
-      <a href="/home" style="font-size:12px;color:#475569;text-decoration:none;">← Back to Surfkit Home</a>
+      <a href="/home" style="font-size:12px;color:#64748b;text-decoration:none;">← Back to Surfkit Home</a>
     </div>
   </div>
 
@@ -215,11 +312,21 @@
     var SUPA_URL = 'https://kpvrewhmnrifsnkgswdt.supabase.co';
     var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtwdnJld2htbnJpZnNua2dzd2R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTI4Mjc4OTQsImV4cCI6MjEwODQwMzg5NH0.HQLPHVNkZ83wQC8dqHINlZ4F7qKR7lML3XQv7tAxX9w';
 
-    var supabase = window.supabase && typeof window.supabase.createClient === 'function'
-      ? window.supabase.createClient(SUPA_URL, SUPA_KEY)
-      : null;
+    var supabaseClient = null;
+    try {
+      supabaseClient = window.supabase && typeof window.supabase.createClient === 'function'
+        ? window.supabase.createClient(SUPA_URL, SUPA_KEY)
+        : null;
+    } catch (_) {
+      supabaseClient = null;
+    }
 
-    // Capture referral code if opened via /login?ref=...
+    var DASHBOARD_REDIRECT_URL = 'https://surfkit.cloud/dashboard/overview';
+    var DASHBOARD_PATH = '/dashboard/overview';
+    var currentMode = 'signin';
+    var oauthPopupTimer = null;
+
+    // Capture referral code and initial mode (?mode=signup) from URL
     try {
       var sp = new URLSearchParams(window.location.search);
       var rParam = sp.get('ref') || sp.get('r');
@@ -227,91 +334,164 @@
         localStorage.setItem('surfkit_ref_code', rParam.trim());
         localStorage.setItem('surfkit_incoming_ref', rParam.trim());
       }
-    } catch (e) {}
-
-    /* ── If already signed in, redirect straight to dashboard ── */
-    if (supabase) {
-      supabase.auth.getSession().then(function (res) {
-        if (res.data && res.data.session && res.data.session.user) {
-          window.location.replace('/dashboard');
-        }
-      }).catch(function () {});
-    }
+      if ((sp.get('mode') || '').toLowerCase() === 'signup') {
+        currentMode = 'signup';
+      }
+    } catch (_) {}
 
     /* ── UI helpers ── */
     function showError(msg) {
-      var el = document.getElementById('error-box');
-      el.textContent = msg; el.style.display = 'block';
-      document.getElementById('success-box').style.display = 'none';
+      try {
+        var el = document.getElementById('error-box');
+        var ok = document.getElementById('success-box');
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+        if (ok) ok.style.display = 'none';
+      } catch (_) {}
     }
+
     function showSuccess(msg) {
-      var el = document.getElementById('success-box');
-      el.textContent = msg; el.style.display = 'block';
-      document.getElementById('error-box').style.display = 'none';
+      try {
+        var el = document.getElementById('success-box');
+        var err = document.getElementById('error-box');
+        if (el) { el.textContent = msg; el.style.display = 'block'; }
+        if (err) err.style.display = 'none';
+      } catch (_) {}
     }
+
     function clearMessages() {
-      document.getElementById('error-box').style.display = 'none';
-      document.getElementById('success-box').style.display = 'none';
+      try {
+        var err = document.getElementById('error-box');
+        var ok = document.getElementById('success-box');
+        if (err) err.style.display = 'none';
+        if (ok) ok.style.display = 'none';
+      } catch (_) {}
     }
+
     function setLoading(btn, loading, label) {
-      btn.disabled = loading;
-      btn.innerHTML = loading
-        ? '<span class="spinner"></span>'
-        : (label || btn.dataset.label || 'Submit');
+      if (!btn) return;
+      try {
+        btn.disabled = loading;
+        btn.innerHTML = loading
+          ? '<span class="spinner"></span>'
+          : (label || btn.dataset.label || 'Submit');
+      } catch (_) {}
     }
 
-    /* ── Password toggle ── */
-    document.getElementById('toggle-pass').addEventListener('click', function () {
-      var inp  = document.getElementById('pass-input');
-      var icon = document.getElementById('eye-icon');
-      if (inp.type === 'password') {
-        inp.type = 'text';
-        icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-      } else {
-        inp.type = 'password';
-        icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-      }
-    });
+    function resetGoogleButtons() {
+      try {
+        var b1 = document.getElementById('google-signin-btn');
+        var t1 = document.getElementById('google-signin-text');
+        var b2 = document.getElementById('google-signup-btn');
+        var t2 = document.getElementById('google-signup-text');
+        if (b1) b1.disabled = false;
+        if (t1) t1.textContent = 'Continue with Google';
+        if (b2) b2.disabled = false;
+        if (t2) t2.textContent = 'Continue with Google';
+      } catch (_) {}
+    }
 
-    /* ── Forgot password ── */
-    document.getElementById('forgot-btn').addEventListener('click', function () {
-      var email = document.getElementById('email-input').value.trim();
-      if (!email) { showError('Enter your email address first.'); return; }
-      if (!supabase) { showError('Auth service unavailable. Please try again later.'); return; }
-      clearMessages();
-      supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/dashboard' })
-        .then(function (res) {
-          if (res.error) showError(res.error.message);
-          else showSuccess('Reset link sent! Check your email inbox.');
-        })
-        .catch(function (e) { showError(e.message || 'Failed to send reset email.'); });
-    });
+    function setSignedOutMode(mode) {
+      try {
+        currentMode = mode === 'signup' ? 'signup' : 'signin';
+        clearMessages();
+        var signinView = document.getElementById('signin-view');
+        var signupView = document.getElementById('signup-view');
+        var heading = document.getElementById('auth-heading');
+        var subtitle = document.getElementById('auth-subtitle');
 
+        if (currentMode === 'signup') {
+          if (signinView) signinView.style.display = 'none';
+          if (signupView) signupView.style.display = 'block';
+          if (heading) heading.textContent = 'Create your Surfkit account';
+          if (subtitle) subtitle.textContent = 'Get started in seconds with your verified Google account.';
+          document.title = 'Create Account — Surfkit';
+        } else {
+          if (signupView) signupView.style.display = 'none';
+          if (signinView) signinView.style.display = 'block';
+          if (heading) heading.textContent = 'Welcome back';
+          if (subtitle) subtitle.textContent = 'Sign in to your Surfkit account to access your dashboard and earnings.';
+          document.title = 'Sign In — Surfkit';
+        }
+      } catch (_) {}
+    }
+
+    function renderAuthState(session) {
+      try {
+        var user = session && session.user ? session.user : null;
+        var activeView = document.getElementById('active-session-view');
+        var signinView = document.getElementById('signin-view');
+        var signupView = document.getElementById('signup-view');
+        var heading = document.getElementById('auth-heading');
+        var subtitle = document.getElementById('auth-subtitle');
+        var nameEl = document.getElementById('session-name');
+        var emailEl = document.getElementById('session-email');
+        var avatarEl = document.getElementById('session-avatar');
+
+        if (user && user.email) {
+          var email = String(user.email || '').trim();
+          var metaName = user.user_metadata && (user.user_metadata.display_name || user.user_metadata.full_name);
+          var displayName = (metaName && String(metaName).trim()) || (email.split('@')[0] || 'Surfkit User');
+
+          if (signinView) signinView.style.display = 'none';
+          if (signupView) signupView.style.display = 'none';
+          if (activeView) activeView.style.display = 'block';
+          if (heading) heading.textContent = 'Account Session';
+          if (subtitle) subtitle.textContent = 'You are currently signed in to Surfkit.';
+          if (nameEl) nameEl.textContent = displayName;
+          if (emailEl) emailEl.textContent = email;
+          if (avatarEl) avatarEl.textContent = displayName.charAt(0).toUpperCase() || 'S';
+          document.title = 'Account Session — Surfkit';
+        } else {
+          if (activeView) activeView.style.display = 'none';
+          setSignedOutMode(currentMode);
+        }
+      } catch (_) {}
+    }
+
+    function broadcastSessionToExtension(session) {
+      if (!session || !session.user) return;
+      try {
+        var u = session.user;
+        localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
+          email: (u.email || '').trim().toLowerCase(),
+          name: (u.user_metadata && (u.user_metadata.display_name || u.user_metadata.full_name)) || (u.email ? u.email.split('@')[0] : 'User'),
+          timestamp: Date.now()
+        }));
+      } catch (_) {}
+      try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch (_) {}
+      try {
+        window.postMessage({
+          type: 'SURFKIT_AUTH_SESSION_UPDATE',
+          session: {
+            access_token: session.access_token,
+            refresh_token: session.refresh_token,
+            expires_at: session.expires_at,
+            user: session.user
+          }
+        }, '*');
+      } catch (_) {}
+    }
 
     /* ── Referral Attribution Helper ── */
     async function attributeReferral(userId, refCode, userEmail) {
-      if (!userId || !refCode || !supabase) return;
+      if (!userId || !refCode || !supabaseClient) return;
       var cleanCode = refCode.trim();
       try {
-        var rpcRes = await supabase.rpc('attribute_user_referral', {
+        var rpcRes = await supabaseClient.rpc('attribute_user_referral', {
           p_new_user_id: userId,
           p_ref_identifier: cleanCode
         });
         if (rpcRes && !rpcRes.error && rpcRes.data && rpcRes.data.success) {
-          console.log('[Referral] Attributed via RPC:', rpcRes.data);
           try {
             localStorage.removeItem('surfkit_ref_code');
             localStorage.removeItem('surfkit_incoming_ref');
-          } catch(e) {}
+          } catch (_) {}
           return;
         }
-      } catch (e) {
-        console.warn('[Referral] RPC attempt notice:', e);
-      }
+      } catch (_) {}
 
-      // Fallback: Direct table operations
       try {
-        var refQuery = await supabase
+        var refQuery = await supabaseClient
           .from('profiles')
           .select('id, referral_code, username, display_name')
           .ilike('referral_code', cleanCode)
@@ -319,7 +499,7 @@
 
         var referrer = refQuery && refQuery.data;
         if (!referrer) {
-          var userQuery = await supabase
+          var userQuery = await supabaseClient
             .from('profiles')
             .select('id, referral_code, username, display_name')
             .or('username.ilike.' + cleanCode + ',display_name.ilike.' + cleanCode)
@@ -328,14 +508,14 @@
         }
 
         if (referrer && referrer.id && referrer.id !== userId) {
-          await supabase
+          await supabaseClient
             .from('profiles')
             .update({ referred_by: referrer.id })
             .eq('id', userId)
             .is('referred_by', null);
 
           var handle = userEmail ? ('@' + userEmail.split('@')[0]) : '@crew_mate';
-          await supabase
+          await supabaseClient
             .from('referrals')
             .upsert({
               referrer_id: referrer.id,
@@ -350,153 +530,273 @@
           try {
             localStorage.removeItem('surfkit_ref_code');
             localStorage.removeItem('surfkit_incoming_ref');
-          } catch(e) {}
-          console.log('[Referral] Attributed via fallback table update');
+          } catch (_) {}
         }
+      } catch (_) {}
+    }
+
+    async function completeSignInAndRedirect(session) {
+      if (!session || !session.user) return;
+      broadcastSessionToExtension(session);
+      try {
+        var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
+        if (pRef && session.user.id) {
+          attributeReferral(session.user.id, pRef, session.user.email).catch(function () {});
+        }
+      } catch (_) {}
+      showSuccess('Signed in! Redirecting to your dashboard…');
+      setTimeout(function () {
+        try { window.location.href = DASHBOARD_PATH; } catch (_) {}
+      }, 350);
+    }
+
+    /* ── Google OAuth Handler (Popup + Fallback Redirect) ── */
+    async function handleGoogleOAuth() {
+      clearMessages();
+      if (!supabaseClient || !supabaseClient.auth) {
+        showError('Authentication service is unavailable. Please refresh and try again.');
+        return;
+      }
+
+      var b1 = document.getElementById('google-signin-btn');
+      var t1 = document.getElementById('google-signin-text');
+      var b2 = document.getElementById('google-signup-btn');
+      var t2 = document.getElementById('google-signup-text');
+      if (b1) b1.disabled = true;
+      if (t1) t1.textContent = 'Connecting to Google...';
+      if (b2) b2.disabled = true;
+      if (t2) t2.textContent = 'Connecting to Google...';
+
+      try {
+        var res = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: DASHBOARD_REDIRECT_URL,
+            skipBrowserRedirect: true
+          }
+        });
+
+        if (res && res.error) {
+          showError(res.error.message || 'Could not start Google Sign-In. Please try again.');
+          resetGoogleButtons();
+          return;
+        }
+
+        var authUrl = res && res.data && res.data.url ? String(res.data.url) : '';
+        if (!authUrl) {
+          showError('Could not obtain Google authentication URL. Please try again.');
+          resetGoogleButtons();
+          return;
+        }
+
+        var popup = null;
+        try {
+          var w = 520;
+          var h = 640;
+          var left = Math.max(0, Math.round(((window.screen && window.screen.width) ? window.screen.width - w : 400) / 2));
+          var top = Math.max(0, Math.round(((window.screen && window.screen.height) ? window.screen.height - h : 200) / 2));
+          popup = window.open(authUrl, 'surfkit_google_oauth', 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top + ',resizable=yes,scrollbars=yes');
+        } catch (_) {
+          popup = null;
+        }
+
+        if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+          window.location.href = authUrl;
+          return;
+        }
+
+        if (oauthPopupTimer) {
+          clearInterval(oauthPopupTimer);
+          oauthPopupTimer = null;
+        }
+        oauthPopupTimer = setInterval(async function () {
+          try {
+            if (!popup || popup.closed) {
+              clearInterval(oauthPopupTimer);
+              oauthPopupTimer = null;
+              resetGoogleButtons();
+              if (supabaseClient && supabaseClient.auth && typeof supabaseClient.auth.getSession === 'function') {
+                var sRes = await supabaseClient.auth.getSession();
+                if (sRes && sRes.data && sRes.data.session && sRes.data.session.user) {
+                  completeSignInAndRedirect(sRes.data.session);
+                }
+              }
+            }
+          } catch (_) {
+            clearInterval(oauthPopupTimer);
+            oauthPopupTimer = null;
+            resetGoogleButtons();
+          }
+        }, 500);
       } catch (err) {
-        console.warn('[Referral] Fallback attribution notice:', err);
+        showError((err && err.message) ? err.message : 'Google Sign-In failed. Please try again.');
+        resetGoogleButtons();
       }
     }
 
-    /* ── Sign-In form ── */
+    /* ── Initial Session Check & Auth Listener ── */
+    renderAuthState(null);
+
+    if (supabaseClient && supabaseClient.auth) {
+      try {
+        supabaseClient.auth.onAuthStateChange(function (event, session) {
+          try {
+            if (event === 'SIGNED_IN' && session && session.user) {
+              completeSignInAndRedirect(session);
+            } else if (event === 'SIGNED_OUT') {
+              renderAuthState(null);
+            } else if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+              renderAuthState(session);
+            }
+          } catch (_) {}
+        });
+      } catch (_) {}
+
+      try {
+        supabaseClient.auth.getSession().then(function (res) {
+          if (res && res.data && res.data.session && res.data.session.user) {
+            renderAuthState(res.data.session);
+          }
+        }).catch(function () {});
+      } catch (_) {}
+    }
+
+    /* ── Authenticated State Actions ── */
+    var gotoDashBtn = document.getElementById('goto-dashboard-btn');
+    if (gotoDashBtn) {
+      gotoDashBtn.addEventListener('click', function () {
+        window.location.href = DASHBOARD_PATH;
+      });
+    }
+
+    var signoutBtn = document.getElementById('session-signout-btn');
+    if (signoutBtn) {
+      signoutBtn.addEventListener('click', async function () {
+        clearMessages();
+        try {
+          if (supabaseClient && supabaseClient.auth) {
+            await supabaseClient.auth.signOut();
+          }
+        } catch (_) {}
+        try { localStorage.removeItem('surfkit_ext_auth_user'); } catch (_) {}
+        try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_OUT' }, '*'); } catch (_) {}
+        try { window.postMessage({ type: 'SURFKIT_AUTH_SESSION_CLEAR' }, '*'); } catch (_) {}
+        currentMode = 'signin';
+        renderAuthState(null);
+        showSuccess('Signed out successfully.');
+      });
+    }
+
+    /* ── Google OAuth Buttons ── */
+    var googleSigninBtn = document.getElementById('google-signin-btn');
+    if (googleSigninBtn) googleSigninBtn.addEventListener('click', handleGoogleOAuth);
+
+    var googleSignupBtn = document.getElementById('google-signup-btn');
+    if (googleSignupBtn) googleSignupBtn.addEventListener('click', handleGoogleOAuth);
+
+    /* ── Mode Switchers ── */
+    var signupToggleBtn = document.getElementById('signup-toggle-btn');
+    if (signupToggleBtn) {
+      signupToggleBtn.addEventListener('click', function () {
+        setSignedOutMode('signup');
+      });
+    }
+
+    var backToSigninBtn = document.getElementById('back-to-signin-btn');
+    if (backToSigninBtn) {
+      backToSigninBtn.addEventListener('click', function () {
+        setSignedOutMode('signin');
+      });
+    }
+
+    /* ── Password toggle ── */
+    var togglePassBtn = document.getElementById('toggle-pass');
+    if (togglePassBtn) {
+      togglePassBtn.addEventListener('click', function () {
+        try {
+          var inp = document.getElementById('pass-input');
+          var icon = document.getElementById('eye-icon');
+          if (!inp || !icon) return;
+          if (inp.type === 'password') {
+            inp.type = 'text';
+            icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+          } else {
+            inp.type = 'password';
+            icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+          }
+        } catch (_) {}
+      });
+    }
+
+    /* ── Forgot password ── */
+    var forgotBtn = document.getElementById('forgot-btn');
+    if (forgotBtn) {
+      forgotBtn.addEventListener('click', function () {
+        try {
+          var emailEl = document.getElementById('email-input');
+          var email = emailEl ? emailEl.value.trim() : '';
+          if (!email) { showError('Enter your email address first.'); return; }
+          if (!supabaseClient || !supabaseClient.auth) { showError('Auth service unavailable. Please try again later.'); return; }
+          clearMessages();
+          supabaseClient.auth.resetPasswordForEmail(email, { redirectTo: DASHBOARD_REDIRECT_URL })
+            .then(function (res) {
+              if (res && res.error) showError(res.error.message);
+              else showSuccess('Reset link sent! Check your email inbox.');
+            })
+            .catch(function (e) { showError((e && e.message) || 'Failed to send reset email.'); });
+        } catch (_) {}
+      });
+    }
+
+    /* ── Sign-In form (Existing Users Only) ── */
     var signinBtn = document.getElementById('signin-btn');
-    signinBtn.dataset.label = 'Sign In';
-    document.getElementById('signin-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      clearMessages();
-      if (!supabase) { showError('Auth service unavailable. Please try again later.'); return; }
+    var signinForm = document.getElementById('signin-form');
+    if (signinBtn) signinBtn.dataset.label = 'Sign In';
 
-      var email = document.getElementById('email-input').value.trim();
-      var pass  = document.getElementById('pass-input').value;
+    if (signinForm) {
+      signinForm.addEventListener('submit', async function (e) {
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        clearMessages();
+        if (!supabaseClient || !supabaseClient.auth) {
+          showError('Auth service unavailable. Please try again later.');
+          return;
+        }
 
-      if (!email || !pass) { showError('Please enter both email and password.'); return; }
+        var emailEl = document.getElementById('email-input');
+        var passEl = document.getElementById('pass-input');
+        var email = emailEl ? emailEl.value.trim() : '';
+        var pass = passEl ? passEl.value : '';
 
-      setLoading(signinBtn, true);
-      try {
-        var res = await supabase.auth.signInWithPassword({ email: email, password: pass });
-        if (res.error) {
-          showError(res.error.message || 'Invalid email or password.');
+        if (!email || !pass) {
+          showError('Please enter both email and password.');
+          return;
+        }
+
+        setLoading(signinBtn, true);
+        try {
+          var res = await supabaseClient.auth.signInWithPassword({ email: email, password: pass });
+          if (res && res.error) {
+            showError(res.error.message || 'Invalid email or password.');
+            setLoading(signinBtn, false, 'Sign In');
+          } else if (res && res.data && res.data.session) {
+            completeSignInAndRedirect(res.data.session);
+          } else {
+            setLoading(signinBtn, false, 'Sign In');
+          }
+        } catch (err) {
+          showError((err && err.message) || 'Sign in failed. Please try again.');
           setLoading(signinBtn, false, 'Sign In');
-        } else if (res.data && res.data.session) {
-          var u = res.data.session.user;
-          try {
-            localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
-              email: u.email.trim().toLowerCase(),
-              name: (u.user_metadata && u.user_metadata.display_name) || u.email.split('@')[0],
-              timestamp: Date.now()
-            }));
-          } catch(e) {}
-          try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
-          try {
-            window.postMessage({
-              type: 'SURFKIT_AUTH_SESSION_UPDATE',
-              session: {
-                access_token: res.data.session.access_token,
-                refresh_token: res.data.session.refresh_token,
-                expires_at: res.data.session.expires_at,
-                user: u
-              }
-            }, '*');
-          } catch(e) {}
-
-          var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
-          if (pRef && u && u.id) {
-            attributeReferral(u.id, pRef, u.email).catch(function(){});
-          }
-
-          showSuccess('Signed in! Redirecting to your dashboard\u2026');
-          setTimeout(function () { window.location.replace('/dashboard'); }, 500);
         }
-      } catch (err) {
-        showError(err.message || 'Sign in failed. Please try again.');
-        setLoading(signinBtn, false, 'Sign In');
-      }
-    });
-
-    /* ── Sign-Up form toggle ── */
-    var signinFormEl  = document.getElementById('signin-form');
-    var signupFormEl  = document.getElementById('signup-form');
-    var signupToggle  = document.getElementById('signup-toggle-btn');
-
-    signupToggle.addEventListener('click', function () {
-      var isShowing = signupFormEl.style.display !== 'none';
-      signinFormEl.style.display  = isShowing ? 'block' : 'none';
-      signupFormEl.style.display  = isShowing ? 'none'  : 'block';
-      signupToggle.textContent    = isShowing ? 'Create Account' : 'Back to Sign In';
-      clearMessages();
-    });
-
-    /* ── Sign-Up form submit ── */
-    var signupBtn = document.getElementById('signup-btn');
-    signupBtn.dataset.label = 'Create Account & Sign In';
-    document.getElementById('signup-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      clearMessages();
-      if (!supabase) { showError('Auth service unavailable. Please try again later.'); return; }
-
-      var email = document.getElementById('su-email').value.trim();
-      var pass  = document.getElementById('su-pass').value;
-
-      if (!email || !pass) { showError('Please fill in all fields.'); return; }
-      if (pass.length < 6) { showError('Password must be at least 6 characters.'); return; }
-
-      setLoading(signupBtn, true);
-      try {
-        var pRef = localStorage.getItem('surfkit_ref_code') || localStorage.getItem('surfkit_incoming_ref');
-      var signUpOpts = { email: email, password: pass };
-      if (pRef) {
-        signUpOpts.options = { data: { referred_by: pRef } };
-      }
-      var res = await supabase.auth.signUp(signUpOpts);
-        if (res.error) {
-          showError(res.error.message || 'Failed to create account.');
-          setLoading(signupBtn, false, 'Create Account & Sign In');
-        } else if (res.data && res.data.session) {
-          var u = res.data.session.user;
-          try {
-            localStorage.setItem('surfkit_ext_auth_user', JSON.stringify({
-              email: u.email.trim().toLowerCase(),
-              name: (u.user_metadata && u.user_metadata.display_name) || u.email.split('@')[0],
-              timestamp: Date.now()
-            }));
-          } catch(e) {}
-          try { window.postMessage({ type: 'SURFKIT_USER_SIGNED_IN' }, '*'); } catch(e) {}
-          try {
-            window.postMessage({
-              type: 'SURFKIT_AUTH_SESSION_UPDATE',
-              session: {
-                access_token: res.data.session.access_token,
-                refresh_token: res.data.session.refresh_token,
-                expires_at: res.data.session.expires_at,
-                user: u
-              }
-            }, '*');
-          } catch(e) {}
-
-          if (pRef && u && u.id) {
-            attributeReferral(u.id, pRef, u.email).catch(function(){});
-          }
-
-          showSuccess('Account created! Redirecting\u2026');
-          setTimeout(function () { window.location.replace('/dashboard'); }, 500);
-        } else {
-          if (pRef && res.data && res.data.user && res.data.user.id) {
-            attributeReferral(res.data.user.id, pRef, email).catch(function(){});
-          }
-          showSuccess('Account created! Check your email to confirm, then sign in.');
-          setLoading(signupBtn, false, 'Create Account & Sign In');
-        }
-      } catch (err) {
-        showError(err.message || 'Sign up failed. Please try again.');
-        setLoading(signupBtn, false, 'Create Account & Sign In');
-      }
-    });
+      });
+    }
 
     /* ── Listen for extension sign-in events ── */
     window.addEventListener('message', function (e) {
-      if (e.data && e.data.type === 'SURFKIT_USER_SIGNED_IN') {
-        window.location.replace('/dashboard');
-      }
+      try {
+        if (e && e.data && e.data.type === 'SURFKIT_USER_SIGNED_IN') {
+          window.location.href = DASHBOARD_PATH;
+        }
+      } catch (_) {}
     });
 
   })();
