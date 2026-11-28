@@ -3985,120 +3985,147 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     window.broadcastAuthSession = broadcastAuthSession;
 
-    async function initSupabaseAuth() {
-      if (!supabaseClient) return null;
+    function ensureGlobalAuthSyncListeners() {
       try {
-        // Persistent listener: re-hydrates currentUser and continuously syncs to extension
-        if (!window.__supabaseAuthListenerSet__ && supabaseClient.auth) {
-          window.__supabaseAuthListenerSet__ = true;
-          window.addEventListener('message', (ev) => {
-            try {
-              if (ev && ev.source === window && ev.data && ev.data.type === 'SURFKIT_POPUP_SIGN_OUT' && currentUser) {
-                handleSignOut();
-              }
-            } catch (_) {}
-          });
-          window.addEventListener('storage', (e) => {
-            try {
-              if (e && e.key === 'sb-kpvrewhmnrifsnkgswdt-auth-token' && e.newValue) {
+        if (!supabaseClient || !supabaseClient.auth || window.__supabaseAuthListenerSet__) return;
+        window.__supabaseAuthListenerSet__ = true;
+        window.addEventListener('message', (ev) => {
+          try {
+            if (ev && ev.source === window && ev.data && ev.data.type === 'SURFKIT_POPUP_SIGN_OUT' && currentUser) {
+              handleSignOut();
+            }
+          } catch (_) {}
+        });
+        window.addEventListener('storage', (e) => {
+          try {
+            if (e && e.key === 'sb-kpvrewhmnrifsnkgswdt-auth-token') {
+              if (e.newValue) {
                 initSupabaseAuth().then((u) => {
                   if (u && typeof loadDataFromSupabase === 'function') loadDataFromSupabase();
                 }).catch(() => {});
+              } else if (currentUser) {
+                handleSignOut();
               }
-            } catch (_) {}
-          });
-          if (surfkitAuthChannel) {
-            try {
-              surfkitAuthChannel.onmessage = async (ev) => {
-                try {
-                  const msg = ev && ev.data ? ev.data : null;
-                  if (!msg) return;
-                  if (msg.type === 'AUTH_SESSION_SYNC' && msg.session && msg.session.user) {
-                    if (msg.session.access_token && msg.session.refresh_token && supabaseClient.auth && typeof supabaseClient.auth.setSession === 'function') {
-                      try {
-                        await supabaseClient.auth.setSession({
-                          access_token: msg.session.access_token,
-                          refresh_token: msg.session.refresh_token
-                        });
-                      } catch (_) {}
-                    }
-                    await handleAuthenticatedSession(msg.session, {
-                      closeModal: true,
-                      cleanAuthParam: true,
-                      forceFetch: activeDataUserId !== msg.session.user.id
-                    });
-                  } else if (msg.type === 'AUTH_SIGN_OUT' && currentUser) {
-                    await handleSignOut();
+            }
+          } catch (_) {}
+        });
+        if (surfkitAuthChannel) {
+          try {
+            surfkitAuthChannel.onmessage = async (ev) => {
+              try {
+                const msg = ev && ev.data ? ev.data : null;
+                if (!msg) return;
+                if (msg.type === 'AUTH_SESSION_SYNC' && msg.session && msg.session.user) {
+                  if (msg.session.access_token && msg.session.refresh_token && supabaseClient.auth && typeof supabaseClient.auth.setSession === 'function') {
+                    try {
+                      await supabaseClient.auth.setSession({
+                        access_token: msg.session.access_token,
+                        refresh_token: msg.session.refresh_token
+                      });
+                    } catch (_) {}
                   }
-                } catch (_) {}
-              };
-            } catch (_) {}
-          }
-          supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
-            console.log('[Dashboard Auth] onAuthStateChange:', event, newSession);
-            if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-              if (newSession && (newSession.user || newSession.access_token)) {
-                const isOAuthPopup = (() => {
-                  try { return Boolean(window.opener && window.name === 'surfkit_google_oauth'); } catch (_) { return false; }
-                })();
-                if (!isOAuthPopup && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
-                  try {
-                    if (localStorage.getItem('surfkit_google_auth_intent') === 'signin') {
-                      const allowed = await verifyGoogleSignInIntent(newSession);
-                      if (!allowed) return;
-                    }
-                  } catch (_) {}
-                }
-
-                if (event === 'SIGNED_IN') {
-                  await handleAuthenticatedSession(newSession, {
+                  await handleAuthenticatedSession(msg.session, {
                     closeModal: true,
                     cleanAuthParam: true,
-                    forceFetch: true
+                    forceFetch: activeDataUserId !== msg.session.user.id
                   });
-                } else if (event === 'INITIAL_SESSION') {
-                  const needsFetch = !window.__supabaseInitialDataLoaded__ || (newSession.user && activeDataUserId !== newSession.user.id);
-                  window.__supabaseInitialDataLoaded__ = true;
-                  await handleAuthenticatedSession(newSession, {
-                    closeModal: false,
-                    cleanAuthParam: false,
-                    skipDataFetch: !needsFetch
-                  });
-                } else {
-                  // TOKEN_REFRESHED: keep tokens & popup/extension synced; only fetch if account wasn't hydrated yet
-                  await handleAuthenticatedSession(newSession, {
-                    closeModal: false,
-                    cleanAuthParam: false,
-                    skipDataFetch: Boolean(newSession.user && activeDataUserId === newSession.user.id)
-                  });
+                } else if (msg.type === 'AUTH_SIGN_OUT' && currentUser) {
+                  await handleSignOut();
                 }
-
-                // Safety: if this page somehow loaded inside any popup after OAuth,
-                // push opener to the clean dashboard and close this window.
+              } catch (_) {}
+            };
+          } catch (_) {}
+        }
+        supabaseClient.auth.onAuthStateChange(async (event, newSession) => {
+          console.log('[Dashboard Auth] onAuthStateChange:', event, newSession);
+          if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+            if (newSession && (newSession.user || newSession.access_token)) {
+              const isOAuthPopup = (() => {
+                try { return Boolean(window.opener && window.name === 'surfkit_google_oauth'); } catch (_) { return false; }
+              })();
+              if (!isOAuthPopup && (event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
                 try {
-                  if (window.opener && !window.opener.closed) {
-                    try { window.opener.location.assign('https://surfkit.cloud/dashboard/overview'); } catch (_) {}
-                    setTimeout(function () { try { window.close(); } catch (_) {} }, 200);
+                  if (localStorage.getItem('surfkit_google_auth_intent') === 'signin') {
+                    const allowed = await verifyGoogleSignInIntent(newSession);
+                    if (!allowed) return;
                   }
                 } catch (_) {}
               }
-            } else if (event === 'SIGNED_OUT') {
-              currentUser = null;
-              window.currentUser = null;
-              window.currentUserId = null;
-              window.currentUserEmail = null;
-              resetUserScopedStateForAccountSwitch(null);
-              try { if (typeof applyAuthModalView === 'function') applyAuthModalView(null); } catch (_) {}
-              saveState();
-              renderApp();
-              try { if (typeof loadChatHistory === 'function') loadChatHistory(); } catch (_) {}
-              try { if (typeof renderNotifications === 'function') renderNotifications(); } catch (_) {}
 
-              // Clear session from extension & BroadcastChannel
-              forwardSessionClearToExtension();
+              if (event === 'SIGNED_IN') {
+                await handleAuthenticatedSession(newSession, {
+                  closeModal: true,
+                  cleanAuthParam: true,
+                  forceFetch: true
+                });
+              } else if (event === 'INITIAL_SESSION') {
+                const needsFetch = !window.__supabaseInitialDataLoaded__ || (newSession.user && activeDataUserId !== newSession.user.id);
+                window.__supabaseInitialDataLoaded__ = true;
+                await handleAuthenticatedSession(newSession, {
+                  closeModal: false,
+                  cleanAuthParam: false,
+                  skipDataFetch: !needsFetch
+                });
+              } else {
+                // TOKEN_REFRESHED: keep tokens & popup/extension synced; only fetch if account wasn't hydrated yet
+                await handleAuthenticatedSession(newSession, {
+                  closeModal: false,
+                  cleanAuthParam: false,
+                  skipDataFetch: Boolean(newSession.user && activeDataUserId === newSession.user.id)
+                });
+              }
+
+              // Safety: if this page somehow loaded inside any popup after OAuth,
+              // push opener to the clean dashboard and close this window.
+              try {
+                if (window.opener && !window.opener.closed) {
+                  try { window.opener.location.assign('https://surfkit.cloud/dashboard/overview'); } catch (_) {}
+                  setTimeout(function () { try { window.close(); } catch (_) {} }, 200);
+                }
+              } catch (_) {}
             }
-          });
+          } else if (event === 'SIGNED_OUT') {
+            currentUser = null;
+            window.currentUser = null;
+            window.currentUserId = null;
+            window.currentUserEmail = null;
+            resetUserScopedStateForAccountSwitch(null);
+            try { if (typeof applyAuthModalView === 'function') applyAuthModalView(null); } catch (_) {}
+            saveState();
+            renderApp();
+            try { if (typeof loadChatHistory === 'function') loadChatHistory(); } catch (_) {}
+            try { if (typeof renderNotifications === 'function') renderNotifications(); } catch (_) {}
+
+            // Clear session from extension & BroadcastChannel
+            forwardSessionClearToExtension();
+          }
+        });
+      } catch (err) {
+        console.warn('[Dashboard Auth] ensureGlobalAuthSyncListeners error:', err);
+      }
+    }
+    // Mount global auth sync once at top level so it stays active across all /dashboard/* sub-routes
+    ensureGlobalAuthSyncListeners();
+
+    function syncSessionOnRouteChange() {
+      try {
+        ensureGlobalAuthSyncListeners();
+        if (currentUser && currentUser.id) {
+          try { if (typeof applyAuthModalView === 'function') applyAuthModalView(currentUser); } catch (_) {}
+          const now = Date.now();
+          if (!window.__lastRouteAuthBroadcastAt || (now - window.__lastRouteAuthBroadcastAt) >= 3000) {
+            window.__lastRouteAuthBroadcastAt = now;
+            if (typeof broadcastAuthSession === 'function') broadcastAuthSession();
+          }
         }
+      } catch (_) {}
+    }
+
+    async function initSupabaseAuth() {
+      if (!supabaseClient) return null;
+      try {
+        // Persistent singleton listener: re-hydrates currentUser and continuously syncs to extension
+        ensureGlobalAuthSyncListeners();
 
         // Dynamic verification using supabase.auth.getSession() and getUser()
         let activeSession = null;
@@ -5603,6 +5630,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       mountActiveAdsterraBanner();
+      try { if (typeof syncSessionOnRouteChange === 'function') syncSessionOnRouteChange(); } catch (_) {}
     }
 
     window.addEventListener('popstate', function() {
